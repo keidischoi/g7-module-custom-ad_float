@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.27
+- Fix upload-mode 「광고 등록」 not writing a DB row. FileUploader still shows selected files, but 0.1.26 stored `$args[0][n].file || null` and always read `images1`…`images9`. G7 can stringify File through `||` (`[object File]`) and abort setState when `$args[0][1]` is missing, so multipart POST had no real File. Register now stores Files with length-guarded ternaries (no `||` / `?.` / `??` / `.map` on File), top-level `uploadFile` / `file` (G7 FormData keeps File/Blob only at the top level), and omits the `images` File field. Backend accepts `file` / `uploadFile` / any leftover upload key, validates with `file`+mimes (not Laravel `image`/getimagesize), and still creates from a staged `image_path`. URL mode unchanged.
+
 ## 0.1.26
 - Restore G7 **FileUploader** (dashed 업로더 박스) for admin 「이미지 업로드」. 0.1.25 replaced it with a plain `<Input type="file">` after uploads failed; the box is back and files actually persist.
 - Why FileUploader broke in 0.1.21: layout actions used `"type": "onFilesChange"` (G7 binds that as `onOnFilesChange`, so the callback never ran) and `onFilesChange` stored files with `.map(function…)` / `$event[0].file`. G7 layout expressions reject `function` and do not run `.map`, so `create.image` stayed empty. Register then posted a non-file `image` → 「image 필드는 이미지여야 합니다」.

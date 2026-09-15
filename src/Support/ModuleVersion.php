@@ -14,7 +14,7 @@ class ModuleVersion
             }
         }
 
-        return '0.1.26';
+        return '0.1.27';
     }
 
     public static function scriptSrc(): string

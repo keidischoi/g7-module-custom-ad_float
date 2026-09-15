@@ -51,7 +51,12 @@ namespace {
     expect('uses event onFilesChange', str_contains((string) $actionsJson, '"event":"onFilesChange"'), true);
     expect('does not use type onFilesChange', str_contains((string) $actionsJson, '"type":"onFilesChange"'), false);
     expect('stores $args[0][0].file', str_contains((string) $actionsJson, '$args[0][0].file'), true);
+    expect('first file is raw File not ternary', str_contains((string) $actionsJson, '"uploadFile":"{{$args[0][0].file}}"'), true);
     expect('stores image_count from $args[0].length', str_contains((string) $actionsJson, '$args[0].length'), true);
+    expect('does not coerce File with || null', str_contains((string) $actionsJson, '.file || null'), false);
+    expect('does not coerce File with ||', str_contains((string) $actionsJson, '.file ||'), false);
+    expect('guards missing indexes with length', str_contains((string) $actionsJson, '$args[0].length > 1 ? $args[0][1].file'), true);
+    expect('stores top-level uploadFile', str_contains((string) $actionsJson, '"uploadFile"'), true);
     expect('no .map(', str_contains((string) $actionsJson, '.map('), false);
     expect('no function keyword', str_contains((string) $actionsJson, 'function'), false);
     expect('no arrow =>', str_contains((string) $actionsJson, '=>'), false);
@@ -85,9 +90,34 @@ namespace {
     $btnJson = json_encode($createBtn, JSON_UNESCAPED_UNICODE);
     expect('create posts multipart', str_contains((string) $btnJson, 'multipart'), true);
     expect('create posts source upload', str_contains((string) $btnJson, '"source":"upload"'), true);
+    expect('create posts file field', str_contains((string) $btnJson, '"file":"{{_local.uploadFile}}"'), true);
     expect('create posts image File', str_contains((string) $btnJson, '"image":"{{_local.create.image}}"'), true);
     expect('create posts images0 File', str_contains((string) $btnJson, '"images0":"{{_local.create.images0}}"'), true);
     expect('create posts images9 File', str_contains((string) $btnJson, '"images9":"{{_local.create.images9}}"'), true);
+    expect('create does not post images as a File', str_contains((string) $btnJson, '"images":"{{_local.create.images}}"'), false);
+    expect('create File fields have no ||', str_contains((string) $btnJson, '"file":"{{_local.uploadFile ||'), false);
+    expect('create image field has no ||', str_contains((string) $btnJson, '"image":"{{_local.create.image ||'), false);
+
+    $urlBtn = null;
+    $findUrl = function ($node) use (&$findUrl, &$urlBtn): void {
+        if (! is_array($node)) {
+            return;
+        }
+        if (($node['id'] ?? '') === 'btn_create_item_url') {
+            $urlBtn = $node;
+        }
+        foreach ($node as $v) {
+            if (is_array($v)) {
+                $findUrl($v);
+            }
+        }
+    };
+    $findUrl($layout);
+    expect('create url button found', is_array($urlBtn), true);
+    $urlJson = json_encode($urlBtn, JSON_UNESCAPED_UNICODE);
+    expect('url create posts source url', str_contains((string) $urlJson, '"source":"url"'), true);
+    expect('url create posts image_url', str_contains((string) $urlJson, 'image_url'), true);
+    expect('url create is not multipart', str_contains((string) $urlJson, 'multipart'), false);
 
     echo "\n{$passed} passed, {$failed} failed\n";
     exit($failed === 0 ? 0 : 1);
