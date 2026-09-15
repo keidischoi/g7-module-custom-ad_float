@@ -1728,13 +1728,31 @@
                     "id": "caf_create_images_uploader",
                     "type": "composite",
                     "name": "FileUploader",
+                    "if": "{{!_local.editingId}}",
                     "props": {
                       "collection": "ad_float",
                       "maxFiles": 10,
                       "maxSize": 10,
                       "accept": ".jpg,.jpeg,.png,.gif,.webp",
                       "autoUpload": false,
-                      "className": "mt-1"
+                      "className": "mt-1",
+                      "uploadTriggerEvent": "upload:ad_float_create",
+                      "apiEndpoints": {
+                        "upload": "/api/modules/custom-ad_float/admin/items",
+                        "delete": "/api/modules/custom-ad_float/admin/items/:id",
+                        "reorder": ""
+                      },
+                      "uploadParams": {
+                        "source": "upload",
+                        "image_source": "upload",
+                        "title": "{{_local.create.title || ''}}",
+                        "alt_text": "{{_local.create.alt_text || ''}}",
+                        "target_url": "{{_local.create.target_url || ''}}",
+                        "sort_order": "{{_local.create.sort_order || 0}}",
+                        "display_seconds": "{{_local.create.display_seconds || ''}}",
+                        "enabled": "1",
+                        "combine": "{{_local.create.combine ? 1 : 0}}"
+                      }
                     },
                     "actions": [
                       {
@@ -1742,39 +1760,229 @@
                         "handler": "setState",
                         "params": {
                           "target": "local",
-                          "uploadFile": "{{$args[0][0].file}}",
-                          "uploadFile0": "{{$args[0][0].file}}",
-                          "uploadFile1": "{{$args[0].length > 1 ? $args[0][1].file : undefined}}",
-                          "uploadFile2": "{{$args[0].length > 2 ? $args[0][2].file : undefined}}",
-                          "uploadFile3": "{{$args[0].length > 3 ? $args[0][3].file : undefined}}",
-                          "uploadFile4": "{{$args[0].length > 4 ? $args[0][4].file : undefined}}",
-                          "uploadFile5": "{{$args[0].length > 5 ? $args[0][5].file : undefined}}",
-                          "uploadFile6": "{{$args[0].length > 6 ? $args[0][6].file : undefined}}",
-                          "uploadFile7": "{{$args[0].length > 7 ? $args[0][7].file : undefined}}",
-                          "uploadFile8": "{{$args[0].length > 8 ? $args[0][8].file : undefined}}",
-                          "uploadFile9": "{{$args[0].length > 9 ? $args[0][9].file : undefined}}",
-                          "create.image": "{{$args[0][0].file}}",
                           "create.image_count": "{{($args[0] && $args[0].length) || 0}}",
-                          "create.image_name": "{{$args[0][0].original_filename}}",
-                          "create.images0": "{{$args[0][0].file}}",
-                          "create.images1": "{{$args[0].length > 1 ? $args[0][1].file : undefined}}",
-                          "create.images2": "{{$args[0].length > 2 ? $args[0][2].file : undefined}}",
-                          "create.images3": "{{$args[0].length > 3 ? $args[0][3].file : undefined}}",
-                          "create.images4": "{{$args[0].length > 4 ? $args[0][4].file : undefined}}",
-                          "create.images5": "{{$args[0].length > 5 ? $args[0][5].file : undefined}}",
-                          "create.images6": "{{$args[0].length > 6 ? $args[0][6].file : undefined}}",
-                          "create.images7": "{{$args[0].length > 7 ? $args[0][7].file : undefined}}",
-                          "create.images8": "{{$args[0].length > 8 ? $args[0][8].file : undefined}}",
-                          "create.images9": "{{$args[0].length > 9 ? $args[0][9].file : undefined}}"
+                          "create.image_name": "{{$args[0].length > 0 ? $args[0][0].original_filename : ''}}"
                         }
                       },
                       {
+                        "event": "onUploadComplete",
+                        "handler": "sequence",
+                        "actions": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "creating": false,
+                              "editingId": null,
+                              "create": {
+                                "title": "",
+                                "alt_text": "",
+                                "target_url": "",
+                                "image_url": "",
+                                "sort_order": 0,
+                                "display_seconds": "",
+                                "source": "url",
+                                "original_source": "",
+                                "image": null,
+                                "images": null,
+                                "image_count": 0,
+                                "extra_urls": [
+                                  {
+                                    "url": ""
+                                  }
+                                ],
+                                "combine": false,
+                                "image_name": "",
+                                "images0": null,
+                                "images1": null,
+                                "images2": null,
+                                "images3": null,
+                                "images4": null,
+                                "images5": null,
+                                "images6": null,
+                                "images7": null,
+                                "images8": null,
+                                "images9": null
+                              },
+                              "createSource": "url",
+                              "uploadFile": null,
+                              "uploadFile0": null,
+                              "uploadFile1": null,
+                              "uploadFile2": null,
+                              "uploadFile3": null,
+                              "uploadFile4": null,
+                              "uploadFile5": null,
+                              "uploadFile6": null,
+                              "uploadFile7": null,
+                              "uploadFile8": null,
+                              "uploadFile9": null
+                            }
+                          },
+                          {
+                            "handler": "toast",
+                            "params": {
+                              "type": "success",
+                              "message": "$t:custom-ad_float.admin.create_success"
+                            }
+                          },
+                          {
+                            "handler": "refetchDataSource",
+                            "params": {
+                              "dataSourceId": "items"
+                            }
+                          }
+                        ]
+                      },
+                      {
                         "event": "onUploadError",
-                        "handler": "toast",
+                        "handler": "sequence",
+                        "actions": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "creating": false
+                            }
+                          },
+                          {
+                            "handler": "toast",
+                            "params": {
+                              "type": "error",
+                              "message": "{{$args[0]}}"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "caf_edit_images_uploader",
+                    "type": "composite",
+                    "name": "FileUploader",
+                    "if": "{{!!_local.editingId}}",
+                    "props": {
+                      "collection": "ad_float",
+                      "maxFiles": 10,
+                      "maxSize": 10,
+                      "accept": ".jpg,.jpeg,.png,.gif,.webp",
+                      "autoUpload": false,
+                      "className": "mt-1",
+                      "uploadTriggerEvent": "upload:ad_float_update",
+                      "apiEndpoints": {
+                        "upload": "/api/modules/custom-ad_float/admin/items/{{_local.editingId}}",
+                        "delete": "/api/modules/custom-ad_float/admin/items/:id",
+                        "reorder": ""
+                      },
+                      "uploadParams": {
+                        "source": "upload",
+                        "image_source": "upload",
+                        "title": "{{_local.create.title || ''}}",
+                        "alt_text": "{{_local.create.alt_text || ''}}",
+                        "target_url": "{{_local.create.target_url || ''}}",
+                        "sort_order": "{{_local.create.sort_order || 0}}",
+                        "display_seconds": "{{_local.create.display_seconds || ''}}",
+                        "enabled": "1",
+                        "combine": "{{_local.create.combine ? 1 : 0}}"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "event": "onFilesChange",
+                        "handler": "setState",
                         "params": {
-                          "type": "error",
-                          "message": "{{$args[0]}}"
+                          "target": "local",
+                          "create.image_count": "{{($args[0] && $args[0].length) || 0}}",
+                          "create.image_name": "{{$args[0].length > 0 ? $args[0][0].original_filename : ''}}"
                         }
+                      },
+                      {
+                        "event": "onUploadComplete",
+                        "handler": "sequence",
+                        "actions": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "creating": false,
+                              "editingId": null,
+                              "create": {
+                                "title": "",
+                                "alt_text": "",
+                                "target_url": "",
+                                "image_url": "",
+                                "sort_order": 0,
+                                "display_seconds": "",
+                                "source": "url",
+                                "original_source": "",
+                                "image": null,
+                                "images": null,
+                                "image_count": 0,
+                                "extra_urls": [
+                                  {
+                                    "url": ""
+                                  }
+                                ],
+                                "combine": false,
+                                "image_name": "",
+                                "images0": null,
+                                "images1": null,
+                                "images2": null,
+                                "images3": null,
+                                "images4": null,
+                                "images5": null,
+                                "images6": null,
+                                "images7": null,
+                                "images8": null,
+                                "images9": null
+                              },
+                              "createSource": "url",
+                              "uploadFile": null,
+                              "uploadFile0": null,
+                              "uploadFile1": null,
+                              "uploadFile2": null,
+                              "uploadFile3": null,
+                              "uploadFile4": null,
+                              "uploadFile5": null,
+                              "uploadFile6": null,
+                              "uploadFile7": null,
+                              "uploadFile8": null,
+                              "uploadFile9": null
+                            }
+                          },
+                          {
+                            "handler": "toast",
+                            "params": {
+                              "type": "success",
+                              "message": "$t:custom-ad_float.admin.update_success"
+                            }
+                          },
+                          {
+                            "handler": "refetchDataSource",
+                            "params": {
+                              "dataSourceId": "items"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "event": "onUploadError",
+                        "handler": "sequence",
+                        "actions": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "creating": false
+                            }
+                          },
+                          {
+                            "handler": "toast",
+                            "params": {
+                              "type": "error",
+                              "message": "{{$args[0]}}"
+                            }
+                          }
+                        ]
                       }
                     ]
                   },
@@ -2415,7 +2623,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : ((error.errors && error.errors[0]) || error.message || (error.data && error.data.message))}}"
+                                  "message": "{{error.message || error.data.message}}"
                                 }
                               }
                             ]
@@ -2431,7 +2639,7 @@
                     "if": "{{!_local.editingId && (_local.createSource || _local.create.source || 'url') === 'upload'}}",
                     "props": {
                       "type": "button",
-                      "disabled": "{{_local.creating || !(_local.uploadFile || _local.create.image || (_local.create.image_count || 0) > 0)}}",
+                      "disabled": "{{_local.creating || !((_local.create.image_count || 0) > 0)}}",
                       "className": "btn btn-primary disabled:opacity-50"
                     },
                     "text": "$t:custom-ad_float.admin.actions.create",
@@ -2448,127 +2656,10 @@
                             }
                           },
                           {
-                            "handler": "apiCall",
-                            "auth_required": true,
-                            "target": "/api/modules/custom-ad_float/admin/items",
+                            "handler": "emitEvent",
                             "params": {
-                              "method": "POST",
-                              "body": {
-                                "source": "upload",
-                                "image_source": "upload",
-                                "file": "{{_local.uploadFile}}",
-                                "image": "{{_local.create.image}}",
-                                "title": "{{_local.create.title || ''}}",
-                                "alt_text": "{{_local.create.alt_text || ''}}",
-                                "target_url": "{{_local.create.target_url ? _local.create.target_url : undefined}}",
-                                "sort_order": "{{_local.create.sort_order || 0}}",
-                                "display_seconds": "{{_local.create.display_seconds ? _local.create.display_seconds : undefined}}",
-                                "enabled": 1,
-                                "combine": "{{_local.create.combine ? 1 : 0}}",
-                                "images0": "{{_local.create.images0}}",
-                                "images1": "{{_local.create.images1}}",
-                                "images2": "{{_local.create.images2}}",
-                                "images3": "{{_local.create.images3}}",
-                                "images4": "{{_local.create.images4}}",
-                                "images5": "{{_local.create.images5}}",
-                                "images6": "{{_local.create.images6}}",
-                                "images7": "{{_local.create.images7}}",
-                                "images8": "{{_local.create.images8}}",
-                                "images9": "{{_local.create.images9}}",
-                                "uploadFile0": "{{_local.uploadFile0}}",
-                                "uploadFile1": "{{_local.uploadFile1}}",
-                                "uploadFile2": "{{_local.uploadFile2}}",
-                                "uploadFile3": "{{_local.uploadFile3}}",
-                                "uploadFile4": "{{_local.uploadFile4}}",
-                                "uploadFile5": "{{_local.uploadFile5}}",
-                                "uploadFile6": "{{_local.uploadFile6}}",
-                                "uploadFile7": "{{_local.uploadFile7}}",
-                                "uploadFile8": "{{_local.uploadFile8}}",
-                                "uploadFile9": "{{_local.uploadFile9}}"
-                              },
-                              "contentType": "multipart/form-data"
-                            },
-                            "onSuccess": [
-                              {
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "creating": false,
-                                  "editingId": null,
-                                  "create": {
-                                    "title": "",
-                                    "alt_text": "",
-                                    "target_url": "",
-                                    "image_url": "",
-                                    "sort_order": 0,
-                                    "display_seconds": "",
-                                    "source": "url",
-                                    "original_source": "",
-                                    "image": null,
-                                    "images": null,
-                                    "image_count": 0,
-                                    "extra_urls": [
-                                      {
-                                        "url": ""
-                                      }
-                                    ],
-                                    "combine": false,
-                                    "image_name": "",
-                                    "images0": null,
-                                    "images1": null,
-                                    "images2": null,
-                                    "images3": null,
-                                    "images4": null,
-                                    "images5": null,
-                                    "images6": null,
-                                    "images7": null,
-                                    "images8": null,
-                                    "images9": null
-                                  },
-                                  "createSource": "url",
-                                  "uploadFile": null,
-                                  "uploadFile0": null,
-                                  "uploadFile1": null,
-                                  "uploadFile2": null,
-                                  "uploadFile3": null,
-                                  "uploadFile4": null,
-                                  "uploadFile5": null,
-                                  "uploadFile6": null,
-                                  "uploadFile7": null,
-                                  "uploadFile8": null,
-                                  "uploadFile9": null
-                                }
-                              },
-                              {
-                                "handler": "toast",
-                                "params": {
-                                  "type": "success",
-                                  "message": "$t:custom-ad_float.admin.create_success"
-                                }
-                              },
-                              {
-                                "handler": "refetchDataSource",
-                                "params": {
-                                  "dataSourceId": "items"
-                                }
-                              }
-                            ],
-                            "onError": [
-                              {
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "creating": false
-                                }
-                              },
-                              {
-                                "handler": "toast",
-                                "params": {
-                                  "type": "error",
-                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : ((error.errors && error.errors[0]) || error.message || (error.data && error.data.message))}}"
-                                }
-                              }
-                            ]
+                              "event": "upload:ad_float_create"
+                            }
                           }
                         ]
                       }
@@ -2690,7 +2781,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : ((error.errors && error.errors[0]) || error.message || (error.data && error.data.message))}}"
+                                  "message": "{{error.message || error.data.message}}"
                                 }
                               }
                             ]
@@ -2706,7 +2797,7 @@
                     "if": "{{!!_local.editingId && (_local.createSource || _local.create.source || 'url') === 'upload'}}",
                     "props": {
                       "type": "button",
-                      "disabled": "{{_local.creating || (!_local.create.image && _local.create.original_source !== 'upload')}}",
+                      "disabled": "{{_local.creating || (!((_local.create.image_count || 0) > 0) && _local.create.original_source !== 'upload')}}",
                       "className": "btn btn-primary disabled:opacity-50"
                     },
                     "text": "$t:custom-ad_float.admin.actions.update",
@@ -2723,105 +2814,122 @@
                             }
                           },
                           {
-                            "handler": "apiCall",
-                            "auth_required": true,
-                            "target": "/api/modules/custom-ad_float/admin/items/{{_local.editingId}}",
+                            "handler": "switch",
                             "params": {
-                              "method": "POST",
-                              "body": {
-                                "source": "upload",
-                                "image_source": "upload",
-                                "file": "{{_local.uploadFile}}",
-                                "image": "{{_local.create.image}}",
-                                "title": "{{_local.create.title || ''}}",
-                                "alt_text": "{{_local.create.alt_text || ''}}",
-                                "target_url": "{{_local.create.target_url ? _local.create.target_url : undefined}}",
-                                "sort_order": "{{_local.create.sort_order || 0}}",
-                                "display_seconds": "{{_local.create.display_seconds ? _local.create.display_seconds : undefined}}"
-                              },
-                              "contentType": "multipart/form-data"
+                              "value": "{{(_local.create.image_count || 0) > 0 ? 'file' : 'meta'}}"
                             },
-                            "onSuccess": [
-                              {
-                                "handler": "setState",
+                            "cases": {
+                              "file": {
+                                "handler": "emitEvent",
                                 "params": {
-                                  "target": "local",
-                                  "creating": false,
-                                  "editingId": null,
-                                  "create": {
-                                    "title": "",
-                                    "alt_text": "",
-                                    "target_url": "",
-                                    "image_url": "",
-                                    "sort_order": 0,
-                                    "display_seconds": "",
-                                    "source": "url",
-                                    "original_source": "",
-                                    "image": null,
-                                    "images": null,
-                                    "image_count": 0,
-                                    "extra_urls": [
-                                      {
-                                        "url": ""
-                                      }
-                                    ],
-                                    "combine": false,
-                                    "image_name": "",
-                                    "images0": null,
-                                    "images1": null,
-                                    "images2": null,
-                                    "images3": null,
-                                    "images4": null,
-                                    "images5": null,
-                                    "images6": null,
-                                    "images7": null,
-                                    "images8": null,
-                                    "images9": null
+                                  "event": "upload:ad_float_update"
+                                }
+                              },
+                              "meta": {
+                                "handler": "apiCall",
+                                "auth_required": true,
+                                "target": "/api/modules/custom-ad_float/admin/items/{{_local.editingId}}",
+                                "params": {
+                                  "method": "POST",
+                                  "body": {
+                                    "source": "upload",
+                                    "image_source": "upload",
+                                    "title": "{{_local.create.title || ''}}",
+                                    "alt_text": "{{_local.create.alt_text || ''}}",
+                                    "target_url": "{{_local.create.target_url ? _local.create.target_url : undefined}}",
+                                    "sort_order": "{{_local.create.sort_order || 0}}",
+                                    "display_seconds": "{{_local.create.display_seconds ? _local.create.display_seconds : undefined}}"
+                                  }
+                                },
+                                "onSuccess": [
+                                  {
+                                    "handler": "setState",
+                                    "params": {
+                                      "target": "local",
+                                      "creating": false,
+                                      "editingId": null,
+                                      "create": {
+                                        "title": "",
+                                        "alt_text": "",
+                                        "target_url": "",
+                                        "image_url": "",
+                                        "sort_order": 0,
+                                        "display_seconds": "",
+                                        "source": "url",
+                                        "original_source": "",
+                                        "image": null,
+                                        "images": null,
+                                        "image_count": 0,
+                                        "extra_urls": [
+                                          {
+                                            "url": ""
+                                          }
+                                        ],
+                                        "combine": false,
+                                        "image_name": "",
+                                        "images0": null,
+                                        "images1": null,
+                                        "images2": null,
+                                        "images3": null,
+                                        "images4": null,
+                                        "images5": null,
+                                        "images6": null,
+                                        "images7": null,
+                                        "images8": null,
+                                        "images9": null
+                                      },
+                                      "createSource": "url",
+                                      "uploadFile": null,
+                                      "uploadFile0": null,
+                                      "uploadFile1": null,
+                                      "uploadFile2": null,
+                                      "uploadFile3": null,
+                                      "uploadFile4": null,
+                                      "uploadFile5": null,
+                                      "uploadFile6": null,
+                                      "uploadFile7": null,
+                                      "uploadFile8": null,
+                                      "uploadFile9": null
+                                    }
                                   },
-                                  "createSource": "url",
-                                  "uploadFile": null,
-                                  "uploadFile0": null,
-                                  "uploadFile1": null,
-                                  "uploadFile2": null,
-                                  "uploadFile3": null,
-                                  "uploadFile4": null,
-                                  "uploadFile5": null,
-                                  "uploadFile6": null,
-                                  "uploadFile7": null,
-                                  "uploadFile8": null,
-                                  "uploadFile9": null
-                                }
+                                  {
+                                    "handler": "toast",
+                                    "params": {
+                                      "type": "success",
+                                      "message": "$t:custom-ad_float.admin.update_success"
+                                    }
+                                  },
+                                  {
+                                    "handler": "refetchDataSource",
+                                    "params": {
+                                      "dataSourceId": "items"
+                                    }
+                                  }
+                                ],
+                                "onError": [
+                                  {
+                                    "handler": "setState",
+                                    "params": {
+                                      "target": "local",
+                                      "creating": false
+                                    }
+                                  },
+                                  {
+                                    "handler": "toast",
+                                    "params": {
+                                      "type": "error",
+                                      "message": "{{error.message || error.data.message}}"
+                                    }
+                                  }
+                                ]
                               },
-                              {
-                                "handler": "toast",
+                              "default": {
+                                "handler": "emitEvent",
                                 "params": {
-                                  "type": "success",
-                                  "message": "$t:custom-ad_float.admin.update_success"
-                                }
-                              },
-                              {
-                                "handler": "refetchDataSource",
-                                "params": {
-                                  "dataSourceId": "items"
+                                  "event": "upload:ad_float_update"
                                 }
                               }
-                            ],
-                            "onError": [
-                              {
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "creating": false
-                                }
-                              },
-                              {
-                                "handler": "toast",
-                                "params": {
-                                  "type": "error",
-                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : ((error.errors && error.errors[0]) || error.message || (error.data && error.data.message))}}"
-                                }
-                              }
-                            ]
+                            }
                           }
                         ]
                       }
@@ -5000,7 +5108,7 @@
                                                 "handler": "toast",
                                                 "params": {
                                                   "type": "error",
-                                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : ((error.errors && error.errors[0]) || error.message || (error.data && error.data.message))}}"
+                                                  "message": "{{error.message || error.data.message}}"
                                                 }
                                               }
                                             ]

@@ -48,6 +48,14 @@ php artisan cache:clear
 - **전체 다시 노출:** `/admin/ad-float` 기본 설정에서 **닫힘 상태 초기화** / **다시 보이게 하기**. 서버가 쿠키 키를 새 값으로 바꿔 예전 기록을 무효화합니다. (`POST /api/modules/custom-ad_float/admin/settings/reset-closed`)
 - **한 브라우저만 테스트:** 개발자 도구에서 해당 키의 쿠키와 localStorage를 지우면 됩니다. 방문자마다 수동으로 지울 필요는 없습니다.
 
+## 업그레이드 (0.1.28)
+
+```bash
+php artisan cache:clear
+```
+
+마이그레이션은 없습니다. 「이미지 업로드」에서 파일을 고른 뒤 **광고 등록**이 422 `이미지 파일을 선택해 주세요`로 실패하던 원인을 고칩니다. FileUploader 박스는 그대로이고, 컴포넌트가 직접 `file`을 올립니다. 등록 실패 시 에러 토스트가 본문을 보여 줍니다. **관리자 페이지는 캐시 삭제 후 하드 리프레시** 하세요. 프론트 `ad-float.js` 캐시 쿼리는 `?v=0.1.28` 입니다.
+
 ## 업그레이드 (0.1.27)
 
 ```bash
@@ -194,4 +202,4 @@ php artisan cache:clear
 | identifier | `custom-ad_float` |
 | vendor | `custom` |
 | namespace | `Modules\\Custom\\AdFloat` |
-| version | `0.1.27` |
+| version | `0.1.28` |

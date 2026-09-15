@@ -40,7 +40,10 @@ class AdFloatItemController extends AdminBaseController
             $source = AdminPayload::resolveSource($request);
             $preview = $request->all();
             $urls = AdminPayload::collectImageUrls($preview);
-            $isBatch = count($files) > 1 || count($urls) > 1 || $request->boolean('combine');
+            // FileUploader posts one File per request as `file`. Do not treat
+            // combine=1 + a single file as a batch — that wraps the row as
+            // {data:[...], meta} and FileUploader cannot parse Attachment.hash.
+            $isBatch = count($files) > 1 || count($urls) > 1;
 
             if ($isBatch) {
                 $data = $request->validate(AdminPayload::itemBatchRules());
@@ -59,10 +62,10 @@ class AdFloatItemController extends AdminBaseController
             $upload = $files[0] ?? $request->file('image') ?? $request->file('file');
 
             if ($source === AdminPayload::SOURCE_UPLOAD && $files === [] && ! $this->hasStagedImagePath($data)) {
-                return $this->error('custom-ad_float::messages.items.file_required', 422);
+                return $this->fileRequiredError();
             }
             if ($source === AdminPayload::SOURCE_URL && $urls === []) {
-                return $this->error('custom-ad_float::messages.items.url_required', 422);
+                return $this->urlRequiredError();
             }
 
             $item = $this->service->createItem($data, $upload instanceof \Illuminate\Http\UploadedFile ? $upload : null);
@@ -72,11 +75,11 @@ class AdFloatItemController extends AdminBaseController
                 $this->toUploaderAttachment($item, $upload instanceof \Illuminate\Http\UploadedFile ? $upload : null)
             );
         } catch (\Illuminate\Validation\ValidationException $e) {
-            throw $e;
+            return $this->validationErrorResponse($e, 'custom-ad_float::messages.items.create_failed');
         } catch (\InvalidArgumentException $e) {
-            return $this->error('custom-ad_float::messages.items.create_failed', 422, $e->getMessage());
+            return $this->error($e->getMessage() !== '' ? $e->getMessage() : 'custom-ad_float::messages.items.create_failed', 422, [$e->getMessage()]);
         } catch (\Exception $e) {
-            return $this->error('custom-ad_float::messages.items.create_failed', 500, $e->getMessage());
+            return $this->error('custom-ad_float::messages.items.create_failed', 500, [$e->getMessage()]);
         }
     }
 
@@ -169,6 +172,7 @@ class AdFloatItemController extends AdminBaseController
             : basename((string) $item->image_path);
 
         return array_merge($row, [
+            'id' => (int) $item->id,
             'hash' => 'caf-'.$item->id,
             'original_filename' => $name !== '' ? $name : ('ad-'.$item->id),
             'mime_type' => $file instanceof \Illuminate\Http\UploadedFile
@@ -180,6 +184,31 @@ class AdFloatItemController extends AdminBaseController
             'order' => (int) $item->sort_order,
             'is_image' => true,
         ]);
+    }
+
+    /**
+     * Put Laravel's errors bag into `message` so G7 toast `{{error.message}}` is never empty.
+     */
+    private function validationErrorResponse(\Illuminate\Validation\ValidationException $e, string $fallbackKey): JsonResponse
+    {
+        $messages = AdminPayload::flattenErrorMessages($e->errors());
+        $first = $messages[0] ?? __($fallbackKey);
+
+        return $this->error($first, 422, $messages !== [] ? $messages : [$first]);
+    }
+
+    private function fileRequiredError(): JsonResponse
+    {
+        $msg = __('custom-ad_float::messages.items.file_required');
+
+        return $this->error('custom-ad_float::messages.items.file_required', 422, [$msg]);
+    }
+
+    private function urlRequiredError(): JsonResponse
+    {
+        $msg = __('custom-ad_float::messages.items.url_required');
+
+        return $this->error('custom-ad_float::messages.items.url_required', 422, [$msg]);
     }
 
     public function update(Request $request, int $id): JsonResponse
@@ -195,24 +224,27 @@ class AdFloatItemController extends AdminBaseController
             $data['image_source'] = $source;
 
             if ($source === AdminPayload::SOURCE_UPLOAD && $files === [] && $item->resolvedSource() !== AdminPayload::SOURCE_UPLOAD && ! $this->hasStagedImagePath($data)) {
-                return $this->error('custom-ad_float::messages.items.file_required', 422);
+                return $this->fileRequiredError();
             }
             if ($source === AdminPayload::SOURCE_URL && empty($data['image_url']) && $item->resolvedSource() !== AdminPayload::SOURCE_URL) {
-                return $this->error('custom-ad_float::messages.items.url_required', 422);
+                return $this->urlRequiredError();
             }
 
             $upload = $files[0] ?? $request->file('image') ?? $request->file('file');
             $item = $this->service->updateItem($item, $data, $upload instanceof \Illuminate\Http\UploadedFile ? $upload : null);
 
-            return $this->success('custom-ad_float::messages.items.update_success', $item->toAdminArray());
+            return $this->success(
+                'custom-ad_float::messages.items.update_success',
+                $this->toUploaderAttachment($item, $upload instanceof \Illuminate\Http\UploadedFile ? $upload : null)
+            );
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return $this->notFound('custom-ad_float::messages.items.not_found');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            throw $e;
+            return $this->validationErrorResponse($e, 'custom-ad_float::messages.items.update_failed');
         } catch (\InvalidArgumentException $e) {
-            return $this->error('custom-ad_float::messages.items.update_failed', 422, $e->getMessage());
+            return $this->error($e->getMessage() !== '' ? $e->getMessage() : 'custom-ad_float::messages.items.update_failed', 422, [$e->getMessage()]);
         } catch (\Exception $e) {
-            return $this->error('custom-ad_float::messages.items.update_failed', 500, $e->getMessage());
+            return $this->error('custom-ad_float::messages.items.update_failed', 500, [$e->getMessage()]);
         }
     }
 

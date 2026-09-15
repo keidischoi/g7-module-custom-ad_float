@@ -2,7 +2,7 @@
   "name": "modules/custom-ad_float",
   "description": "Floating carousel advertisement module for Gnuboard7",
   "type": "library",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "license": "MIT",
   "autoload": {
     "psr-4": {
