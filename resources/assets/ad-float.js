@@ -439,14 +439,26 @@
       '.g7-custom-ad-float .g7-ad-dot.is-active{background:#fff}',
       '.g7-custom-ad-float .g7-ad-close{top:6px;right:6px;left:auto;margin:0;width:24px;height:24px;line-height:24px;z-index:3}',
       '@media (max-width:767px){.g7-custom-ad-float.g7-mobile-hide{display:none!important}.g7-custom-ad-float.g7-mobile-show .g7-ad-frame{max-width:calc(100vw - 24px);max-height:calc(100vh - 48px)}}',
-      '.g7-caf-modal{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;font-family:inherit}',
-      '.g7-caf-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.55)}',
-      '.g7-caf-modal-box{position:relative;z-index:1;width:min(960px,100%);height:min(90vh,720px);max-height:calc(100vh - 24px);background:#111;border-radius:12px;box-shadow:0 16px 50px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}',
-      '.g7-caf-modal-bar{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#1f1f1f;color:#fff;flex:0 0 auto}',
-      '.g7-caf-modal-ext{color:#fff;font-size:14px;text-decoration:underline;background:none;border:0;cursor:pointer}',
-      '.g7-caf-modal-close{margin-left:auto;width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:22px;line-height:36px;cursor:pointer}',
-      '.g7-caf-modal-frame{flex:1 1 auto;min-height:0;width:100%;border:0;background:#fff}',
-      '@media (max-width:767px){.g7-caf-modal{padding:0}.g7-caf-modal-box{width:100%;height:100%;max-height:100vh;border-radius:0}}'
+      '.g7-caf-modal{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;font-family:inherit;-webkit-font-smoothing:antialiased}',
+      '.g7-caf-modal-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.48);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;transition:opacity .18s ease}',
+      '.g7-caf-modal.is-open .g7-caf-modal-backdrop{opacity:1}',
+      '.g7-caf-modal-box{position:relative;z-index:1;display:flex;flex-direction:column;width:min(920px,calc(100vw - 32px));height:min(85vh,760px);max-height:85vh;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 24px 80px rgba(15,23,42,.28),0 2px 8px rgba(15,23,42,.08);opacity:0;transform:scale(.96);transition:opacity .18s ease,transform .18s ease}',
+      '.g7-caf-modal.is-open .g7-caf-modal-box{opacity:1;transform:scale(1)}',
+      '.g7-caf-modal-bar{display:flex;align-items:center;gap:12px;flex:0 0 auto;min-height:56px;padding:10px 12px 10px 18px;background:#fff;border-bottom:1px solid rgba(15,23,42,.08)}',
+      '.g7-caf-modal-title{flex:1;min-width:0;margin:0;font-size:15px;font-weight:600;line-height:1.3;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+      '.g7-caf-modal-close{flex:0 0 auto;width:36px;height:36px;margin:0;padding:0;border:0;border-radius:999px;background:transparent;color:#64748b;font-size:22px;line-height:36px;text-align:center;cursor:pointer;transition:background .15s ease,color .15s ease}',
+      '.g7-caf-modal-close:hover,.g7-caf-modal-close:focus{background:#f1f5f9;color:#0f172a;outline:none}',
+      '.g7-caf-modal-body{position:relative;flex:1 1 auto;min-height:0;background:#f8fafc}',
+      '.g7-caf-modal-skel{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,#f1f5f9 0%,#e2e8f0 45%,#f1f5f9 90%);background-size:200% 100%;animation:g7-caf-shimmer 1.15s ease-in-out infinite}',
+      '.g7-caf-modal-body.is-ready .g7-caf-modal-skel{opacity:0;pointer-events:none;transition:opacity .2s ease}',
+      '@keyframes g7-caf-shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}',
+      '.g7-caf-modal-frame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;opacity:0;transition:opacity .2s ease}',
+      '.g7-caf-modal-body.is-ready .g7-caf-modal-frame{opacity:1}',
+      '.g7-caf-modal-foot{display:flex;flex:0 0 auto;align-items:center;justify-content:center;gap:8px;padding:10px 16px;background:#fafbfc;border-top:1px solid rgba(15,23,42,.08)}',
+      '.g7-caf-modal-ext{color:#334155;font-size:13px;font-weight:600;line-height:1.4;text-decoration:none;background:none;border:0;cursor:pointer;padding:4px 2px}',
+      '.g7-caf-modal-ext:hover,.g7-caf-modal-ext:focus{color:#0f172a;text-decoration:underline;outline:none}',
+      '@media (max-width:767px){.g7-caf-modal{padding:max(8px,env(safe-area-inset-top,8px)) max(8px,env(safe-area-inset-right,8px)) max(8px,env(safe-area-inset-bottom,8px)) max(8px,env(safe-area-inset-left,8px))}.g7-caf-modal-box{width:100%;height:100%;max-height:100%;border-radius:16px}}',
+      '@media (prefers-reduced-motion:reduce){.g7-caf-modal-backdrop,.g7-caf-modal-box,.g7-caf-modal-skel,.g7-caf-modal-frame{transition:none;animation:none;transform:none}}'
     ].join('');
     document.head.appendChild(style);
   }
@@ -494,6 +506,8 @@
 
   var modalEl = null;
   var modalPrevOverflow = '';
+  var modalCloseTimer = 0;
+  var modalClosing = false;
 
   function onModalKey(event) {
     if (event.key === 'Escape' || event.keyCode === 27) {
@@ -502,29 +516,49 @@
     }
   }
 
-  function closeLinkModal() {
-    if (!modalEl) return;
-    try {
-      if (modalEl.parentNode) modalEl.parentNode.removeChild(modalEl);
-    } catch (e) {}
+  function teardownLinkModal() {
+    if (modalCloseTimer) {
+      window.clearTimeout(modalCloseTimer);
+      modalCloseTimer = 0;
+    }
+    if (modalEl && modalEl.parentNode) {
+      try { modalEl.parentNode.removeChild(modalEl); } catch (e) {}
+    }
     modalEl = null;
+    modalClosing = false;
     try { document.body.style.overflow = modalPrevOverflow; } catch (e2) {}
     document.removeEventListener('keydown', onModalKey);
   }
 
-  function openLinkModal(url) {
-    closeLinkModal();
+  function closeLinkModal() {
+    if (!modalEl || modalClosing) return;
+    modalClosing = true;
+    modalEl.classList.remove('is-open');
+    var reduce = false;
+    try {
+      reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch (e) {}
+    if (reduce) {
+      teardownLinkModal();
+      return;
+    }
+    modalCloseTimer = window.setTimeout(teardownLinkModal, 180);
+  }
+
+  function openLinkModal(url, title) {
+    teardownLinkModal();
     modalPrevOverflow = '';
     try {
       modalPrevOverflow = document.body.style.overflow || '';
       document.body.style.overflow = 'hidden';
     } catch (e) {}
     ensureStyle();
+    var label = (title && String(title).replace(/^\s+|\s+$/g, '')) || '광고';
     modalEl = document.createElement('div');
     modalEl.className = 'g7-caf-modal';
     modalEl.setAttribute('role', 'dialog');
     modalEl.setAttribute('aria-modal', 'true');
-    modalEl.setAttribute('aria-label', '광고 링크');
+    modalEl.setAttribute('aria-labelledby', 'g7-caf-modal-title');
 
     var backdrop = document.createElement('div');
     backdrop.className = 'g7-caf-modal-backdrop';
@@ -536,12 +570,10 @@
     var bar = document.createElement('div');
     bar.className = 'g7-caf-modal-bar';
 
-    var openNew = document.createElement('a');
-    openNew.className = 'g7-caf-modal-ext';
-    openNew.href = url;
-    openNew.target = '_blank';
-    openNew.rel = 'noopener noreferrer';
-    openNew.textContent = '새 창으로 열기';
+    var heading = document.createElement('h2');
+    heading.id = 'g7-caf-modal-title';
+    heading.className = 'g7-caf-modal-title';
+    heading.textContent = label;
 
     var closeBtn = document.createElement('button');
     closeBtn.type = 'button';
@@ -550,21 +582,59 @@
     closeBtn.textContent = '×';
     closeBtn.addEventListener('click', closeLinkModal);
 
-    bar.appendChild(openNew);
+    bar.appendChild(heading);
     bar.appendChild(closeBtn);
+
+    var body = document.createElement('div');
+    body.className = 'g7-caf-modal-body';
+
+    var skel = document.createElement('div');
+    skel.className = 'g7-caf-modal-skel';
+    skel.setAttribute('aria-hidden', 'true');
 
     var iframe = document.createElement('iframe');
     iframe.className = 'g7-caf-modal-frame';
-    iframe.src = url;
-    iframe.setAttribute('title', '광고 링크');
+    iframe.setAttribute('title', label);
     iframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
 
+    var readyTimer = 0;
+    function markReady() {
+      if (readyTimer) {
+        window.clearTimeout(readyTimer);
+        readyTimer = 0;
+      }
+      body.classList.add('is-ready');
+    }
+    iframe.addEventListener('load', markReady);
+    iframe.addEventListener('error', markReady);
+    readyTimer = window.setTimeout(markReady, 1800);
+    iframe.src = url;
+
+    body.appendChild(skel);
+    body.appendChild(iframe);
+
+    var foot = document.createElement('div');
+    foot.className = 'g7-caf-modal-foot';
+    var openNew = document.createElement('a');
+    openNew.className = 'g7-caf-modal-ext';
+    openNew.href = url;
+    openNew.target = '_blank';
+    openNew.rel = 'noopener noreferrer';
+    openNew.textContent = '새 탭에서 열기';
+    foot.appendChild(openNew);
+
     box.appendChild(bar);
-    box.appendChild(iframe);
+    box.appendChild(body);
+    box.appendChild(foot);
     modalEl.appendChild(backdrop);
     modalEl.appendChild(box);
     document.body.appendChild(modalEl);
     document.addEventListener('keydown', onModalKey);
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () {
+        if (modalEl && !modalClosing) modalEl.classList.add('is-open');
+      });
+    });
     try { closeBtn.focus(); } catch (e3) {}
   }
 
@@ -653,6 +723,7 @@
       var link = document.createElement(item.target_url ? 'a' : 'div');
       link.className = 'g7-ad-link';
       if (item.id) link.setAttribute('data-item-id', String(item.id));
+      if (item.title) link.setAttribute('data-title', String(item.title));
       if (item.target_url) {
         link.href = item.target_url;
         var mode = linkOpenMode(config);
@@ -794,7 +865,7 @@
       if (mode === 'modal' && isHttpUrl(href)) {
         event.preventDefault();
         stop();
-        openLinkModal(href);
+        openLinkModal(href, link.getAttribute('data-title') || (items[slideIndex] && items[slideIndex].title) || '');
       }
     }, true);
 
