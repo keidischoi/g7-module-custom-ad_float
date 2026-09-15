@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.16
+- Fix admin **결합** / **결합 해제**: G7 `setState` keys cannot use `{{}}`, so `itemSel.{{ad.id}}` never persisted and the POST body sent empty ids (`combine_min` / generic 「캐러셀 결합에 실패했습니다.」). Checkboxes now toggle `_local.itemIds` (numeric array; static key + `.concat`/`.filter`). POST `{ item_ids, ids, sels }`.
+- Client toast 「결합하려면 광고를 2개 이상 선택하세요」 when fewer than 2 are selected. onError prefers `error.errors[0]` then `error.message`.
+- Backend `AdminPayload::selectedItemIds` accepts `item_ids` array or JSON string, `sels` object or JSON string, comma-separated `ids`, and top-level `sel_{id}` flags.
+- Combine 422 uses `combine_min` / `combine_unavailable` as the **primary** message (not only buried in `errors`). Missing `carousel_group` column tells the admin to run `php artisan migrate` (migration `2026_09_15_000007`).
+- `/admin/items/combine` remains registered before `/{id}`.
+
 ## 0.1.15
 - Admin `/admin/ad-float` 기본 설정: 「닫힘 상태 초기화」 / 「다시 보이게 하기」 rotates `close_cookie_key` (e.g. `g7_custom_ad_float_closed_<unix>_<hex>`) so visitor X-close cookies/localStorage under the old key are ignored and ads show again. No need for each visitor to clear cookies.
 - `POST /api/modules/custom-ad_float/admin/settings/reset-closed` (auth + `custom-ad_float.ads.update`) saves the new key and returns updated settings. Toast: 방문자가 닫았던 기록이 무효화되어 다시 표시됩니다.

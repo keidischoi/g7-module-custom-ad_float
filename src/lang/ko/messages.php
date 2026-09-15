@@ -26,7 +26,7 @@ return [
         'combine_success' => '선택한 광고를 캐러셀로 결합했습니다.',
         'combine_failed' => '캐러셀 결합에 실패했습니다.',
         'combine_min' => '결합하려면 광고를 2개 이상 선택하세요.',
-        'combine_unavailable' => '캐러셀 결합을 쓰려면 마이그레이션을 실행하세요.',
+        'combine_unavailable' => '캐러셀 결합을 쓰려면 php artisan migrate 를 실행하세요. (마이그레이션 2026_09_15_000007)',
         'uncombine_success' => '선택한 광고의 캐러셀 결합을 해제했습니다.',
         'uncombine_failed' => '캐러셀 결합 해제에 실패했습니다.',
         'uncombine_min' => '결합 해제할 광고를 선택하세요.',

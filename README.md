@@ -46,6 +46,15 @@ php artisan cache:clear
 - **전체 다시 노출:** `/admin/ad-float` 기본 설정에서 **닫힘 상태 초기화** / **다시 보이게 하기**. 서버가 쿠키 키를 새 값으로 바꿔 예전 기록을 무효화합니다. (`POST /api/modules/custom-ad_float/admin/settings/reset-closed`)
 - **한 브라우저만 테스트:** 개발자 도구에서 해당 키의 쿠키와 localStorage를 지우면 됩니다. 방문자마다 수동으로 지울 필요는 없습니다.
 
+## 업그레이드 (0.1.16)
+
+```bash
+php artisan migrate
+php artisan cache:clear
+```
+
+캐러셀 **결합**은 `custom_ad_float_items.carousel_group` 컬럼이 필요합니다 (마이그레이션 `2026_09_15_000007`, 0.1.14에서 추가). 0.1.14 이상으로 올린 뒤 migrate를 안 했다면 결합이 실패합니다. 관리자 화면을 새로고침하세요.
+
 ## 업그레이드 (0.1.15)
 
 ```bash
@@ -94,4 +103,4 @@ php artisan cache:clear
 | identifier | `custom-ad_float` |
 | vendor | `custom` |
 | namespace | `Modules\\Custom\\AdFloat` |
-| version | `0.1.15` |
+| version | `0.1.16` |

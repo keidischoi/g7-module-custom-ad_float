@@ -26,7 +26,7 @@ return [
         'combine_success' => 'Selected ads were combined into a carousel.',
         'combine_failed' => 'Failed to combine ads.',
         'combine_min' => 'Select at least two ads to combine.',
-        'combine_unavailable' => 'Run migrations before combining ads into a carousel.',
+        'combine_unavailable' => 'Run php artisan migrate before combining ads into a carousel (migration 2026_09_15_000007).',
         'uncombine_success' => 'Carousel grouping was removed from the selected ads.',
         'uncombine_failed' => 'Failed to uncombine ads.',
         'uncombine_min' => 'Select ads to uncombine.',

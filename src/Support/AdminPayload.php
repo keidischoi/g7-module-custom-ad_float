@@ -271,24 +271,179 @@ class AdminPayload
     }
 
     /**
+     * Collect selected ad ids from combine/uncombine payloads.
+     *
+     * G7 apiCall may send arrays, JSON strings, comma-separated ids, nested
+     * objects, or top-level `sel_{id}` flags depending on the engine.
+     *
      * @return array<int, int>
      */
     public static function selectedItemIds(mixed $ids, mixed $sels = null): array
     {
         $out = [];
-        if (is_array($ids)) {
-            foreach ($ids as $id) {
-                if (is_numeric($id) && (int) $id > 0) {
-                    $out[] = (int) $id;
+        self::collectIdList($out, $ids);
+        self::collectSelMap($out, $sels);
+
+        return self::uniqueSortedIds($out);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public static function selectedItemIdsFromRequest(Request $request): array
+    {
+        $bag = $request->all();
+        foreach (['item_ids', 'itemIds', 'ids', 'sels', 'itemSel', 'item_sel'] as $key) {
+            if (! array_key_exists($key, $bag)) {
+                $value = $request->input($key);
+                if ($value !== null) {
+                    $bag[$key] = $value;
                 }
             }
         }
-        if (is_array($sels)) {
-            foreach ($sels as $key => $on) {
-                $id = is_numeric($key) ? (int) $key : 0;
-                if ($id > 0 && ($on === true || $on === 1 || $on === '1' || $on === 'true')) {
-                    $out[] = $id;
+
+        return self::selectedItemIdsFromBag($bag);
+    }
+
+    /**
+     * @param  array<string, mixed>  $bag
+     * @return array<int, int>
+     */
+    public static function selectedItemIdsFromBag(array $bag): array
+    {
+        $out = [];
+        foreach (['item_ids', 'itemIds', 'ids'] as $key) {
+            if (array_key_exists($key, $bag)) {
+                self::collectIdList($out, $bag[$key]);
+            }
+        }
+        foreach (['sels', 'itemSel', 'item_sel'] as $key) {
+            if (array_key_exists($key, $bag)) {
+                self::collectSelMap($out, $bag[$key]);
+            }
+        }
+        self::collectSelMap($out, $bag);
+
+        return self::uniqueSortedIds($out);
+    }
+
+    /**
+     * @param  array<int, int>  $out
+     */
+    private static function collectIdList(array &$out, mixed $ids): void
+    {
+        $ids = self::decodeJsonIfString($ids);
+        if (is_bool($ids)) {
+            return;
+        }
+        if (is_numeric($ids) && (int) $ids > 0) {
+            $out[] = (int) $ids;
+
+            return;
+        }
+        if (is_string($ids)) {
+            $trimmed = trim($ids);
+            if ($trimmed === '' || self::isBlank($trimmed) || str_contains($trimmed, '{{')) {
+                return;
+            }
+            foreach (preg_split('/[,\s]+/', $trimmed) ?: [] as $part) {
+                if (is_numeric($part) && (int) $part > 0) {
+                    $out[] = (int) $part;
                 }
+            }
+
+            return;
+        }
+        if (! is_array($ids)) {
+            return;
+        }
+        $isList = array_is_list($ids);
+        foreach ($ids as $key => $value) {
+            if (is_array($value)) {
+                self::collectIdList($out, $value);
+
+                continue;
+            }
+            if ($isList) {
+                if (! is_bool($value) && is_numeric($value) && (int) $value > 0) {
+                    $out[] = (int) $value;
+                }
+
+                continue;
+            }
+            if (is_numeric($key) && (int) $key > 0 && self::isTruthyFlag($value)) {
+                $out[] = (int) $key;
+            } elseif (! is_bool($value) && is_numeric($value) && (int) $value > 0 && ! self::isTruthyFlag($value)) {
+                $out[] = (int) $value;
+            }
+            if (is_string($key) && preg_match('/^(?:sel_|item_sel_|itemSel_)(\d+)$/', $key, $m) && self::isTruthyFlag($value)) {
+                $out[] = (int) $m[1];
+            }
+        }
+    }
+
+    /**
+     * @param  array<int, int>  $out
+     */
+    private static function collectSelMap(array &$out, mixed $sels): void
+    {
+        $sels = self::decodeJsonIfString($sels);
+        if (! is_array($sels)) {
+            return;
+        }
+        foreach ($sels as $key => $on) {
+            $id = 0;
+            if (is_numeric($key) && (int) $key > 0) {
+                $id = (int) $key;
+            } elseif (is_string($key) && preg_match('/^(?:sel_|item_sel_|itemSel_)(\d+)$/', $key, $m)) {
+                $id = (int) $m[1];
+            }
+            if ($id > 0 && self::isTruthyFlag($on)) {
+                $out[] = $id;
+            }
+        }
+    }
+
+    private static function decodeJsonIfString(mixed $value): mixed
+    {
+        if (! is_string($value)) {
+            return $value;
+        }
+        $trimmed = trim($value);
+        if ($trimmed === '' || self::isBlank($trimmed) || str_contains($trimmed, '{{')) {
+            return $value;
+        }
+        if (($trimmed[0] ?? '') !== '[' && ($trimmed[0] ?? '') !== '{') {
+            return $value;
+        }
+        $decoded = json_decode($trimmed, true);
+
+        return is_array($decoded) ? $decoded : $value;
+    }
+
+    private static function isTruthyFlag(mixed $value): bool
+    {
+        if ($value === true || $value === 1 || $value === 1.0) {
+            return true;
+        }
+        if (! is_string($value)) {
+            return false;
+        }
+        $normalized = strtolower(trim($value));
+
+        return in_array($normalized, ['1', 'true', 'on', 'yes', 'checked'], true);
+    }
+
+    /**
+     * @param  array<int, int>  $ids
+     * @return array<int, int>
+     */
+    private static function uniqueSortedIds(array $ids): array
+    {
+        $out = [];
+        foreach ($ids as $id) {
+            if (is_numeric($id) && (int) $id > 0) {
+                $out[] = (int) $id;
             }
         }
         $out = array_values(array_unique($out));
