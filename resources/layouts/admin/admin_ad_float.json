@@ -4307,9 +4307,11 @@
                                       },
                                       {
                                         "type": "basic",
-                                        "name": "Toggle",
+                                        "name": "Input",
                                         "props": {
+                                          "type": "checkbox",
                                           "name": "sch_enabled_{{sidx}}",
+                                          "className": "h-4 w-4 cursor-pointer",
                                           "autoBinding": false,
                                           "checked": "{{!(sch.enabled === false || sch.enabled === 0 || sch.enabled === '0' || sch.enabled === 'false')}}"
                                         },
