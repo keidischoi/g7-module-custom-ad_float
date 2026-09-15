@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.10
+- Fix admin ad create/save: empty optional fields (`target_url`, `display_seconds`, schedule dates) no longer fail validation.
+- Accept relative click URLs (no longer require a strict `url` scheme).
+- Normalize blank/`null` JSON payloads from the G7 layout engine before validate.
+- Create item API returns HTTP 200 (G7 admin `apiCall` success path).
+- Idempotent settings/items migrations; register dynamic tables for uninstall.
+
 ## 0.1.9
 - Rename module from `local-popup_ad` to `custom-ad_float` (vendor `custom`, namespace `Modules\\Custom\\AdFloat`).
 - Tables renamed to `custom_ad_float_settings` / `custom_ad_float_items`.

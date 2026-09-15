@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Base\AdminBaseController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Custom\AdFloat\Services\AdFloatService;
+use Modules\Custom\AdFloat\Support\AdminPayload;
 
 class AdFloatSettingController extends AdminBaseController
 {
@@ -28,6 +29,7 @@ class AdFloatSettingController extends AdminBaseController
     public function update(Request $request): JsonResponse
     {
         try {
+            AdminPayload::nullifyEmpty($request, ['start_at', 'end_at', 'close_cookie_key']);
             $data = $request->validate([
                 'enabled' => ['nullable'],
                 'home_only' => ['nullable'],

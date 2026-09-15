@@ -1250,8 +1250,8 @@
                                 "pause_on_hover": "{{_local.form?.pause_on_hover ? 1 : 0}}",
                                 "open_new_tab": "{{_local.form?.open_new_tab ? 1 : 0}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
-                                "start_at": "{{_local.form?.start_at || null}}",
-                                "end_at": "{{_local.form?.end_at || null}}"
+                                "start_at": "{{_local.form?.start_at ? _local.form.start_at : undefined}}",
+                                "end_at": "{{_local.form?.end_at ? _local.form.end_at : undefined}}"
                               }
                             },
                             "onSuccess": [
@@ -1289,7 +1289,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "$t:custom-ad_float.admin.save_failed"
+                                  "message": "{{error.message}}"
                                 }
                               }
                             ]
@@ -1642,10 +1642,10 @@
                               "body": {
                                 "title": "{{_local.create?.title || ''}}",
                                 "alt_text": "{{_local.create?.alt_text || ''}}",
-                                "target_url": "{{_local.create?.target_url || null}}",
+                                "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
                                 "image_url": "{{_local.create?.image_url || ''}}",
-                                "sort_order": "{{Number(_local.create?.sort_order) || 0}}",
-                                "display_seconds": "{{_local.create?.display_seconds ? Number(_local.create.display_seconds) : null}}",
+                                "sort_order": "{{_local.create?.sort_order || 0}}",
+                                "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}",
                                 "enabled": 1
                               }
                             },
@@ -1691,7 +1691,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "$t:custom-ad_float.admin.create_failed"
+                                  "message": "{{error.message}}"
                                 }
                               }
                             ]

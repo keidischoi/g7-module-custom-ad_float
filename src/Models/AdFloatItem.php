@@ -15,6 +15,8 @@ class AdFloatItem extends Model
 
     protected $casts = [
         'enabled' => 'boolean',
+        'sort_order' => 'integer',
+        'display_seconds' => 'integer',
     ];
 
     public function imageUrl(): string

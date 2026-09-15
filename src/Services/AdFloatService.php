@@ -6,6 +6,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Modules\Custom\AdFloat\Models\AdFloatItem;
 use Modules\Custom\AdFloat\Models\AdFloatSetting;
+use Modules\Custom\AdFloat\Support\AdminPayload;
 
 class AdFloatService
 {
@@ -72,7 +73,7 @@ class AdFloatService
             }
         }
         foreach (['start_at', 'end_at'] as $dateKey) {
-            if (array_key_exists($dateKey, $data) && ($data[$dateKey] === '' || $data[$dateKey] === null)) {
+            if (array_key_exists($dateKey, $data) && AdminPayload::isBlank($data[$dateKey])) {
                 $data[$dateKey] = null;
             }
         }
@@ -88,16 +89,18 @@ class AdFloatService
 
     public function createItem(array $data, ?UploadedFile $image = null): AdFloatItem
     {
-        if ($image) {
-            $data['image_path'] = $image->store('custom-ad-float', 'public');
-        } elseif (! empty($data['image_url'])) {
-            $data['image_path'] = $data['image_url'];
+        $data = $this->applyImage($data, $image);
+        if (empty($data['image_path'])) {
+            throw new \InvalidArgumentException(__('custom-ad_float::messages.items.image_required'));
         }
-        unset($data['image_url']);
+        unset($data['image'], $data['image_url']);
         $data['enabled'] = array_key_exists('enabled', $data)
             ? filter_var($data['enabled'], FILTER_VALIDATE_BOOLEAN)
             : true;
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
+        if (array_key_exists('display_seconds', $data) && ($data['display_seconds'] === '' || $data['display_seconds'] === null)) {
+            $data['display_seconds'] = null;
+        }
 
         return AdFloatItem::create($data);
     }
@@ -106,13 +109,14 @@ class AdFloatService
     {
         if ($image) {
             $this->deleteStoredImage($item);
-            $data['image_path'] = $image->store('custom-ad-float', 'public');
-        } elseif (! empty($data['image_url'])) {
-            $data['image_path'] = $data['image_url'];
         }
-        unset($data['image_url']);
+        $data = $this->applyImage($data, $image, requireImage: false);
+        unset($data['image'], $data['image_url']);
         if (array_key_exists('enabled', $data)) {
             $data['enabled'] = filter_var($data['enabled'], FILTER_VALIDATE_BOOLEAN);
+        }
+        if (array_key_exists('display_seconds', $data) && ($data['display_seconds'] === '' || $data['display_seconds'] === null)) {
+            $data['display_seconds'] = null;
         }
         $item->update($data);
 
@@ -130,6 +134,27 @@ class AdFloatService
     {
         $this->deleteStoredImage($item);
         $item->delete();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function applyImage(array $data, ?UploadedFile $image, bool $requireImage = true): array
+    {
+        if ($image) {
+            try {
+                $data['image_path'] = $image->store('custom-ad-float', 'public');
+            } catch (\Throwable $e) {
+                throw new \RuntimeException('Failed to store uploaded image: '.$e->getMessage(), 0, $e);
+            }
+        } elseif (! empty($data['image_url']) && is_string($data['image_url'])) {
+            $data['image_path'] = trim($data['image_url']);
+        } elseif ($requireImage) {
+            $data['image_path'] = '';
+        }
+
+        return $data;
     }
 
     private function deleteStoredImage(AdFloatItem $item): void
