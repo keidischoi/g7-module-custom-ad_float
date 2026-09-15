@@ -18,7 +18,7 @@ class PayloadController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'data' => ['settings' => ['enabled' => false], 'items' => []],
+                'data' => ['settings' => ['enabled' => false], 'items' => [], 'windows' => []],
             ], 200);
         }
     }

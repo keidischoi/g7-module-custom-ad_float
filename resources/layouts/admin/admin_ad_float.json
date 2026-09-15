@@ -3161,6 +3161,14 @@
               },
               {
                 "type": "basic",
+                "name": "P",
+                "props": {
+                  "className": "text-xs text-gray-500 mb-3"
+                },
+                "text": "$t:custom-ad_float.admin.schedules_multi_position_hint"
+              },
+              {
+                "type": "basic",
                 "name": "Div",
                 "props": {
                   "className": "border border-gray-200 dark:border-gray-700 rounded-lg p-3"

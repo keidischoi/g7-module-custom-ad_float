@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.18
+- When **예약 사용 ON**, apply **every** matching reservation (not only the first). Each distinct `position` mounts its own float root (`g7-custom-ad-float-{left|right|top|bottom}`).
+- Matching rows that share a position merge into **one** carousel: first row’s visuals, union of `item_ids` (empty = all enabled ads).
+- **예약 사용 OFF** stays a single window from 기본 설정. Close cookie is per-position (`close_cookie_key + '_' + position`); the legacy `default` window keeps the unsuffixed key.
+- Admin hint under 예약: 「같은 시간대에 위치만 다른 예약을 여러 개 두면 동시에 여러 곳에 표시됩니다.」
+- Payload `windows: [{ id, settings, items }]` plus first window as `settings`/`items` for old JS. Combine/carousel and stats (per `item_id` + page) unchanged.
+
 ## 0.1.17
 - Admin labels: `show_arrows` → 「슬라이딩 버튼」 (hint: 이전/다음 화살표 표시), `show_dots` → 「DOT 표시」 (hint: 캐러셀 인디케이터 점). Grouped with **자동재생** as Toggle controls in 기본 설정 and per-reservation rows.
 - Front JS still hides arrows/dots when the flag is false (also `0` / `"false"`), and when there is only one slide (`items.length > 1`).

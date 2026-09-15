@@ -549,18 +549,77 @@ class AdminPayload
     }
 
     /**
+     * Every enabled reservation row whose window + weekdays match `$now`.
+     *
+     * @param  array<int, array<string, mixed>>  $schedules
+     * @return array<int, array<string, mixed>>
+     */
+    public static function matchingSchedules(array $schedules, \DateTimeInterface $now): array
+    {
+        $out = [];
+        foreach ($schedules as $row) {
+            if (is_array($row) && self::scheduleMatchesNow($row, $now)) {
+                $out[] = $row;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
      * @param  array<int, array<string, mixed>>  $schedules
      * @return array<string, mixed>|null
      */
     public static function firstMatchingSchedule(array $schedules, \DateTimeInterface $now): ?array
     {
-        foreach ($schedules as $row) {
-            if (is_array($row) && self::scheduleMatchesNow($row, $now)) {
-                return $row;
+        $matches = self::matchingSchedules($schedules, $now);
+
+        return $matches[0] ?? null;
+    }
+
+    /**
+     * One floating window per position. The first matching row at that
+     * position supplies visuals; later rows merge `item_ids` (empty = all ads).
+     *
+     * @param  array<int, array<string, mixed>>  $matches
+     * @param  array<string, mixed>  $baseSettings
+     * @return array<int, array{id:string,settings:array<string,mixed>,item_ids:array<int,int>}>
+     */
+    public static function windowsFromMatchingSchedules(array $matches, array $baseSettings): array
+    {
+        $groups = [];
+        foreach ($matches as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $settings = self::overlayVisual($baseSettings, $row);
+            $pos = $settings['position'] ?? 'right';
+            if (! in_array($pos, ['left', 'right', 'top', 'bottom'], true)) {
+                $pos = 'right';
+            }
+            $settings['position'] = $pos;
+            $settings['enabled'] = true;
+            $ids = self::normalizeItemIds($row);
+            if (! isset($groups[$pos])) {
+                $groups[$pos] = [
+                    'id' => $pos,
+                    'settings' => $settings,
+                    'item_ids' => $ids,
+                ];
+
+                continue;
+            }
+            $existing = $groups[$pos]['item_ids'];
+            if ($existing === [] || $ids === []) {
+                $groups[$pos]['item_ids'] = [];
+            } else {
+                $merged = array_values(array_unique(array_merge($existing, $ids)));
+                sort($merged);
+                $groups[$pos]['item_ids'] = $merged;
             }
         }
 
-        return null;
+        return array_values($groups);
     }
 
     public static function combineDateTime(mixed $date, mixed $time, mixed $fallback = null): ?string
@@ -647,8 +706,13 @@ class AdminPayload
     public static function normalizeItemIds(array $row): array
     {
         $ids = [];
-        if (isset($row['item_ids']) && is_array($row['item_ids'])) {
-            foreach ($row['item_ids'] as $id) {
+        $rawIds = $row['item_ids'] ?? null;
+        if (is_string($rawIds)) {
+            $decoded = json_decode($rawIds, true);
+            $rawIds = is_array($decoded) ? $decoded : [];
+        }
+        if (is_array($rawIds)) {
+            foreach ($rawIds as $id) {
                 if (is_numeric($id) && (int) $id > 0) {
                     $ids[] = (int) $id;
                 }

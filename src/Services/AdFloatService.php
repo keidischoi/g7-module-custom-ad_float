@@ -15,43 +15,114 @@ class AdFloatService
     public function payload(): array
     {
         $row = AdFloatSetting::current();
-        $resolved = $row->resolvePublicSettings(now());
-        $settings = $resolved['settings'];
-
-        if (! empty($resolved['hide']) || empty($settings['enabled'])) {
-            return ['settings' => ['enabled' => false], 'items' => []];
+        $base = $row->toPublicSettingsArray();
+        if (empty($base['enabled'])) {
+            return $this->emptyPayload();
         }
 
-        $itemsQuery = AdFloatItem::query()
-            ->where('enabled', true)
-            ->orderBy('sort_order')
-            ->orderBy('id');
-        $itemIds = $resolved['item_ids'] ?? [];
-        if (is_array($itemIds) && $itemIds !== []) {
-            $itemsQuery->whereIn('id', $itemIds);
+        $allItems = $this->orderItemsForCarousel(
+            AdFloatItem::query()->where('enabled', true)->orderBy('sort_order')->orderBy('id')->get()
+        );
+
+        if (! $row->schedulesEnabled()) {
+            return $this->payloadFromWindows([
+                $this->windowFromItems('default', $base, $allItems),
+            ]);
         }
-        $items = $this->orderItemsForCarousel($itemsQuery->get())
-            ->take(max(1, (int) ($settings['max_items'] ?? $row->max_items)));
+
+        $schedules = AdFloatSetting::hasSchedulesColumn()
+            ? AdminPayload::normalizeSchedules($row->schedules)
+            : [];
+        $matches = AdminPayload::matchingSchedules($schedules, now());
+        if ($matches === []) {
+            return $this->emptyPayload();
+        }
+
+        $windows = [];
+        foreach (AdminPayload::windowsFromMatchingSchedules($matches, $base) as $group) {
+            $items = $allItems;
+            $ids = $group['item_ids'] ?? [];
+            if (is_array($ids) && $ids !== []) {
+                $allow = array_fill_keys(array_map('intval', $ids), true);
+                $items = $items->filter(fn (AdFloatItem $item) => isset($allow[(int) $item->id]))->values();
+            }
+            $window = $this->windowFromItems((string) $group['id'], $group['settings'], $items);
+            if ($window['items'] === []) {
+                continue;
+            }
+            $windows[] = $window;
+        }
+
+        return $this->payloadFromWindows($windows);
+    }
+
+    /**
+     * @return array{settings:array<string,mixed>,items:array<int, mixed>,windows:array<int, mixed>}
+     */
+    private function emptyPayload(): array
+    {
+        return [
+            'settings' => ['enabled' => false],
+            'items' => [],
+            'windows' => [],
+        ];
+    }
+
+    /**
+     * @param  array<int, array{id:string,settings:array<string,mixed>,items:array<int, array<string, mixed>>}>  $windows
+     * @return array{settings:array<string,mixed>,items:array<int, mixed>,windows:array<int, mixed>}
+     */
+    private function payloadFromWindows(array $windows): array
+    {
+        if ($windows === []) {
+            return $this->emptyPayload();
+        }
+        $first = $windows[0];
 
         return [
-            'settings' => $settings,
-            'items' => $items->map(function (AdFloatItem $item) {
-                $row = [
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'image_url' => $item->imageUrl(),
-                    'target_url' => $item->target_url,
-                    'alt_text' => $item->alt_text ?: $item->title,
-                    'display_seconds' => $item->display_seconds,
-                    'sort_order' => (int) $item->sort_order,
-                ];
-                if (AdFloatItem::hasCarouselGroupColumn()) {
-                    $row['carousel_group'] = $item->carousel_group;
-                }
-
-                return $row;
-            })->values()->all(),
+            'settings' => $first['settings'],
+            'items' => $first['items'],
+            'windows' => $windows,
         ];
+    }
+
+    /**
+     * @param  Collection<int, AdFloatItem>  $items
+     * @param  array<string, mixed>  $settings
+     * @return array{id:string,settings:array<string,mixed>,items:array<int, array<string, mixed>>}
+     */
+    private function windowFromItems(string $id, array $settings, Collection $items): array
+    {
+        $settings['enabled'] = true;
+        $items = $this->orderItemsForCarousel($items)
+            ->take(max(1, (int) ($settings['max_items'] ?? 20)));
+
+        return [
+            'id' => $id,
+            'settings' => $settings,
+            'items' => $items->map(fn (AdFloatItem $item) => $this->publicItemArray($item))->values()->all(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function publicItemArray(AdFloatItem $item): array
+    {
+        $row = [
+            'id' => $item->id,
+            'title' => $item->title,
+            'image_url' => $item->imageUrl(),
+            'target_url' => $item->target_url,
+            'alt_text' => $item->alt_text ?: $item->title,
+            'display_seconds' => $item->display_seconds,
+            'sort_order' => (int) $item->sort_order,
+        ];
+        if (AdFloatItem::hasCarouselGroupColumn()) {
+            $row['carousel_group'] = $item->carousel_group;
+        }
+
+        return $row;
     }
 
     public function updateSettings(array $data): AdFloatSetting

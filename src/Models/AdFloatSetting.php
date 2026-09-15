@@ -178,17 +178,18 @@ class AdFloatSetting extends Model
         $schedules = static::hasSchedulesColumn()
             ? AdminPayload::normalizeSchedules($this->schedules)
             : [];
-        $match = AdminPayload::firstMatchingSchedule($schedules, $now);
-        if ($match === null) {
+        $matches = AdminPayload::matchingSchedules($schedules, $now);
+        if ($matches === []) {
             $settings['enabled'] = false;
 
             return ['hide' => true, 'settings' => $settings, 'item_ids' => []];
         }
+        $first = $matches[0];
 
         return [
             'hide' => false,
-            'settings' => AdminPayload::overlayVisual($settings, $match),
-            'item_ids' => AdminPayload::normalizeItemIds($match),
+            'settings' => AdminPayload::overlayVisual($settings, $first),
+            'item_ids' => AdminPayload::normalizeItemIds($first),
         ];
     }
 
