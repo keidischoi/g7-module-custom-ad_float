@@ -136,6 +136,13 @@ namespace {
     expect('overlayVisual pins base show_close', $direct['show_close'] ?? null, false);
     expect('overlayVisual still applies other schedule visuals', $direct['width_px'] ?? null, 90);
 
+    $pinLink = AdminPayload::overlayVisual(
+        ['link_open_mode' => 'modal', 'open_new_tab' => false, 'position' => 'right'],
+        ['link_open_mode' => 'same', 'open_new_tab' => true]
+    );
+    expect('overlayVisual pins base link_open_mode', $pinLink['link_open_mode'] ?? null, 'modal');
+    expect('overlayVisual derived open_new_tab from base mode', $pinLink['open_new_tab'] ?? null, false);
+
     $added = [
         'id' => 's1_1',
         'enabled' => true,

@@ -156,6 +156,18 @@ class AdFloatService
         if (array_key_exists('vertical_offset_px', $data) && ! AdFloatSetting::hasVerticalOffsetColumn()) {
             unset($data['vertical_offset_px']);
         }
+        if (array_key_exists('link_open_mode', $data) || array_key_exists('open_new_tab', $data)) {
+            $mode = AdminPayload::normalizeLinkOpenMode(
+                $data['link_open_mode'] ?? null,
+                $data['open_new_tab'] ?? null
+            );
+            if (AdFloatSetting::hasLinkOpenModeColumn()) {
+                $data['link_open_mode'] = $mode;
+            } else {
+                unset($data['link_open_mode']);
+            }
+            $data['open_new_tab'] = $mode === 'new_tab';
+        }
         if (array_key_exists('schedules', $data)) {
             $schedules = AdminPayload::normalizeSchedules($data['schedules']);
             if (AdFloatSetting::hasSchedulesColumn()) {

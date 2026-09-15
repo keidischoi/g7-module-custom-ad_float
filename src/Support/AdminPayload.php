@@ -52,7 +52,7 @@ class AdminPayload
             'radius_px', 'offset_px', 'vertical_align', 'vertical_offset_px',
             'z_index', 'max_items', 'mobile_mode',
             'autoplay', 'show_arrows', 'show_dots', 'show_close',
-            'pause_on_hover', 'open_new_tab',
+            'pause_on_hover', 'open_new_tab', 'link_open_mode',
         ];
     }
 
@@ -115,6 +115,12 @@ class AdminPayload
             }
             $settings[$key] = self::toBool($settings[$key], (bool) ($defaults[$key] ?? true));
         }
+        $mode = self::normalizeLinkOpenMode(
+            $settings['link_open_mode'] ?? null,
+            array_key_exists('open_new_tab', $settings) ? $settings['open_new_tab'] : null
+        );
+        $settings['link_open_mode'] = $mode;
+        $settings['open_new_tab'] = $mode === 'new_tab';
 
         return $settings;
     }
@@ -143,6 +149,7 @@ class AdminPayload
             'show_close' => true,
             'pause_on_hover' => true,
             'open_new_tab' => true,
+            'link_open_mode' => 'new_tab',
         ];
     }
 
@@ -189,6 +196,7 @@ class AdminPayload
             'schedules.*.show_close' => ['nullable'],
             'schedules.*.pause_on_hover' => ['nullable'],
             'schedules.*.open_new_tab' => ['nullable'],
+            'schedules.*.link_open_mode' => ['nullable', 'in:same,new_tab,modal'],
         ];
     }
 
@@ -691,6 +699,8 @@ class AdminPayload
                 $out[$key] = (int) $value;
             } elseif ($key === 'vertical_align') {
                 $out[$key] = self::normalizeVerticalAlign($value);
+            } elseif ($key === 'link_open_mode') {
+                $out[$key] = self::normalizeLinkOpenMode($value, $row['open_new_tab'] ?? null);
             } else {
                 $out[$key] = is_string($value) ? trim($value) : $value;
             }
@@ -711,6 +721,12 @@ class AdminPayload
         if (array_key_exists('show_close', $base)) {
             $merged['show_close'] = self::toBool($base['show_close'], true);
         }
+        // Link open mode is global (기본 설정). Reservations must not override it.
+        $merged['link_open_mode'] = self::normalizeLinkOpenMode(
+            $base['link_open_mode'] ?? null,
+            $base['open_new_tab'] ?? null
+        );
+        $merged['open_new_tab'] = $merged['link_open_mode'] === 'new_tab';
 
         return $merged;
     }
@@ -953,6 +969,34 @@ class AdminPayload
         }
 
         return 'middle';
+    }
+
+    /**
+     * same | new_tab | modal. Missing mode falls back to historic open_new_tab
+     * (true → new_tab, false → same). Default is new_tab.
+     */
+    public static function normalizeLinkOpenMode(mixed $mode, mixed $openNewTab = null): string
+    {
+        if (is_string($mode) && ! self::isBlank($mode)) {
+            $v = strtolower(trim($mode));
+            if (in_array($v, ['same', 'new_tab', 'modal'], true)) {
+                return $v;
+            }
+            if (in_array($v, ['current', 'self', '_self'], true)) {
+                return 'same';
+            }
+            if (in_array($v, ['blank', '_blank', 'new', 'tab'], true)) {
+                return 'new_tab';
+            }
+            if (in_array($v, ['popup', 'iframe'], true)) {
+                return 'modal';
+            }
+        }
+        if ($openNewTab !== null && ! self::isBlank($openNewTab)) {
+            return self::toBool($openNewTab, true) ? 'new_tab' : 'same';
+        }
+
+        return 'new_tab';
     }
 
     public static function blankToNull(mixed $value): ?string

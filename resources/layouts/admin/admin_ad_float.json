@@ -41,6 +41,7 @@
           "show_close": true,
           "pause_on_hover": true,
           "open_new_tab": true,
+          "link_open_mode": "new_tab",
           "mobile_mode": "hide",
           "close_cookie_key": "g7_custom_ad_float_closed",
           "start_at": "",
@@ -200,7 +201,8 @@
                                 "show_dots": "{{_local.form?.show_dots === true || _local.form?.show_dots === 1 || _local.form?.show_dots === '1' || _local.form?.show_dots === 'true' ? 1 : 0}}",
                                 "show_close": "{{_local.form?.show_close === true || _local.form?.show_close === 1 || _local.form?.show_close === '1' || _local.form?.show_close === 'true' ? 1 : 0}}",
                                 "pause_on_hover": "{{_local.form?.pause_on_hover === true || _local.form?.pause_on_hover === 1 || _local.form?.pause_on_hover === '1' || _local.form?.pause_on_hover === 'true' ? 1 : 0}}",
-                                "open_new_tab": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true' ? 1 : 0}}",
+                                "open_new_tab": "{{(_local.form.link_open_mode || 'new_tab') === 'new_tab' ? 1 : 0}}",
+                                "link_open_mode": "{{_local.form.link_open_mode || 'new_tab'}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
                                 "schedules_enabled": "{{_local.form.schedules_enabled ? 1 : 0}}",
                                 "schedules": "{{_local.form.schedules || []}}"
@@ -1481,7 +1483,7 @@
               {
                 "type": "basic",
                 "name": "Div",
-                "id": "tog_open_new_tab",
+                "id": "f_link_open_mode",
                 "props": {
                   "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
                 },
@@ -1496,17 +1498,26 @@
                         "props": {
                           "className": "text-sm font-medium"
                         },
-                        "text": "$t:custom-ad_float.admin.fields.open_new_tab"
+                        "text": "$t:custom-ad_float.admin.fields.link_open_mode"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-1"
+                        },
+                        "text": "$t:custom-ad_float.admin.link_open_mode_hint"
                       }
                     ]
                   },
                   {
                     "type": "basic",
-                    "name": "Toggle",
+                    "name": "Select",
                     "props": {
-                      "name": "open_new_tab",
-                      "autoBinding": false,
-                      "checked": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true'}}"
+                      "name": "link_open_mode",
+                      "className": "input w-auto min-w-[8rem]",
+                      "value": "{{_local.form.link_open_mode || 'new_tab'}}",
+                      "autoBinding": false
                     },
                     "actions": [
                       {
@@ -1514,8 +1525,35 @@
                         "handler": "setState",
                         "params": {
                           "target": "local",
-                          "form.open_new_tab": "{{$event.target.checked === true}}"
+                          "form.link_open_mode": "{{$event.target.value}}",
+                          "form.open_new_tab": "{{$event.target.value === 'new_tab'}}"
                         }
+                      }
+                    ],
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Option",
+                        "props": {
+                          "value": "same"
+                        },
+                        "text": "$t:custom-ad_float.admin.link_open.same"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Option",
+                        "props": {
+                          "value": "new_tab"
+                        },
+                        "text": "$t:custom-ad_float.admin.link_open.new_tab"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Option",
+                        "props": {
+                          "value": "modal"
+                        },
+                        "text": "$t:custom-ad_float.admin.link_open.modal"
                       }
                     ]
                   }
@@ -4592,35 +4630,16 @@
                                             "type": "basic",
                                             "name": "Div",
                                             "props": {
-                                              "className": "flex items-center justify-between gap-2 py-1.5"
+                                              "className": "md:col-span-2 py-1.5"
                                             },
                                             "children": [
                                               {
                                                 "type": "basic",
-                                                "name": "Span",
+                                                "name": "P",
                                                 "props": {
-                                                  "className": "text-xs"
+                                                  "className": "text-xs text-gray-500"
                                                 },
-                                                "text": "$t:custom-ad_float.admin.fields.open_new_tab"
-                                              },
-                                              {
-                                                "type": "basic",
-                                                "name": "Toggle",
-                                                "props": {
-                                                  "name": "sch_open_new_tab_{{sidx}}",
-                                                  "autoBinding": false,
-                                                  "checked": "{{sch.open_new_tab === true || sch.open_new_tab === 1 || sch.open_new_tab === '1' || sch.open_new_tab === 'true'}}"
-                                                },
-                                                "actions": [
-                                                  {
-                                                    "type": "change",
-                                                    "handler": "setState",
-                                                    "params": {
-                                                      "target": "local",
-                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {open_new_tab: ($event.target.checked === true)}) : row))}}"
-                                                    }
-                                                  }
-                                                ]
+                                                "text": "$t:custom-ad_float.admin.link_open_global_hint"
                                               }
                                             ]
                                           }
@@ -4791,7 +4810,8 @@
                                 "show_dots": "{{_local.form?.show_dots === true || _local.form?.show_dots === 1 || _local.form?.show_dots === '1' || _local.form?.show_dots === 'true' ? 1 : 0}}",
                                 "show_close": "{{_local.form?.show_close === true || _local.form?.show_close === 1 || _local.form?.show_close === '1' || _local.form?.show_close === 'true' ? 1 : 0}}",
                                 "pause_on_hover": "{{_local.form?.pause_on_hover === true || _local.form?.pause_on_hover === 1 || _local.form?.pause_on_hover === '1' || _local.form?.pause_on_hover === 'true' ? 1 : 0}}",
-                                "open_new_tab": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true' ? 1 : 0}}",
+                                "open_new_tab": "{{(_local.form.link_open_mode || 'new_tab') === 'new_tab' ? 1 : 0}}",
+                                "link_open_mode": "{{_local.form.link_open_mode || 'new_tab'}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
                                 "schedules_enabled": "{{_local.form.schedules_enabled ? 1 : 0}}",
                                 "schedules": "{{_local.form.schedules || []}}"

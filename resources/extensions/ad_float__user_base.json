@@ -8,7 +8,7 @@
   "scripts": [
     {
       "id": "custom-ad_float-js",
-      "src": "/api/modules/custom-ad_float/assets/ad-float.js?v=0.1.22",
+      "src": "/api/modules/custom-ad_float/assets/ad-float.js?v=0.1.23",
       "async": true,
       "defer": true,
       "optional": true,
@@ -28,7 +28,7 @@
           "name": "HtmlContent",
           "failOnError": false,
           "props": {
-            "html": "<div id=\"g7_custom_ad_float_mount\" class=\"g7-custom-ad-float-mount\" hidden></div><script src=\"/api/modules/custom-ad_float/assets/ad-float.js?v=0.1.22\" async></script>"
+            "html": "<div id=\"g7_custom_ad_float_mount\" class=\"g7-custom-ad-float-mount\" hidden></div><script src=\"/api/modules/custom-ad_float/assets/ad-float.js?v=0.1.23\" async></script>"
           }
         }
       ]

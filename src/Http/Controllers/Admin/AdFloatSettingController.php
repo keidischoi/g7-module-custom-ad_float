@@ -52,6 +52,7 @@ class AdFloatSettingController extends AdminBaseController
                 'show_close' => ['nullable'],
                 'pause_on_hover' => ['nullable'],
                 'open_new_tab' => ['nullable'],
+                'link_open_mode' => ['nullable', 'in:same,new_tab,modal'],
                 'mobile_mode' => ['required', 'in:hide,show'],
                 'start_at' => ['nullable', 'date'],
                 'end_at' => ['nullable', 'date'],

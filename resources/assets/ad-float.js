@@ -438,7 +438,15 @@
       '.g7-custom-ad-float .g7-ad-dot{position:static;width:7px;height:7px;margin:0;padding:0;border-radius:50%;background:rgba(255,255,255,.55)}',
       '.g7-custom-ad-float .g7-ad-dot.is-active{background:#fff}',
       '.g7-custom-ad-float .g7-ad-close{top:6px;right:6px;left:auto;margin:0;width:24px;height:24px;line-height:24px;z-index:3}',
-      '@media (max-width:767px){.g7-custom-ad-float.g7-mobile-hide{display:none!important}.g7-custom-ad-float.g7-mobile-show .g7-ad-frame{max-width:calc(100vw - 24px);max-height:calc(100vh - 48px)}}'
+      '@media (max-width:767px){.g7-custom-ad-float.g7-mobile-hide{display:none!important}.g7-custom-ad-float.g7-mobile-show .g7-ad-frame{max-width:calc(100vw - 24px);max-height:calc(100vh - 48px)}}',
+      '.g7-caf-modal{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;font-family:inherit}',
+      '.g7-caf-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.55)}',
+      '.g7-caf-modal-box{position:relative;z-index:1;width:min(960px,100%);height:min(90vh,720px);max-height:calc(100vh - 24px);background:#111;border-radius:12px;box-shadow:0 16px 50px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}',
+      '.g7-caf-modal-bar{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#1f1f1f;color:#fff;flex:0 0 auto}',
+      '.g7-caf-modal-ext{color:#fff;font-size:14px;text-decoration:underline;background:none;border:0;cursor:pointer}',
+      '.g7-caf-modal-close{margin-left:auto;width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:22px;line-height:36px;cursor:pointer}',
+      '.g7-caf-modal-frame{flex:1 1 auto;min-height:0;width:100%;border:0;background:#fff}',
+      '@media (max-width:767px){.g7-caf-modal{padding:0}.g7-caf-modal-box{width:100%;height:100%;max-height:100vh;border-radius:0}}'
     ].join('');
     document.head.appendChild(style);
   }
@@ -460,6 +468,104 @@
     if (value === false || value === 0) return false;
     if (value === true || value === 1) return true;
     return !!value;
+  }
+
+  function linkOpenMode(config) {
+    var raw = config && config.link_open_mode;
+    if (raw !== undefined && raw !== null) {
+      var s = String(raw).replace(/^\s+|\s+$/g, '').toLowerCase();
+      if (s === 'same' || s === 'new_tab' || s === 'modal') return s;
+      if (s === 'current' || s === 'self' || s === '_self') return 'same';
+      if (s === 'blank' || s === '_blank' || s === 'new' || s === 'tab') return 'new_tab';
+      if (s === 'popup' || s === 'iframe') return 'modal';
+    }
+    return settingOn(config && config.open_new_tab, true) ? 'new_tab' : 'same';
+  }
+
+  function isHttpUrl(url) {
+    if (!url) return false;
+    try {
+      var u = new URL(url, window.location.href);
+      return u.protocol === 'http:' || u.protocol === 'https:';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  var modalEl = null;
+  var modalPrevOverflow = '';
+
+  function onModalKey(event) {
+    if (event.key === 'Escape' || event.keyCode === 27) {
+      event.preventDefault();
+      closeLinkModal();
+    }
+  }
+
+  function closeLinkModal() {
+    if (!modalEl) return;
+    try {
+      if (modalEl.parentNode) modalEl.parentNode.removeChild(modalEl);
+    } catch (e) {}
+    modalEl = null;
+    try { document.body.style.overflow = modalPrevOverflow; } catch (e2) {}
+    document.removeEventListener('keydown', onModalKey);
+  }
+
+  function openLinkModal(url) {
+    closeLinkModal();
+    modalPrevOverflow = '';
+    try {
+      modalPrevOverflow = document.body.style.overflow || '';
+      document.body.style.overflow = 'hidden';
+    } catch (e) {}
+    ensureStyle();
+    modalEl = document.createElement('div');
+    modalEl.className = 'g7-caf-modal';
+    modalEl.setAttribute('role', 'dialog');
+    modalEl.setAttribute('aria-modal', 'true');
+    modalEl.setAttribute('aria-label', '광고 링크');
+
+    var backdrop = document.createElement('div');
+    backdrop.className = 'g7-caf-modal-backdrop';
+    backdrop.addEventListener('click', closeLinkModal);
+
+    var box = document.createElement('div');
+    box.className = 'g7-caf-modal-box';
+
+    var bar = document.createElement('div');
+    bar.className = 'g7-caf-modal-bar';
+
+    var openNew = document.createElement('a');
+    openNew.className = 'g7-caf-modal-ext';
+    openNew.href = url;
+    openNew.target = '_blank';
+    openNew.rel = 'noopener noreferrer';
+    openNew.textContent = '새 창으로 열기';
+
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'g7-caf-modal-close';
+    closeBtn.setAttribute('aria-label', '닫기');
+    closeBtn.textContent = '×';
+    closeBtn.addEventListener('click', closeLinkModal);
+
+    bar.appendChild(openNew);
+    bar.appendChild(closeBtn);
+
+    var iframe = document.createElement('iframe');
+    iframe.className = 'g7-caf-modal-frame';
+    iframe.src = url;
+    iframe.setAttribute('title', '광고 링크');
+    iframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+
+    box.appendChild(bar);
+    box.appendChild(iframe);
+    modalEl.appendChild(backdrop);
+    modalEl.appendChild(box);
+    document.body.appendChild(modalEl);
+    document.addEventListener('keydown', onModalKey);
+    try { closeBtn.focus(); } catch (e3) {}
   }
 
   function windowId(raw, index) {
@@ -549,7 +655,8 @@
       if (item.id) link.setAttribute('data-item-id', String(item.id));
       if (item.target_url) {
         link.href = item.target_url;
-        if (settingOn(config.open_new_tab)) {
+        var mode = linkOpenMode(config);
+        if (mode === 'new_tab') {
           link.target = '_blank';
           link.rel = 'noopener noreferrer';
         }
@@ -679,9 +786,16 @@
 
     root.addEventListener('click', function (event) {
       var link = event.target.closest('.g7-ad-link');
-      if (!link) return;
+      if (!link || !root.contains(link)) return;
       var itemId = Number(link.getAttribute('data-item-id') || (items[slideIndex] && items[slideIndex].id) || 0);
       trackClick(itemId);
+      var mode = linkOpenMode(config);
+      var href = link.getAttribute('href') || link.href;
+      if (mode === 'modal' && isHttpUrl(href)) {
+        event.preventDefault();
+        stop();
+        openLinkModal(href);
+      }
     }, true);
 
     paint();
