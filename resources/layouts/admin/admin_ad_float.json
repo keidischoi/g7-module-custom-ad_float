@@ -99,7 +99,8 @@
         },
         "itemIds": [],
         "resettingClosed": false,
-        "schSeq": 0
+        "schSeq": 0,
+        "createSource": "url"
       }
     }
   ],
@@ -1630,7 +1631,7 @@
                         "name": "Button",
                         "props": {
                           "type": "button",
-                          "className": "{{(_local.create?.source || 'url') === 'upload' ? 'px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white' : 'px-3 py-1.5 text-sm rounded-md border'}}"
+                          "className": "{{(_local.createSource || _local.create.source || 'url') === 'upload' ? 'px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white' : 'px-3 py-1.5 text-sm rounded-md border'}}"
                         },
                         "text": "$t:custom-ad_float.admin.fields.source_upload",
                         "actions": [
@@ -1639,7 +1640,8 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "create.source": "upload"
+                              "create.source": "upload",
+                              "createSource": "upload"
                             }
                           }
                         ]
@@ -1650,7 +1652,7 @@
                         "name": "Button",
                         "props": {
                           "type": "button",
-                          "className": "{{(_local.create?.source || 'url') === 'url' ? 'px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white' : 'px-3 py-1.5 text-sm rounded-md border'}}"
+                          "className": "{{(_local.createSource || _local.create.source || 'url') === 'url' ? 'px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white' : 'px-3 py-1.5 text-sm rounded-md border'}}"
                         },
                         "text": "$t:custom-ad_float.admin.fields.source_url",
                         "actions": [
@@ -1659,7 +1661,8 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "create.source": "url"
+                              "create.source": "url",
+                              "createSource": "url"
                             }
                           }
                         ]
@@ -1672,7 +1675,7 @@
                 "id": "n_image_file",
                 "type": "basic",
                 "name": "Div",
-                "if": "{{(_local.create?.source || 'url') === 'upload'}}",
+                "if": "{{(_local.createSource || _local.create.source || 'url') === 'upload'}}",
                 "props": {
                   "className": "form-group w-full mb-4"
                 },
@@ -1700,45 +1703,54 @@
                     "text": "$t:custom-ad_float.admin.image_file_hint"
                   },
                   {
-                    "id": "caf_create_images_uploader",
-                    "type": "composite",
-                    "name": "FileUploader",
+                    "id": "caf_create_images_box",
+                    "type": "basic",
+                    "name": "Div",
                     "props": {
-                      "name": "FileUploader",
-                      "maxFiles": 10,
-                      "maxSize": 10,
-                      "accept": "image/jpeg,image/png,image/gif,image/webp,image/*",
-                      "autoUpload": false,
-                      "className": "mt-1"
+                      "className": "mt-1 w-full rounded-lg border border-dashed border-gray-500 px-3 py-4"
                     },
-                    "actions": [
+                    "children": [
                       {
-                        "type": "onFilesChange",
-                        "handler": "setState",
-                        "params": {
-                          "target": "local",
-                          "create.image": "{{($event[0] && ($event[0].file || $event[0])) || null}}",
-                          "create.images": "{{($event || []).map(function(p) { return p.file || p; })}}",
-                          "create.image_count": "{{($event && $event.length) || 0}}"
-                        }
+                        "id": "caf_create_images_input",
+                        "type": "basic",
+                        "name": "Input",
+                        "props": {
+                          "type": "file",
+                          "name": "image",
+                          "multiple": true,
+                          "accept": "image/*",
+                          "className": "block w-full text-sm cursor-pointer"
+                        },
+                        "actions": [
+                          {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "create.image": "{{$event.target.files[0]}}",
+                              "create.images": "{{$event.target.files}}",
+                              "create.image_count": "{{$event.target.files.length}}"
+                            }
+                          }
+                        ]
                       }
                     ]
                   },
                   {
                     "type": "basic",
                     "name": "P",
-                    "if": "{{!!(_local.create?.image?.name)}}",
+                    "if": "{{!!(_local.create.image && _local.create.image.name)}}",
                     "props": {
                       "className": "text-xs text-gray-500 mt-1"
                     },
-                    "text": "{{_local.create?.image?.name}}"
+                    "text": "{{_local.create.image.name}}"
                   },
                   {
                     "type": "basic",
                     "name": "Img",
-                    "if": "{{!!_local.editingId && !!_local.create?.image_url && !_local.create?.image}}",
+                    "if": "{{!!_local.editingId && !!_local.create.image_url && !_local.create.image}}",
                     "props": {
-                      "src": "{{_local.create?.image_url}}",
+                      "src": "{{_local.create.image_url}}",
                       "alt": "",
                       "className": "mt-2 w-24 h-24 object-cover rounded-md border"
                     }
@@ -1747,11 +1759,11 @@
                     "id": "n_image_count",
                     "type": "basic",
                     "name": "P",
-                    "if": "{{(_local.create?.image_count || 0) > 1}}",
+                    "if": "{{(_local.create.image_count || 0) > 1}}",
                     "props": {
                       "className": "text-xs text-gray-500 mt-1"
                     },
-                    "text": "{{(_local.create?.image_count || 0) + ' '}} $t:custom-ad_float.admin.files_selected"
+                    "text": "{{(_local.create.image_count || 0) + ' '}} $t:custom-ad_float.admin.files_selected"
                   }
                 ]
               },
@@ -1759,7 +1771,7 @@
                 "id": "n_image",
                 "type": "basic",
                 "name": "Div",
-                "if": "{{(_local.create?.source || 'url') !== 'upload'}}",
+                "if": "{{(_local.createSource || _local.create.source || 'url') !== 'upload'}}",
                 "props": {
                   "className": "form-group w-full mb-4"
                 },
@@ -1813,7 +1825,7 @@
                 "id": "n_extra_urls",
                 "type": "basic",
                 "name": "Div",
-                "if": "{{!_local.editingId && (_local.create?.source || 'url') !== 'upload'}}",
+                "if": "{{!_local.editingId && (_local.createSource || _local.create.source || 'url') !== 'upload'}}",
                 "props": {
                   "className": "form-group w-full mb-4"
                 },
@@ -1877,7 +1889,7 @@
                         "handler": "setState",
                         "params": {
                           "target": "local",
-                          "create.extra_urls": "{{(_local.create?.extra_urls || []).concat([{url:''}])}}"
+                          "create.extra_urls": "{{(_local.create.extra_urls || []).concat([{url:''}])}}"
                         }
                       }
                     ]
@@ -1920,7 +1932,7 @@
                           "type": "text",
                           "name": "title",
                           "className": "input w-full",
-                          "value": "{{_local.create?.title ?? ''}}",
+                          "value": "{{_local.create.title || ''}}",
                           "autoBinding": false
                         },
                         "actions": [
@@ -1965,7 +1977,7 @@
                           "type": "text",
                           "name": "alt_text",
                           "className": "input w-full",
-                          "value": "{{_local.create?.alt_text ?? ''}}",
+                          "value": "{{_local.create.alt_text || ''}}",
                           "autoBinding": false
                         },
                         "actions": [
@@ -2010,7 +2022,7 @@
                           "type": "text",
                           "name": "target_url",
                           "className": "input w-full",
-                          "value": "{{_local.create?.target_url ?? ''}}",
+                          "value": "{{_local.create.target_url || ''}}",
                           "autoBinding": false
                         },
                         "actions": [
@@ -2055,7 +2067,7 @@
                           "type": "text",
                           "name": "sort_order",
                           "className": "input w-full",
-                          "value": "{{_local.create?.sort_order ?? 0}}",
+                          "value": "{{_local.create.sort_order || 0}}",
                           "autoBinding": false
                         },
                         "actions": [
@@ -2100,7 +2112,7 @@
                           "type": "text",
                           "name": "display_seconds",
                           "className": "input w-full",
-                          "value": "{{_local.create?.display_seconds ?? ''}}",
+                          "value": "{{_local.create.display_seconds || ''}}",
                           "autoBinding": false
                         },
                         "actions": [
@@ -2157,7 +2169,7 @@
                       "name": "combine_on_create",
                       "className": "h-4 w-4 cursor-pointer",
                       "autoBinding": false,
-                      "checked": "{{_local.create?.combine === true || _local.create?.combine === 1 || _local.create?.combine === '1' || _local.create?.combine === 'true'}}"
+                      "checked": "{{_local.create.combine === true || _local.create.combine === 1 || _local.create.combine === '1' || _local.create.combine === 'true'}}"
                     },
                     "actions": [
                       {
@@ -2214,7 +2226,8 @@
                               }
                             ],
                             "combine": false
-                          }
+                          },
+                          "createSource": "url"
                         }
                       }
                     ]
@@ -2223,10 +2236,10 @@
                     "id": "btn_create_item_url",
                     "type": "basic",
                     "name": "Button",
-                    "if": "{{!_local.editingId && (_local.create?.source || 'url') === 'url'}}",
+                    "if": "{{!_local.editingId && (_local.createSource || _local.create.source || 'url') === 'url'}}",
                     "props": {
                       "type": "button",
-                      "disabled": "{{_local.creating || !(_local.create?.image_url)}}",
+                      "disabled": "{{_local.creating || !(_local.create.image_url)}}",
                       "className": "btn btn-primary disabled:opacity-50"
                     },
                     "text": "$t:custom-ad_float.admin.actions.create",
@@ -2250,14 +2263,14 @@
                               "method": "POST",
                               "body": {
                                 "source": "url",
-                                "title": "{{_local.create?.title || ''}}",
-                                "alt_text": "{{_local.create?.alt_text || ''}}",
-                                "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
-                                "image_url": "{{_local.create?.image_url || ''}}",
-                                "sort_order": "{{_local.create?.sort_order || 0}}",
-                                "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}",
+                                "title": "{{_local.create.title || ''}}",
+                                "alt_text": "{{_local.create.alt_text || ''}}",
+                                "target_url": "{{_local.create.target_url ? _local.create.target_url : undefined}}",
+                                "image_url": "{{_local.create.image_url || ''}}",
+                                "sort_order": "{{_local.create.sort_order || 0}}",
+                                "display_seconds": "{{_local.create.display_seconds ? _local.create.display_seconds : undefined}}",
                                 "enabled": 1,
-                                "combine": "{{_local.create?.combine ? 1 : 0}}",
+                                "combine": "{{_local.create.combine ? 1 : 0}}",
                                 "extra_urls": "{{_local.create.extra_urls || []}}"
                               }
                             },
@@ -2286,7 +2299,8 @@
                                       }
                                     ],
                                     "combine": false
-                                  }
+                                  },
+                                  "createSource": "url"
                                 }
                               },
                               {
@@ -2315,7 +2329,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : (error.errors?.[0] || error.message || error.data?.message)}}"
+                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : ((error.errors && error.errors[0]) || error.message || (error.data && error.data.message))}}"
                                 }
                               }
                             ]
@@ -2328,10 +2342,10 @@
                     "id": "btn_create_item_upload",
                     "type": "basic",
                     "name": "Button",
-                    "if": "{{!_local.editingId && _local.create?.source === 'upload'}}",
+                    "if": "{{!_local.editingId && (_local.createSource || _local.create.source || 'url') === 'upload'}}",
                     "props": {
                       "type": "button",
-                      "disabled": "{{_local.creating || !(_local.create?.image || (_local.create?.image_count || 0) > 0)}}",
+                      "disabled": "{{_local.creating || !(_local.create.image || (_local.create.image_count || 0) > 0)}}",
                       "className": "btn btn-primary disabled:opacity-50"
                     },
                     "text": "$t:custom-ad_float.admin.actions.create",
@@ -2393,7 +2407,8 @@
                                       }
                                     ],
                                     "combine": false
-                                  }
+                                  },
+                                  "createSource": "url"
                                 }
                               },
                               {
@@ -2422,7 +2437,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : (error.errors?.[0] || error.message || error.data?.message)}}"
+                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : ((error.errors && error.errors[0]) || error.message || (error.data && error.data.message))}}"
                                 }
                               }
                             ]
@@ -2435,10 +2450,10 @@
                     "id": "btn_update_item_url",
                     "type": "basic",
                     "name": "Button",
-                    "if": "{{!!_local.editingId && (_local.create?.source || 'url') === 'url'}}",
+                    "if": "{{!!_local.editingId && (_local.createSource || _local.create.source || 'url') === 'url'}}",
                     "props": {
                       "type": "button",
-                      "disabled": "{{_local.creating || !(_local.create?.image_url)}}",
+                      "disabled": "{{_local.creating || !(_local.create.image_url)}}",
                       "className": "btn btn-primary disabled:opacity-50"
                     },
                     "text": "$t:custom-ad_float.admin.actions.update",
@@ -2462,12 +2477,12 @@
                               "method": "POST",
                               "body": {
                                 "source": "url",
-                                "title": "{{_local.create?.title || ''}}",
-                                "alt_text": "{{_local.create?.alt_text || ''}}",
-                                "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
-                                "image_url": "{{_local.create?.image_url || ''}}",
-                                "sort_order": "{{_local.create?.sort_order || 0}}",
-                                "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}"
+                                "title": "{{_local.create.title || ''}}",
+                                "alt_text": "{{_local.create.alt_text || ''}}",
+                                "target_url": "{{_local.create.target_url ? _local.create.target_url : undefined}}",
+                                "image_url": "{{_local.create.image_url || ''}}",
+                                "sort_order": "{{_local.create.sort_order || 0}}",
+                                "display_seconds": "{{_local.create.display_seconds ? _local.create.display_seconds : undefined}}"
                               }
                             },
                             "onSuccess": [
@@ -2495,7 +2510,8 @@
                                       }
                                     ],
                                     "combine": false
-                                  }
+                                  },
+                                  "createSource": "url"
                                 }
                               },
                               {
@@ -2524,7 +2540,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : (error.errors?.[0] || error.message || error.data?.message)}}"
+                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : ((error.errors && error.errors[0]) || error.message || (error.data && error.data.message))}}"
                                 }
                               }
                             ]
@@ -2537,10 +2553,10 @@
                     "id": "btn_update_item_upload",
                     "type": "basic",
                     "name": "Button",
-                    "if": "{{!!_local.editingId && _local.create?.source === 'upload'}}",
+                    "if": "{{!!_local.editingId && (_local.createSource || _local.create.source || 'url') === 'upload'}}",
                     "props": {
                       "type": "button",
-                      "disabled": "{{_local.creating || (!_local.create?.image && _local.create?.original_source !== 'upload')}}",
+                      "disabled": "{{_local.creating || (!_local.create.image && _local.create.original_source !== 'upload')}}",
                       "className": "btn btn-primary disabled:opacity-50"
                     },
                     "text": "$t:custom-ad_float.admin.actions.update",
@@ -2565,7 +2581,7 @@
                               "body": {
                                 "source": "upload",
                                 "image_source": "upload",
-                                "image": "{{_local.create.image ? _local.create.image : undefined}}",
+                                "image": "{{_local.create.image}}",
                                 "title": "{{_local.create.title || ''}}",
                                 "alt_text": "{{_local.create.alt_text || ''}}",
                                 "target_url": "{{_local.create.target_url ? _local.create.target_url : undefined}}",
@@ -2599,7 +2615,8 @@
                                       }
                                     ],
                                     "combine": false
-                                  }
+                                  },
+                                  "createSource": "url"
                                 }
                               },
                               {
@@ -2628,7 +2645,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : (error.errors?.[0] || error.message || error.data?.message)}}"
+                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : ((error.errors && error.errors[0]) || error.message || (error.data && error.data.message))}}"
                                 }
                               }
                             ]
@@ -2754,7 +2771,7 @@
                                   "handler": "toast",
                                   "params": {
                                     "type": "error",
-                                    "message": "{{error.errors?.[0] || error.message || error.data?.message}}"
+                                    "message": "{{(error.errors && error.errors[0]) || error.message || (error.data && error.data.message)}}"
                                   }
                                 }
                               ]
@@ -2827,7 +2844,7 @@
                                   "handler": "toast",
                                   "params": {
                                     "type": "error",
-                                    "message": "{{error.errors?.[0] || error.message || error.data?.message}}"
+                                    "message": "{{(error.errors && error.errors[0]) || error.message || (error.data && error.data.message)}}"
                                   }
                                 }
                               ]
@@ -3069,7 +3086,10 @@
                                           "create.display_seconds": "{{ad.display_seconds || ''}}",
                                           "create.source": "{{ad.source || ad.image_source || 'url'}}",
                                           "create.original_source": "{{ad.source || ad.image_source || 'url'}}",
-                                          "create.image": null
+                                          "createSource": "{{ad.source || ad.image_source || 'url'}}",
+                                          "create.image": null,
+                                          "create.images": null,
+                                          "create.image_count": 0
                                         }
                                       },
                                       {
@@ -4695,6 +4715,7 @@
                                     ]
                                   },
                                   {
+                                    "id": "btn_remove_schedule",
                                     "type": "basic",
                                     "name": "Button",
                                     "props": {
@@ -4705,11 +4726,91 @@
                                     "actions": [
                                       {
                                         "type": "click",
-                                        "handler": "setState",
-                                        "params": {
-                                          "target": "local",
-                                          "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {_deleted: true}) : row))}}"
-                                        }
+                                        "handler": "sequence",
+                                        "actions": [
+                                          {
+                                            "handler": "setState",
+                                            "params": {
+                                              "target": "local",
+                                              "saving": true,
+                                              "form.schedules": "{{(_local.form.schedules || []).map(function(row) { return row.id === sch.id ? Object.assign({}, row, {_deleted: true}) : row; })}}"
+                                            }
+                                          },
+                                          {
+                                            "handler": "apiCall",
+                                            "auth_required": true,
+                                            "target": "/api/modules/custom-ad_float/admin/settings",
+                                            "params": {
+                                              "method": "PUT",
+                                              "body": {
+                                                "enabled": "{{_local.form.enabled === true || _local.form.enabled === 1 || _local.form.enabled === '1' || _local.form.enabled === 'true' ? 1 : 0}}",
+                                                "home_only": "{{_local.form.home_only ? 1 : 0}}",
+                                                "position": "{{_local.form.position || 'right'}}",
+                                                "direction": "{{_local.form.direction || 'horizontal'}}",
+                                                "interval_ms": "{{Number(_local.form.interval_ms) || 4000}}",
+                                                "width_px": "{{Number(_local.form.width_px) || 180}}",
+                                                "height_px": "{{Number(_local.form.height_px) || 180}}",
+                                                "radius_px": "{{Number(_local.form.radius_px) || 10}}",
+                                                "offset_px": "{{Number(_local.form.offset_px || 24)}}",
+                                                "vertical_align": "{{_local.form.vertical_align || 'middle'}}",
+                                                "vertical_offset_px": "{{Number(_local.form.vertical_offset_px || 24)}}",
+                                                "z_index": "{{Number(_local.form.z_index) || 9990}}",
+                                                "max_items": "{{Number(_local.form.max_items) || 20}}",
+                                                "close_cookie_key": "{{_local.form.close_cookie_key || 'g7_custom_ad_float_closed'}}",
+                                                "autoplay": "{{_local.form.autoplay === true || _local.form.autoplay === 1 || _local.form.autoplay === '1' || _local.form.autoplay === 'true' ? 1 : 0}}",
+                                                "show_arrows": "{{_local.form.show_arrows === true || _local.form.show_arrows === 1 || _local.form.show_arrows === '1' || _local.form.show_arrows === 'true' ? 1 : 0}}",
+                                                "show_dots": "{{_local.form.show_dots === true || _local.form.show_dots === 1 || _local.form.show_dots === '1' || _local.form.show_dots === 'true' ? 1 : 0}}",
+                                                "show_close": "{{_local.form.show_close === true || _local.form.show_close === 1 || _local.form.show_close === '1' || _local.form.show_close === 'true' ? 1 : 0}}",
+                                                "pause_on_hover": "{{_local.form.pause_on_hover === true || _local.form.pause_on_hover === 1 || _local.form.pause_on_hover === '1' || _local.form.pause_on_hover === 'true' ? 1 : 0}}",
+                                                "open_new_tab": "{{(_local.form.link_open_mode || 'new_tab') === 'new_tab' ? 1 : 0}}",
+                                                "link_open_mode": "{{_local.form.link_open_mode || 'new_tab'}}",
+                                                "mobile_mode": "{{_local.form.mobile_mode || 'hide'}}",
+                                                "schedules_enabled": "{{_local.form.schedules_enabled ? 1 : 0}}",
+                                                "schedules": "{{_local.form.schedules || []}}",
+                                                "remove_schedule_id": "{{sch.id}}"
+                                              }
+                                            },
+                                            "onSuccess": [
+                                              {
+                                                "handler": "setState",
+                                                "params": {
+                                                  "target": "local",
+                                                  "saving": false,
+                                                  "hasChanges": false
+                                                }
+                                              },
+                                              {
+                                                "handler": "toast",
+                                                "params": {
+                                                  "type": "success",
+                                                  "message": "$t:custom-ad_float.admin.remove_schedule_success"
+                                                }
+                                              },
+                                              {
+                                                "handler": "refetchDataSource",
+                                                "params": {
+                                                  "dataSourceId": "settings"
+                                                }
+                                              }
+                                            ],
+                                            "onError": [
+                                              {
+                                                "handler": "setState",
+                                                "params": {
+                                                  "target": "local",
+                                                  "saving": false
+                                                }
+                                              },
+                                              {
+                                                "handler": "toast",
+                                                "params": {
+                                                  "type": "error",
+                                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : ((error.errors && error.errors[0]) || error.message || (error.data && error.data.message))}}"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
                                       }
                                     ]
                                   }

@@ -168,8 +168,15 @@ class AdFloatService
             }
             $data['open_new_tab'] = $mode === 'new_tab';
         }
-        if (array_key_exists('schedules', $data)) {
-            $schedules = AdminPayload::normalizeSchedules($data['schedules']);
+        $removeIds = AdminPayload::collectRemoveScheduleIds($data);
+        unset($data['remove_schedule_id'], $data['remove_schedule_ids']);
+        if (array_key_exists('schedules', $data) || $removeIds !== []) {
+            if (array_key_exists('schedules', $data)) {
+                $schedules = AdminPayload::normalizeSchedules($data['schedules']);
+            } else {
+                $schedules = AdminPayload::normalizeSchedules($settings->schedules);
+            }
+            $schedules = AdminPayload::withoutRemovedSchedules($schedules, $removeIds);
             if (AdFloatSetting::hasSchedulesColumn()) {
                 $data['schedules'] = $schedules;
             } else {

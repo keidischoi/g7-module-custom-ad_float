@@ -178,6 +178,31 @@ namespace {
     ]);
     expect('id/enabled-only row kept, empty junk dropped', array_column($identityOnly, 'id'), ['n1']);
 
+    $deletedTrueStr = AdminPayload::normalizeSchedules([
+        array_merge($added, ['_deleted' => 'true']),
+        array_merge($added, ['id' => 'keep_false', '_deleted' => 'false']),
+        array_merge($added, ['id' => 'keep_0', '_deleted' => '0']),
+    ]);
+    expect('string true _deleted dropped, false/0 kept', array_column($deletedTrueStr, 'id'), ['keep_false', 'keep_0']);
+
+    expect('collect single remove id', AdminPayload::collectRemoveScheduleIds(['remove_schedule_id' => 's1_1']), ['s1_1']);
+    expect('collect csv remove ids', AdminPayload::collectRemoveScheduleIds(['remove_schedule_ids' => 'a, b']), ['a', 'b']);
+    expect('collect json array remove ids', AdminPayload::collectRemoveScheduleIds(['remove_schedule_ids' => '["x","y"]']), ['x', 'y']);
+
+    $removed = AdminPayload::withoutRemovedSchedules($kept, ['s1_1']);
+    expect('withoutRemovedSchedules drops matching id', array_column($removed, 'id'), []);
+    $keptOther = AdminPayload::withoutRemovedSchedules(
+        AdminPayload::normalizeSchedules([
+            array_merge($added, ['id' => 'keep_me']),
+            array_merge($added, ['id' => 'drop_me']),
+        ]),
+        ['drop_me']
+    );
+    expect('withoutRemovedSchedules keeps others', array_column($keptOther, 'id'), ['keep_me']);
+
+    expect('scheduleRowDeleted true', AdminPayload::scheduleRowDeleted(['_deleted' => true]), true);
+    expect('scheduleRowDeleted false string', AdminPayload::scheduleRowDeleted(['_deleted' => 'false']), false);
+
     echo "\n{$passed} passed, {$failed} failed\n";
     exit($failed === 0 ? 0 : 1);
 }
