@@ -84,6 +84,28 @@ class Module extends AbstractModule
                 'icon' => 'fas fa-images',
                 'order' => 90,
                 'permission' => 'custom-ad_float.ads.read',
+                'children' => [
+                    [
+                        'name' => [
+                            'ko' => '광고 설정',
+                            'en' => 'Ad settings',
+                        ],
+                        'slug' => 'ad-float-settings',
+                        'url' => '/admin/ad-float',
+                        'permission' => 'custom-ad_float.ads.read',
+                        'order' => 10,
+                    ],
+                    [
+                        'name' => [
+                            'ko' => '통계',
+                            'en' => 'Stats',
+                        ],
+                        'slug' => 'ad-float-stats',
+                        'url' => '/admin/ad-float/stats',
+                        'permission' => 'custom-ad_float.ads.read',
+                        'order' => 20,
+                    ],
+                ],
             ],
         ];
     }

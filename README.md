@@ -4,7 +4,7 @@
 
 ## 기능
 
-- 관리자 `/admin/ad-float`: **기본 설정** → **광고 목록** → **날짜 및 시간 예약**. 「통계 보기」로 `/admin/ad-float/stats` (노출·클릭, 광고별 × 페이지별)
+- 관리자: **플로팅 광고 → 광고 설정** (`/admin/ad-float`)에서 기본 설정·광고 목록·예약을 관리. **통계** 탭/메뉴로 `/admin/ad-float/stats` (노출·클릭, 광고별 × 페이지별)
 - **예약 사용 ON**일 때 같은 시간대에 위치만 다른 예약을 여러 개 두면 왼쪽+오른쪽처럼 동시에 여러 곳에 표시됩니다.
 - 광고 이미지: **파일 업로드**(여러 장) 또는 **웹주소 연결**(여러 행). 등록 시 「결합하여 캐러셀로 등록」 가능
 - 광고 목록에서 선택 후 **결합** / **결합 해제**. 같은 그룹은 「캐러셀 A」 배지
@@ -47,6 +47,14 @@ php artisan cache:clear
 
 - **전체 다시 노출:** `/admin/ad-float` 기본 설정에서 **닫힘 상태 초기화** / **다시 보이게 하기**. 서버가 쿠키 키를 새 값으로 바꿔 예전 기록을 무효화합니다. (`POST /api/modules/custom-ad_float/admin/settings/reset-closed`)
 - **한 브라우저만 테스트:** 개발자 도구에서 해당 키의 쿠키와 localStorage를 지우면 됩니다. 방문자마다 수동으로 지울 필요는 없습니다.
+
+## 업그레이드 (0.1.20)
+
+```bash
+php artisan cache:clear
+```
+
+마이그레이션은 없습니다. 관리자 사이드바에 **플로팅 광고 → 광고 설정 / 통계**가 생깁니다. 화면 위 탭으로도 전환합니다. 프론트 `ad-float.js` 캐시 쿼리는 `?v=0.1.20` 입니다.
 
 ## 업그레이드 (0.1.19)
 
@@ -111,8 +119,8 @@ php artisan cache:clear
 
 ## 관리자
 
-- UI: `/admin/ad-float`
-- 통계: `/admin/ad-float/stats` (오늘 / 7일 / 30일 / 전체)
+- 사이드 메뉴: **플로팅 광고** → **광고 설정** `/admin/ad-float`, **통계** `/admin/ad-float/stats`
+- 각 화면 위 탭 **광고 설정 | 통계**. 통계 기간: 오늘 / 7일 / 30일 / 전체
 - API: `/api/modules/custom-ad_float/admin/...`
 - 공개 트래킹: `POST /api/modules/custom-ad_float/track` `{ type: "impression"|"click", item_id, page_path }` (인증 없음, 분당 제한)
 
@@ -129,4 +137,4 @@ php artisan cache:clear
 | identifier | `custom-ad_float` |
 | vendor | `custom` |
 | namespace | `Modules\\Custom\\AdFloat` |
-| version | `0.1.19` |
+| version | `0.1.20` |

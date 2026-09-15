@@ -86,24 +86,36 @@
                     "text": "$t:custom-ad_float.admin.stats.description"
                   }
                 ]
+              }
+            ]
+          },
+          {
+            "type": "basic",
+            "name": "Div",
+            "id": "caf_subnav",
+            "props": {
+              "className": "flex items-center gap-1 mb-6 border-b border-gray-200 dark:border-gray-700"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "A",
+                "id": "caf_tab_settings",
+                "props": {
+                  "href": "/admin/ad-float",
+                  "className": "px-3 py-2 text-sm font-medium border-b-2 -mb-px border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
+                },
+                "text": "$t:custom-ad_float.admin.nav.settings"
               },
               {
                 "type": "basic",
-                "name": "Div",
+                "name": "A",
+                "id": "caf_tab_stats",
                 "props": {
-                  "className": "flex items-center gap-2"
+                  "href": "/admin/ad-float/stats",
+                  "className": "px-3 py-2 text-sm font-medium border-b-2 -mb-px border-blue-600 text-blue-600 dark:text-blue-400"
                 },
-                "children": [
-                  {
-                    "type": "basic",
-                    "name": "A",
-                    "props": {
-                      "href": "/admin/ad-float",
-                      "className": "px-3 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
-                    },
-                    "text": "$t:custom-ad_float.admin.stats.back"
-                  }
-                ]
+                "text": "$t:custom-ad_float.admin.nav.stats"
               }
             ]
           },

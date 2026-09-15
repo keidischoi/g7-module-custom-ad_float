@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.20
+- Admin sidebar: **플로팅 광고** is a parent with children **광고 설정** (`/admin/ad-float`) and **통계** (`/admin/ad-float/stats`), same `children` pattern as `custom-digital_product`.
+- Both admin layouts have a top tab bar **광고 설정 | 통계** (active underline). The old 「통계 보기」 / 「설정으로」 header buttons are replaced by those tabs.
+
 ## 0.1.19
 - Front JS honors **X 버튼** (`show_close`) OFF: G7 often saves `0` / `"0"` / `"false"`, and `0 !== false` still created the ×. `settingOn()` now treats those as off and **defaults ON** when the flag is missing (same helper for arrows, dots, autoplay, pause-on-hover, new-tab, enabled, home_only).
 - Each payload window keeps `show_close` after reservation overlay; PHP `AdminPayload::toBool()` avoids Laravel `(bool) "0" === true`.
