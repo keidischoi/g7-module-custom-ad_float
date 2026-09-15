@@ -77,7 +77,14 @@ class AdFloatItemController extends AdminBaseController
     public function combine(Request $request): JsonResponse
     {
         try {
-            $ids = AdminPayload::selectedItemIds($request->input('item_ids'), $request->input('sels'));
+            if (! AdFloatItem::hasCarouselGroupColumn()) {
+                return $this->error(
+                    'custom-ad_float::messages.items.combine_unavailable',
+                    422,
+                    [__('custom-ad_float::messages.items.combine_unavailable')]
+                );
+            }
+            $ids = AdminPayload::selectedItemIdsFromRequest($request);
             $items = $this->service->combineItems($ids)->map->toAdminArray()->values()->all();
 
             return $this->success('custom-ad_float::messages.items.combine_success', [
@@ -85,18 +92,24 @@ class AdFloatItemController extends AdminBaseController
                 'meta' => ['total' => count($items)],
             ]);
         } catch (\InvalidArgumentException $e) {
-            return $this->error('custom-ad_float::messages.items.combine_failed', 422, $e->getMessage());
+            $key = $this->itemExceptionMessageKey($e, 'combine_failed');
+
+            return $this->error($key, 422, [$e->getMessage()]);
         } catch (\Exception $e) {
-            return $this->error('custom-ad_float::messages.items.combine_failed', 500, $e->getMessage());
+            return $this->error('custom-ad_float::messages.items.combine_failed', 500, [$e->getMessage()]);
         }
     }
 
     public function uncombine(Request $request): JsonResponse
     {
         try {
-            $ids = AdminPayload::selectedItemIds($request->input('item_ids'), $request->input('sels'));
+            $ids = AdminPayload::selectedItemIdsFromRequest($request);
             if ($ids === []) {
-                return $this->error('custom-ad_float::messages.items.uncombine_min', 422);
+                return $this->error(
+                    'custom-ad_float::messages.items.uncombine_min',
+                    422,
+                    [__('custom-ad_float::messages.items.uncombine_min')]
+                );
             }
             $items = $this->service->uncombineItems($ids)->map->toAdminArray()->values()->all();
 
@@ -104,9 +117,26 @@ class AdFloatItemController extends AdminBaseController
                 'data' => $items,
                 'meta' => ['total' => count($items)],
             ]);
+        } catch (\InvalidArgumentException $e) {
+            $key = $this->itemExceptionMessageKey($e, 'uncombine_failed');
+
+            return $this->error($key, 422, [$e->getMessage()]);
         } catch (\Exception $e) {
-            return $this->error('custom-ad_float::messages.items.uncombine_failed', 500, $e->getMessage());
+            return $this->error('custom-ad_float::messages.items.uncombine_failed', 500, [$e->getMessage()]);
         }
+    }
+
+    private function itemExceptionMessageKey(\InvalidArgumentException $e, string $fallback): string
+    {
+        $msg = $e->getMessage();
+        foreach (['combine_min', 'combine_unavailable', 'uncombine_min'] as $name) {
+            $key = 'custom-ad_float::messages.items.'.$name;
+            if ($msg === __($key)) {
+                return $key;
+            }
+        }
+
+        return 'custom-ad_float::messages.items.'.$fallback;
     }
 
     /**

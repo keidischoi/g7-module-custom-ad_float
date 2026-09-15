@@ -96,7 +96,7 @@
           ],
           "combine": false
         },
-        "itemSel": {},
+        "itemIds": [],
         "resettingClosed": false
       }
     }
@@ -2607,43 +2607,62 @@
                     "actions": [
                       {
                         "type": "click",
-                        "handler": "apiCall",
-                        "auth_required": true,
-                        "target": "/api/modules/custom-ad_float/admin/items/combine",
-                        "params": {
-                          "method": "POST",
-                          "body": {
-                            "sels": "{{_local.itemSel ?? {}}}"
-                          }
-                        },
-                        "onSuccess": [
+                        "handler": "conditions",
+                        "conditions": [
                           {
-                            "handler": "setState",
-                            "params": {
-                              "target": "local",
-                              "itemSel": {}
+                            "if": "{{(_local.itemIds ?? []).length < 2}}",
+                            "then": {
+                              "handler": "toast",
+                              "params": {
+                                "type": "error",
+                                "message": "$t:custom-ad_float.admin.combine_min"
+                              }
                             }
                           },
                           {
-                            "handler": "toast",
-                            "params": {
-                              "type": "success",
-                              "message": "$t:custom-ad_float.admin.combine_success"
-                            }
-                          },
-                          {
-                            "handler": "refetchDataSource",
-                            "params": {
-                              "dataSourceId": "items"
-                            }
-                          }
-                        ],
-                        "onError": [
-                          {
-                            "handler": "toast",
-                            "params": {
-                              "type": "error",
-                              "message": "{{error.message}}"
+                            "then": {
+                              "handler": "apiCall",
+                              "auth_required": true,
+                              "target": "/api/modules/custom-ad_float/admin/items/combine",
+                              "params": {
+                                "method": "POST",
+                                "body": {
+                                  "item_ids": "{{_local.itemIds ?? []}}",
+                                  "ids": "{{(_local.itemIds ?? []).join(',')}}",
+                                  "sels": "{{_local.itemSel || undefined}}"
+                                }
+                              },
+                              "onSuccess": [
+                                {
+                                  "handler": "setState",
+                                  "params": {
+                                    "target": "local",
+                                    "itemIds": []
+                                  }
+                                },
+                                {
+                                  "handler": "toast",
+                                  "params": {
+                                    "type": "success",
+                                    "message": "$t:custom-ad_float.admin.combine_success"
+                                  }
+                                },
+                                {
+                                  "handler": "refetchDataSource",
+                                  "params": {
+                                    "dataSourceId": "items"
+                                  }
+                                }
+                              ],
+                              "onError": [
+                                {
+                                  "handler": "toast",
+                                  "params": {
+                                    "type": "error",
+                                    "message": "{{error.errors?.[0] || error.message || error.data?.message}}"
+                                  }
+                                }
+                              ]
                             }
                           }
                         ]
@@ -2661,43 +2680,62 @@
                     "actions": [
                       {
                         "type": "click",
-                        "handler": "apiCall",
-                        "auth_required": true,
-                        "target": "/api/modules/custom-ad_float/admin/items/uncombine",
-                        "params": {
-                          "method": "POST",
-                          "body": {
-                            "sels": "{{_local.itemSel ?? {}}}"
-                          }
-                        },
-                        "onSuccess": [
+                        "handler": "conditions",
+                        "conditions": [
                           {
-                            "handler": "setState",
-                            "params": {
-                              "target": "local",
-                              "itemSel": {}
+                            "if": "{{(_local.itemIds ?? []).length < 1}}",
+                            "then": {
+                              "handler": "toast",
+                              "params": {
+                                "type": "error",
+                                "message": "$t:custom-ad_float.admin.uncombine_min"
+                              }
                             }
                           },
                           {
-                            "handler": "toast",
-                            "params": {
-                              "type": "success",
-                              "message": "$t:custom-ad_float.admin.uncombine_success"
-                            }
-                          },
-                          {
-                            "handler": "refetchDataSource",
-                            "params": {
-                              "dataSourceId": "items"
-                            }
-                          }
-                        ],
-                        "onError": [
-                          {
-                            "handler": "toast",
-                            "params": {
-                              "type": "error",
-                              "message": "{{error.message}}"
+                            "then": {
+                              "handler": "apiCall",
+                              "auth_required": true,
+                              "target": "/api/modules/custom-ad_float/admin/items/uncombine",
+                              "params": {
+                                "method": "POST",
+                                "body": {
+                                  "item_ids": "{{_local.itemIds ?? []}}",
+                                  "ids": "{{(_local.itemIds ?? []).join(',')}}",
+                                  "sels": "{{_local.itemSel || undefined}}"
+                                }
+                              },
+                              "onSuccess": [
+                                {
+                                  "handler": "setState",
+                                  "params": {
+                                    "target": "local",
+                                    "itemIds": []
+                                  }
+                                },
+                                {
+                                  "handler": "toast",
+                                  "params": {
+                                    "type": "success",
+                                    "message": "$t:custom-ad_float.admin.uncombine_success"
+                                  }
+                                },
+                                {
+                                  "handler": "refetchDataSource",
+                                  "params": {
+                                    "dataSourceId": "items"
+                                  }
+                                }
+                              ],
+                              "onError": [
+                                {
+                                  "handler": "toast",
+                                  "params": {
+                                    "type": "error",
+                                    "message": "{{error.errors?.[0] || error.message || error.data?.message}}"
+                                  }
+                                }
+                              ]
                             }
                           }
                         ]
@@ -2752,16 +2790,33 @@
                               "name": "item_sel_{{ad.id}}",
                               "className": "h-4 w-4 cursor-pointer",
                               "autoBinding": false,
-                              "checked": "{{_local.itemSel?.[String(ad.id)] === true || _local.itemSel?.[ad.id] === true}}"
+                              "checked": "{{(_local.itemIds ?? []).filter(id => Number(id) === Number(ad.id)).length > 0}}"
                             },
                             "actions": [
                               {
                                 "type": "change",
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "itemSel.{{ad.id}}": "{{$event.target.checked === true}}"
-                                }
+                                "handler": "conditions",
+                                "conditions": [
+                                  {
+                                    "if": "{{$event.target.checked === true}}",
+                                    "then": {
+                                      "handler": "setState",
+                                      "params": {
+                                        "target": "local",
+                                        "itemIds": "{{(_local.itemIds || []).concat((_local.itemIds || []).filter(id => Number(id) === Number(ad.id)).length ? [] : [Number(ad.id)])}}"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "then": {
+                                      "handler": "setState",
+                                      "params": {
+                                        "target": "local",
+                                        "itemIds": "{{(_local.itemIds || []).filter(id => Number(id) !== Number(ad.id))}}"
+                                      }
+                                    }
+                                  }
+                                ]
                               }
                             ]
                           }
