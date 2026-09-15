@@ -25,7 +25,11 @@ namespace {
 
     $createUpload = AdminPayload::itemRules(AdminPayload::SOURCE_UPLOAD, true);
     expect('upload create image is nullable not required', $createUpload['image'][0] ?? null, 'nullable');
-    expect('upload create still validates image mime', in_array('image', $createUpload['image'], true), true);
+    expect('upload create uses file rule not image getimagesize', in_array('file', $createUpload['image'], true), true);
+    expect('upload create does not use image rule', in_array('image', $createUpload['image'], true), false);
+    expect('upload create still validates mime', in_array('mimes:jpg,jpeg,png,gif,webp', $createUpload['image'], true), true);
+    expect('file field is an upload rule', in_array('file', $createUpload['file'] ?? [], true), true);
+    expect('images0 field is an upload rule', array_key_exists('images0', $createUpload), true);
     expect('images is nullable (not required array)', $createUpload['images'][0] ?? null, 'nullable');
 
     $createUrl = AdminPayload::itemRules(AdminPayload::SOURCE_URL, true);
@@ -42,6 +46,9 @@ namespace {
 
     expect('images0 is an upload field name', AdminPayload::isUploadFieldName('images0'), true);
     expect('images9 is an upload field name', AdminPayload::isUploadFieldName('images9'), true);
+    expect('uploadFile is an upload field name', AdminPayload::isUploadFieldName('uploadFile'), true);
+    expect('uploadFile0 is an upload field name', AdminPayload::isUploadFieldName('uploadFile0'), true);
+    expect('file is an upload field name', AdminPayload::isUploadFieldName('file'), true);
     expect('FileUploader is an upload field name', AdminPayload::isUploadFieldName('FileUploader'), true);
     expect('title is not an upload field name', AdminPayload::isUploadFieldName('title'), false);
 

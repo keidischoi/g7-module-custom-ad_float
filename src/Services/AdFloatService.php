@@ -343,7 +343,21 @@ class AdFloatService
      */
     private function sanitizeItemFields(array $data, string $source, bool $isCreate): array
     {
-        unset($data['image'], $data['image_url'], $data['source']);
+        unset(
+            $data['image'],
+            $data['image_url'],
+            $data['source'],
+            $data['file'],
+            $data['files'],
+            $data['FileUploader'],
+            $data['uploadFile'],
+            $data['collection'],
+            $data['attachmentable_type'],
+            $data['attachmentable_id']
+        );
+        for ($i = 0; $i <= 9; $i++) {
+            unset($data['images'.$i], $data['uploadFile'.$i]);
+        }
         if (AdFloatItem::hasImageSourceColumn()) {
             $data['image_source'] = $source;
         } else {
@@ -494,6 +508,8 @@ class AdFloatService
             }
         } elseif ($source === AdminPayload::SOURCE_URL && ! empty($data['image_url']) && is_string($data['image_url'])) {
             $data['image_path'] = trim($data['image_url']);
+        } elseif ($source === AdminPayload::SOURCE_UPLOAD && ! empty($data['image_path']) && is_string($data['image_path'])) {
+            $data['image_path'] = trim($data['image_path']);
         } elseif ($requireImage) {
             $data['image_path'] = $data['image_path'] ?? '';
         }

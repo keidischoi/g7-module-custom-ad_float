@@ -56,17 +56,21 @@ class AdFloatItemController extends AdminBaseController
 
             $data = $request->validate(AdminPayload::itemRules($source, true));
             $data['image_source'] = $source;
+            $upload = $files[0] ?? $request->file('image') ?? $request->file('file');
 
-            if ($source === AdminPayload::SOURCE_UPLOAD && $files === []) {
+            if ($source === AdminPayload::SOURCE_UPLOAD && $files === [] && ! $this->hasStagedImagePath($data)) {
                 return $this->error('custom-ad_float::messages.items.file_required', 422);
             }
             if ($source === AdminPayload::SOURCE_URL && $urls === []) {
                 return $this->error('custom-ad_float::messages.items.url_required', 422);
             }
 
-            $item = $this->service->createItem($data, $files[0] ?? $request->file('image'));
+            $item = $this->service->createItem($data, $upload instanceof \Illuminate\Http\UploadedFile ? $upload : null);
 
-            return $this->success('custom-ad_float::messages.items.create_success', $item->toAdminArray());
+            return $this->success(
+                'custom-ad_float::messages.items.create_success',
+                $this->toUploaderAttachment($item, $upload instanceof \Illuminate\Http\UploadedFile ? $upload : null)
+            );
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\InvalidArgumentException $e) {
@@ -141,6 +145,43 @@ class AdFloatItemController extends AdminBaseController
         return 'custom-ad_float::messages.items.'.$fallback;
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function hasStagedImagePath(array $data): bool
+    {
+        $path = $data['image_path'] ?? null;
+
+        return is_string($path) && trim($path) !== '';
+    }
+
+    /**
+     * G7 FileUploader expects Attachment-shaped fields (hash, download_url, is_image)
+     * when this endpoint is used as apiEndpoints.upload. Extra keys are ignored by the list UI.
+     *
+     * @return array<string, mixed>
+     */
+    private function toUploaderAttachment(AdFloatItem $item, ?\Illuminate\Http\UploadedFile $file): array
+    {
+        $row = $item->toAdminArray();
+        $name = $file instanceof \Illuminate\Http\UploadedFile
+            ? (string) $file->getClientOriginalName()
+            : basename((string) $item->image_path);
+
+        return array_merge($row, [
+            'hash' => 'caf-'.$item->id,
+            'original_filename' => $name !== '' ? $name : ('ad-'.$item->id),
+            'mime_type' => $file instanceof \Illuminate\Http\UploadedFile
+                ? (string) ($file->getMimeType() ?: 'image/jpeg')
+                : 'image/jpeg',
+            'size' => $file instanceof \Illuminate\Http\UploadedFile ? (int) $file->getSize() : 0,
+            'size_formatted' => '',
+            'download_url' => $item->imageUrl(),
+            'order' => (int) $item->sort_order,
+            'is_image' => true,
+        ]);
+    }
+
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -153,14 +194,15 @@ class AdFloatItemController extends AdminBaseController
             $data = $request->validate(AdminPayload::itemRules($source, false));
             $data['image_source'] = $source;
 
-            if ($source === AdminPayload::SOURCE_UPLOAD && $files === [] && $item->resolvedSource() !== AdminPayload::SOURCE_UPLOAD) {
+            if ($source === AdminPayload::SOURCE_UPLOAD && $files === [] && $item->resolvedSource() !== AdminPayload::SOURCE_UPLOAD && ! $this->hasStagedImagePath($data)) {
                 return $this->error('custom-ad_float::messages.items.file_required', 422);
             }
             if ($source === AdminPayload::SOURCE_URL && empty($data['image_url']) && $item->resolvedSource() !== AdminPayload::SOURCE_URL) {
                 return $this->error('custom-ad_float::messages.items.url_required', 422);
             }
 
-            $item = $this->service->updateItem($item, $data, $files[0] ?? $request->file('image'));
+            $upload = $files[0] ?? $request->file('image') ?? $request->file('file');
+            $item = $this->service->updateItem($item, $data, $upload instanceof \Illuminate\Http\UploadedFile ? $upload : null);
 
             return $this->success('custom-ad_float::messages.items.update_success', $item->toAdminArray());
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {

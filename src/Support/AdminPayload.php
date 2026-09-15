@@ -433,12 +433,20 @@ class AdminPayload
             $add($file);
         }
 
+        // G7 may post the File under an unexpected key. If named fields were
+        // empty, keep any valid upload rather than silently creating nothing.
+        if ($out === []) {
+            foreach ($all as $file) {
+                $add($file);
+            }
+        }
+
         return $out;
     }
 
     public static function isUploadFieldName(string $name): bool
     {
-        return (bool) preg_match('/^(image|images|file|files|FileUploader)/i', $name);
+        return (bool) preg_match('/^(image|images|file|files|FileUploader|uploadFile)/i', $name);
     }
 
     private static function hasValidUpload(Request $request, string $key): bool
@@ -462,13 +470,15 @@ class AdminPayload
      */
     public static function itemRules(string $source, bool $isCreate): array
     {
-        $imageRule = ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'];
+        // `file` not `image`: Laravel's image rule uses getimagesize and rejects
+        // octet-stream / leftover "[object File]" strings that G7 may post.
+        $fileRule = ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'];
 
         $imageUrlRule = $source === self::SOURCE_URL && $isCreate
             ? ['required', 'string', 'max:1000']
             : ['nullable', 'string', 'max:1000'];
 
-        return [
+        $rules = [
             'title' => ['nullable', 'string', 'max:120'],
             'alt_text' => ['nullable', 'string', 'max:255'],
             'target_url' => ['nullable', 'string', 'max:1000'],
@@ -478,16 +488,28 @@ class AdminPayload
             'source' => ['nullable', 'in:upload,url'],
             'image_source' => ['nullable', 'in:upload,url'],
             'image_url' => $imageUrlRule,
-            'image' => $imageRule,
+            'image_path' => ['nullable', 'string', 'max:1000'],
+            'image' => $fileRule,
+            'file' => $fileRule,
+            'uploadFile' => $fileRule,
             'images' => ['nullable'],
-            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'],
+            'images.*' => $fileRule,
             'image_urls' => ['nullable', 'array', 'max:30'],
             'image_urls.*' => ['nullable', 'string', 'max:1000'],
             'extra_urls' => ['nullable', 'array', 'max:30'],
             'extra_urls.*.url' => ['nullable', 'string', 'max:1000'],
             'combine' => ['nullable'],
             'carousel_group' => ['nullable', 'string', 'max:36'],
+            'collection' => ['nullable', 'string', 'max:100'],
+            'attachmentable_type' => ['nullable', 'string', 'max:100'],
+            'attachmentable_id' => ['nullable'],
         ];
+        for ($i = 0; $i <= 9; $i++) {
+            $rules['images'.$i] = $fileRule;
+            $rules['uploadFile'.$i] = $fileRule;
+        }
+
+        return $rules;
     }
 
     /**
@@ -497,7 +519,6 @@ class AdminPayload
     {
         $rules = self::itemRules(self::SOURCE_URL, false);
         $rules['image_url'] = ['nullable', 'string', 'max:1000'];
-        $rules['image'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'];
 
         return $rules;
     }
