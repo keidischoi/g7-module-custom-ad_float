@@ -249,11 +249,13 @@
   function applyPlacement(root, config) {
     if (!root) return;
     var pos = config.position || 'right';
-    var gap = Math.max(0, num(config.offset_px, 24));
+    var gap = num(config.offset_px, 24);
     var valign = verticalAlign(config.vertical_align);
     var voff = num(config.vertical_offset_px, 24);
     var adW = root.offsetWidth || Math.max(80, num(config.width_px, 180));
+    var adH = root.offsetHeight || Math.max(80, num(config.height_px, 180));
     var vw = viewportWidth();
+    var vh = window.innerHeight || document.documentElement.clientHeight || 0;
 
     root.style.top = '';
     root.style.bottom = '';
@@ -268,23 +270,22 @@
       if (pos === 'top') root.style.top = gap + 'px';
       else root.style.bottom = gap + 'px';
       root.removeAttribute('data-caf-box');
+      keepPartiallyOnScreen(root, adW, adH, vw, vh);
       return;
     }
 
     if (valign === 'top') {
-      root.style.setProperty('top', Math.max(0, voff) + 'px', 'important');
+      root.style.setProperty('top', voff + 'px', 'important');
       root.style.setProperty('bottom', 'auto', 'important');
       root.style.setProperty('transform', 'none', 'important');
     } else if (valign === 'bottom') {
-      root.style.setProperty('bottom', Math.max(0, voff) + 'px', 'important');
+      root.style.setProperty('bottom', voff + 'px', 'important');
       root.style.setProperty('top', 'auto', 'important');
       root.style.setProperty('transform', 'none', 'important');
     } else {
       root.style.setProperty('top', '50%', 'important');
       root.style.setProperty('bottom', 'auto', 'important');
-      root.style.setProperty('transform', voff
-        ? 'translateY(calc(-50% + ' + voff + 'px))'
-        : 'translateY(-50%)', 'important');
+      root.style.setProperty('transform', 'translateY(calc(-50% + ' + voff + 'px))', 'important');
     }
 
     var box = findContentBox();
@@ -292,9 +293,7 @@
     if (box) {
       var rect = box.getBoundingClientRect();
       root.setAttribute('data-caf-box', box.id || box.className || 'column');
-      // Outside the content box: left ad’s right edge at rect.left - gap,
-      // right ad’s left edge at rect.right + gap. getBoundingClientRect is
-      // viewport coords, matching position:fixed.
+      // Positive gap = outside into the side margin; negative = inward over the content.
       if (pos === 'left') {
         leftPx = rect.left - gap - adW;
       } else {
@@ -305,9 +304,42 @@
       leftPx = pos === 'left' ? gap : (vw - gap - adW);
     }
 
-    leftPx = clamp(leftPx, 0, Math.max(0, vw - adW));
+    var minVis = 32;
+    leftPx = clamp(leftPx, minVis - adW, Math.max(minVis - adW, vw - minVis));
     root.style.setProperty('left', Math.round(leftPx) + 'px', 'important');
     root.style.setProperty('right', 'auto', 'important');
+    keepPartiallyOnScreen(root, adW, adH, vw, vh);
+  }
+
+  function keepPartiallyOnScreen(root, adW, adH, vw, vh) {
+    try {
+      var r = root.getBoundingClientRect();
+      var minVis = 32;
+      var dx = 0;
+      var dy = 0;
+      if (r.right < minVis) dx = minVis - r.right;
+      else if (r.left > vw - minVis) dx = (vw - minVis) - r.left;
+      if (r.bottom < minVis) dy = minVis - r.bottom;
+      else if (r.top > vh - minVis) dy = (vh - minVis) - r.top;
+      if (!dx && !dy) return;
+      // getBoundingClientRect includes transforms, so drop the axis we just wrote as pixels.
+      var hadTx = (root.style.transform || '').indexOf('translateX') !== -1;
+      if (dx) {
+        root.style.setProperty('left', Math.round(r.left + dx) + 'px', 'important');
+        root.style.setProperty('right', 'auto', 'important');
+      }
+      if (dy) {
+        root.style.setProperty('top', Math.round(r.top + dy) + 'px', 'important');
+        root.style.setProperty('bottom', 'auto', 'important');
+      }
+      if (dx && dy) {
+        root.style.setProperty('transform', 'none', 'important');
+      } else if (dy) {
+        root.style.setProperty('transform', hadTx ? 'translateX(-50%)' : 'none', 'important');
+      } else if (hadTx) {
+        root.style.setProperty('transform', 'none', 'important');
+      }
+    } catch (e) {}
   }
 
   function watchPlacement(root, config) {
@@ -394,7 +426,7 @@
     var valign = verticalAlign(config.vertical_align);
     root.style.setProperty('--g7-ad-width', Math.max(80, num(config.width_px, 180)) + 'px');
     root.style.setProperty('--g7-ad-height', Math.max(80, num(config.height_px, 180)) + 'px');
-    root.style.setProperty('--g7-ad-offset', Math.max(0, num(config.offset_px, 24)) + 'px');
+    root.style.setProperty('--g7-ad-offset', num(config.offset_px, 24) + 'px');
     root.style.setProperty('--g7-ad-v-offset', num(config.vertical_offset_px, 24) + 'px');
     root.style.setProperty('--g7-ad-z', String(Math.max(100, num(config.z_index, 9990))));
     root.style.setProperty('--g7-ad-radius', Math.max(0, num(config.radius_px, 10)) + 'px');

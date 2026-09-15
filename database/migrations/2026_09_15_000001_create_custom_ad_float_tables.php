@@ -20,7 +20,7 @@ return new class extends Migration
                 $table->unsignedInteger('width_px')->default(180);
                 $table->unsignedInteger('height_px')->default(180);
                 $table->unsignedInteger('radius_px')->default(10);
-                $table->unsignedInteger('offset_px')->default(24);
+                $table->integer('offset_px')->default(24);
                 $table->string('vertical_align', 20)->default('middle');
                 $table->integer('vertical_offset_px')->default(24);
                 $table->unsignedInteger('z_index')->default(9990);

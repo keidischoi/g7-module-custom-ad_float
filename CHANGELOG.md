@@ -1,8 +1,8 @@
 # Changelog
 
 ## 0.1.13
-- Left/right ads align to the **main content column** via `getBoundingClientRect()` (not `left/right: var(--g7-ad-offset)` viewport walls). Finder prefers `#main_content` / `max-w-7xl` / centered max-width under `user_layout_root` and **never** treats a full-bleed wrapper as the box (that clamp looked like viewport walls). Gap (`offset_px`) is **outside** the column. Recompute on resize/orientation/scroll (rAF). `left`/`right` are set with `!important` so leftover CSS cannot pin to the viewport.
-- `offset_px` is the horizontal gap from the content box edge for left/right (admin label: 본문 박스 좌우 여백). Top/bottom still use it as viewport inset.
+- Left/right ads align to the **main content column** via `getBoundingClientRect()` (not `left/right: var(--g7-ad-offset)` viewport walls). Finder prefers `#main_content` / `max-w-7xl` / centered max-width under `user_layout_root` and **never** treats a full-bleed wrapper as the box (that clamp looked like viewport walls). Recompute on resize/orientation/scroll (rAF). `left`/`right` are set with `!important` so leftover CSS cannot pin to the viewport.
+- `offset_px` / `vertical_offset_px` accept **negatives** (−500…500). Horizontal: positive = outside into the side margin, negative = inward over the content. Vertical: opposite-direction nudge. JS no longer `Math.max(0)` the offsets; final position is only nudged back if the ad would fully leave the viewport.
 - New settings `vertical_align` (`top` | `middle` | `bottom`, default `middle`) and `vertical_offset_px` (default 24) for left/right ads. Top = `top: px`; middle = center plus optional px nudge (positive = down); bottom = `bottom: px`.
 - Placement updates on resize/scroll (rAF) and ResizeObserver; ads are clamped on-screen if the content box is flush or wider than the viewport.
 - Admin 기본 설정 + reservation visual overrides include 세로 위치 / 세로 여백. Idempotent migration; public payload includes the new fields; missing columns still work with defaults.

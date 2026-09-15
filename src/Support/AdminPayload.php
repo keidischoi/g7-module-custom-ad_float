@@ -113,7 +113,7 @@ class AdminPayload
             'schedules.*.width_px' => ['nullable', 'integer', 'min:80', 'max:1200'],
             'schedules.*.height_px' => ['nullable', 'integer', 'min:80', 'max:1200'],
             'schedules.*.radius_px' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'schedules.*.offset_px' => ['nullable', 'integer', 'min:0', 'max:500'],
+            'schedules.*.offset_px' => ['nullable', 'integer', 'min:-500', 'max:500'],
             'schedules.*.vertical_align' => ['nullable', 'in:top,middle,bottom'],
             'schedules.*.vertical_offset_px' => ['nullable', 'integer', 'min:-500', 'max:500'],
             'schedules.*.z_index' => ['nullable', 'integer', 'min:100', 'max:2147483647'],

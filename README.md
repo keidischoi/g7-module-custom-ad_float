@@ -44,9 +44,9 @@ php artisan migrate
 php artisan cache:clear
 ```
 
-`custom_ad_float_settings`에 `vertical_align`, `vertical_offset_px`가 추가됩니다. 프론트 `ad-float.js` 캐시 쿼리는 `?v=0.1.13` 입니다.
+`custom_ad_float_settings`에 `vertical_align`, `vertical_offset_px`가 추가되고 `offset_px`는 부호 있는 정수(−500…500)로 바뀝니다. 프론트 `ad-float.js` 캐시 쿼리는 `?v=0.1.13` 입니다.
 
-왼쪽/오른쪽 광고는 본문 박스(`#main_content` 등) 좌우 가장자리에 붙고, 세로 위치는 위/가운데/아래 + px입니다. 컬럼이 아직 없으면 기본값(가운데, 24px)으로 동작합니다.
+왼쪽/오른쪽 광고는 본문 박스 좌우 가장자리 기준입니다. 양수 여백=바깥, 음수=본문 쪽. 세로 위치는 위/가운데/아래 + px(음수 허용). 컬럼이 아직 없으면 기본값(가운데, 24px)으로 동작합니다.
 
 ## 관리자
 

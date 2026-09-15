@@ -807,7 +807,7 @@
                           "className": "input w-full",
                           "value": "{{_local.form?.offset_px ?? 24}}",
                           "autoBinding": false,
-                          "min": 0,
+                          "min": -500,
                           "max": 500
                         },
                         "actions": [
@@ -816,7 +816,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.offset_px": "{{Number($event.target.value) || 0}}"
+                              "form.offset_px": "{{Number($event.target.value)}}"
                             }
                           }
                         ]
@@ -3433,7 +3433,9 @@
                                                   "name": "sch_offset_px_{{sidx}}",
                                                   "className": "input w-full",
                                                   "value": "{{sch.offset_px ?? ''}}",
-                                                  "autoBinding": false
+                                                  "autoBinding": false,
+                                                  "min": -500,
+                                                  "max": 500
                                                 },
                                                 "actions": [
                                                   {
@@ -3441,7 +3443,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.offset_px": "{{Number($event.target.value) || 0}}"
+                                                      "form.schedules.{{sidx}}.offset_px": "{{Number($event.target.value)}}"
                                                     }
                                                   }
                                                 ]
@@ -3534,7 +3536,9 @@
                                                   "name": "sch_vertical_offset_px_{{sidx}}",
                                                   "className": "input w-full",
                                                   "value": "{{sch.vertical_offset_px ?? ''}}",
-                                                  "autoBinding": false
+                                                  "autoBinding": false,
+                                                  "min": -500,
+                                                  "max": 500
                                                 },
                                                 "actions": [
                                                   {
