@@ -100,6 +100,19 @@ class AdFloatService
         return $settings->fresh();
     }
 
+    public function resetClosedState(): AdFloatSetting
+    {
+        $settings = AdFloatSetting::current();
+        $current = (string) ($settings->close_cookie_key ?: '');
+        do {
+            $key = AdFloatSetting::generateCloseCookieKey();
+        } while ($key === $current);
+
+        $settings->update(['close_cookie_key' => $key]);
+
+        return $settings->fresh();
+    }
+
     public function listItems()
     {
         $items = AdFloatItem::query()->orderBy('sort_order')->orderBy('id')->get();

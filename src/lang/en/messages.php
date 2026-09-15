@@ -6,6 +6,8 @@ return [
         'fetch_failed' => 'Failed to load floating ad settings.',
         'update_success' => 'Floating ad settings saved.',
         'update_failed' => 'Failed to save floating ad settings.',
+        'reset_closed_success' => 'Visitor close records were invalidated, so ads will show again.',
+        'reset_closed_failed' => 'Failed to reset the closed-ad state.',
     ],
     'items' => [
         'fetch_success' => 'Ad items loaded.',

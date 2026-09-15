@@ -49,6 +49,9 @@ Route::prefix('admin/settings')
         Route::post('/', [AdFloatSettingController::class, 'update'])
             ->middleware('permission:admin,custom-ad_float.ads.update')
             ->name('update.post');
+        Route::post('/reset-closed', [AdFloatSettingController::class, 'resetClosed'])
+            ->middleware('permission:admin,custom-ad_float.ads.update')
+            ->name('reset_closed');
     });
 
 Route::prefix('admin/items')

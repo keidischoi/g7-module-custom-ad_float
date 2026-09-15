@@ -6,6 +6,8 @@ return [
         'fetch_failed' => '플로팅 광고 설정 조회에 실패했습니다.',
         'update_success' => '플로팅 광고 설정을 저장했습니다.',
         'update_failed' => '플로팅 광고 설정 저장에 실패했습니다.',
+        'reset_closed_success' => '방문자가 닫았던 기록이 무효화되어 다시 표시됩니다.',
+        'reset_closed_failed' => '닫힘 상태 초기화에 실패했습니다.',
     ],
     'items' => [
         'fetch_success' => '광고 목록을 조회했습니다.',

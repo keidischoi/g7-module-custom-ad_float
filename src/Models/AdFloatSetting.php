@@ -8,6 +8,8 @@ use Modules\Custom\AdFloat\Support\AdminPayload;
 
 class AdFloatSetting extends Model
 {
+    public const DEFAULT_CLOSE_COOKIE_KEY = 'g7_custom_ad_float_closed';
+
     protected $table = 'custom_ad_float_settings';
 
     protected $fillable = [
@@ -33,7 +35,7 @@ class AdFloatSetting extends Model
             'interval_ms' => 4000, 'width_px' => 180, 'height_px' => 180, 'radius_px' => 10,
             'offset_px' => 24, 'z_index' => 9990, 'autoplay' => true, 'show_arrows' => true,
             'show_dots' => true, 'show_close' => true, 'pause_on_hover' => true, 'open_new_tab' => true,
-            'mobile_mode' => 'hide', 'max_items' => 20, 'close_cookie_key' => 'g7_custom_ad_float_closed',
+            'mobile_mode' => 'hide', 'max_items' => 20, 'close_cookie_key' => self::DEFAULT_CLOSE_COOKIE_KEY,
         ];
         if (static::hasSchedulesColumn()) {
             $defaults['schedules'] = [];
@@ -49,6 +51,14 @@ class AdFloatSetting extends Model
         }
 
         return static::query()->firstOrCreate(['id' => 1], $defaults);
+    }
+
+    /**
+     * Unique cookie/localStorage key so previous visitor close flags are ignored.
+     */
+    public static function generateCloseCookieKey(): string
+    {
+        return self::DEFAULT_CLOSE_COOKIE_KEY.'_'.time().'_'.bin2hex(random_bytes(3));
     }
 
     /**
@@ -208,7 +218,7 @@ class AdFloatSetting extends Model
             'mobile_mode' => $this->mobile_mode,
             'max_items' => (int) $this->max_items,
             'show_close' => (bool) $this->show_close,
-            'close_cookie_key' => $this->close_cookie_key ?: 'g7_custom_ad_float_closed',
+            'close_cookie_key' => $this->close_cookie_key ?: self::DEFAULT_CLOSE_COOKIE_KEY,
             'start_at' => optional($this->start_at)->toIso8601String(),
             'end_at' => optional($this->end_at)->toIso8601String(),
         ];

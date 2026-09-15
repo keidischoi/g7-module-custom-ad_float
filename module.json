@@ -5,7 +5,7 @@
     "ko": "플로팅 광고",
     "en": "Floating Ads"
   },
-  "version": "0.1.14",
+  "version": "0.1.15",
   "license": "MIT",
   "description": {
     "ko": "그누보드7 메인 테마에 좌우/상하 고정 캐러셀 광고를 이벤트·레이아웃 훅과 JS로 주입하는 모듈",

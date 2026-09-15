@@ -96,7 +96,8 @@
           ],
           "combine": false
         },
-        "itemSel": {}
+        "itemSel": {},
+        "resettingClosed": false
       }
     }
   ],
@@ -999,7 +1000,7 @@
                         "props": {
                           "type": "text",
                           "name": "close_cookie_key",
-                          "className": "input w-full",
+                          "className": "input w-full font-mono text-sm",
                           "value": "{{_local.form?.close_cookie_key ?? 'g7_custom_ad_float_closed'}}",
                           "autoBinding": false
                         },
@@ -1013,6 +1014,179 @@
                             }
                           }
                         ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                          "className": "flex flex-wrap items-center gap-2 mt-2"
+                        },
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "Button",
+                            "id": "btn_reset_closed",
+                            "props": {
+                              "type": "button",
+                              "disabled": "{{_local.resettingClosed}}",
+                              "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 disabled:opacity-50"
+                            },
+                            "text": "$t:custom-ad_float.admin.actions.reset_closed",
+                            "actions": [
+                              {
+                                "type": "click",
+                                "handler": "sequence",
+                                "actions": [
+                                  {
+                                    "handler": "setState",
+                                    "params": {
+                                      "target": "local",
+                                      "resettingClosed": true
+                                    }
+                                  },
+                                  {
+                                    "handler": "apiCall",
+                                    "auth_required": true,
+                                    "target": "/api/modules/custom-ad_float/admin/settings/reset-closed",
+                                    "params": {
+                                      "method": "POST",
+                                      "body": {}
+                                    },
+                                    "onSuccess": [
+                                      {
+                                        "handler": "setState",
+                                        "params": {
+                                          "target": "local",
+                                          "resettingClosed": false,
+                                          "hasChanges": false
+                                        }
+                                      },
+                                      {
+                                        "handler": "toast",
+                                        "params": {
+                                          "type": "success",
+                                          "message": "$t:custom-ad_float.admin.reset_closed_success"
+                                        }
+                                      },
+                                      {
+                                        "handler": "refetchDataSource",
+                                        "params": {
+                                          "dataSourceId": "settings"
+                                        }
+                                      }
+                                    ],
+                                    "onError": [
+                                      {
+                                        "handler": "setState",
+                                        "params": {
+                                          "target": "local",
+                                          "resettingClosed": false
+                                        }
+                                      },
+                                      {
+                                        "handler": "toast",
+                                        "params": {
+                                          "type": "error",
+                                          "message": "{{error.message}}"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Button",
+                            "id": "btn_show_again",
+                            "props": {
+                              "type": "button",
+                              "disabled": "{{_local.resettingClosed}}",
+                              "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 disabled:opacity-50"
+                            },
+                            "text": "$t:custom-ad_float.admin.actions.show_again",
+                            "actions": [
+                              {
+                                "type": "click",
+                                "handler": "sequence",
+                                "actions": [
+                                  {
+                                    "handler": "setState",
+                                    "params": {
+                                      "target": "local",
+                                      "resettingClosed": true
+                                    }
+                                  },
+                                  {
+                                    "handler": "apiCall",
+                                    "auth_required": true,
+                                    "target": "/api/modules/custom-ad_float/admin/settings/reset-closed",
+                                    "params": {
+                                      "method": "POST",
+                                      "body": {}
+                                    },
+                                    "onSuccess": [
+                                      {
+                                        "handler": "setState",
+                                        "params": {
+                                          "target": "local",
+                                          "resettingClosed": false,
+                                          "hasChanges": false
+                                        }
+                                      },
+                                      {
+                                        "handler": "toast",
+                                        "params": {
+                                          "type": "success",
+                                          "message": "$t:custom-ad_float.admin.reset_closed_success"
+                                        }
+                                      },
+                                      {
+                                        "handler": "refetchDataSource",
+                                        "params": {
+                                          "dataSourceId": "settings"
+                                        }
+                                      }
+                                    ],
+                                    "onError": [
+                                      {
+                                        "handler": "setState",
+                                        "params": {
+                                          "target": "local",
+                                          "resettingClosed": false
+                                        }
+                                      },
+                                      {
+                                        "handler": "toast",
+                                        "params": {
+                                          "type": "error",
+                                          "message": "{{error.message}}"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-2"
+                        },
+                        "text": "$t:custom-ad_float.admin.reset_closed_hint"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-400 mt-1"
+                        },
+                        "text": "$t:custom-ad_float.admin.close_cookie_key_hint"
                       }
                     ]
                   }
