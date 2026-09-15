@@ -5,6 +5,10 @@
     "save": "설정 저장",
     "save_success": "설정을 저장했습니다.",
     "save_failed": "설정 저장에 실패했습니다.",
+    "nav": {
+      "settings": "광고 설정",
+      "stats": "통계"
+    },
     "sections": {
       "settings": "기본 설정",
       "items": "광고 목록",
