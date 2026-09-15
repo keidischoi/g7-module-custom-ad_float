@@ -10,7 +10,8 @@
       "items": "Ad catalog",
       "create": "Add ad",
       "edit": "Edit ad",
-      "schedules": "Date and time reservations"
+      "schedules": "Date and time reservations",
+      "placements": "Ad windows"
     },
     "fields": {
       "enabled": "Enabled",
@@ -77,6 +78,8 @@
       "refresh": "Refresh",
       "add_schedule": "+ Add reservation",
       "remove_schedule": "−",
+      "add_placement": "+ Add ad window",
+      "remove_placement": "Remove",
       "add_url": "+ Add image URL",
       "combine": "Combine",
       "uncombine": "Uncombine",
@@ -106,7 +109,7 @@
     "reset_closed_success": "Visitor close records were invalidated, so ads will show again.",
     "reset_closed_hint": "Close state is stored per browser in a cookie and localStorage. This button changes the cookie key so ads show again for everyone.",
     "close_cookie_key_hint": "To test a single browser, clear this key from cookies and localStorage in DevTools.",
-    "settings_hint": "These values apply when reservations are off, and as defaults for new reservation rows.",
+    "settings_hint": "These values apply when reservations are off, and as defaults when adding a new ad window or reservation.",
     "offset_px_hint": "Left/right: from the content box edge. Positive = outward into the side margin, negative = inward over the content. Top/bottom: from the viewport edge (negative = off-screen direction).",
     "vertical_align_hint": "Applies to left/right ads. Top/bottom positions stay horizontally centered on the viewport.",
     "vertical_offset_px_hint": "Top: px from the viewport top (negative = up). Bottom: px from the viewport bottom (negative = down). Middle: nudge from center (positive = down, negative = up).",
@@ -115,9 +118,13 @@
       "middle": "Middle",
       "bottom": "Bottom"
     },
-    "schedules_enabled_hint": "When on, only the matching reservation below is applied. If none match, ads are hidden.",
+    "schedules_enabled_hint": "When on, only the matching reservation below is applied. If none match, ads are hidden. With ad windows, the reservation only filters which ads may show; each window keeps its own position.",
     "schedules_hint": "Add multiple windows. The first matching On row from the top wins. Turn a row off to skip it. All days on or empty means every day.",
     "item_ids_hint": "Leave empty to show all currently enabled ads.",
+    "placements_hint": "Add more than one window to show ads in several positions at once. Leave empty to keep the single-window defaults.",
+    "placements_empty": "With no windows, ads use the single position from basic settings.",
+    "placement_card": "Window",
+    "placement_item_ids_hint": "Ads for this window. Leave empty to use every ad allowed by the schedule (when reservations are on) or every enabled ad.",
     "row_settings_hint": "Override position, size, and carousel options for this window only.",
     "carousel_options": "Carousel options",
     "carousel_options_hint": "Applies when two or more slides are shown. A single ad hides the buttons and dots.",

@@ -31,6 +31,7 @@ class AdFloatSettingController extends AdminBaseController
         try {
             AdminPayload::nullifyEmpty($request, ['start_at', 'end_at', 'close_cookie_key']);
             AdminPayload::nullifyScheduleBlanks($request);
+            AdminPayload::preparePlacementsRequest($request);
             $data = $request->validate(array_merge([
                 'enabled' => ['nullable'],
                 'home_only' => ['nullable'],
@@ -56,7 +57,7 @@ class AdFloatSettingController extends AdminBaseController
                 'start_at' => ['nullable', 'date'],
                 'end_at' => ['nullable', 'date'],
                 'schedules_enabled' => ['nullable'],
-            ], AdminPayload::scheduleNestedRules()));
+            ], AdminPayload::scheduleNestedRules(), AdminPayload::placementNestedRules()));
 
             $row = $this->service->updateSettings($data);
 

@@ -6,7 +6,8 @@
 
   var API = '/api/modules/custom-ad_float/payload';
   var TRACK_API = '/api/modules/custom-ad_float/track';
-  var ROOT_ID = 'g7-custom-ad-float';
+  var ROOT_CLASS = 'g7-custom-ad-float';
+  var ROOT_ID_PREFIX = 'g7-custom-ad-float';
   var MOUNT_ID = 'g7_custom_ad_float_mount';
 
   function pagePath() {
@@ -135,9 +136,11 @@
 
   function isAdNode(el) {
     if (!el) return true;
-    if (el.id === ROOT_ID || el.id === MOUNT_ID) return true;
+    var id = el.id || '';
+    if (id === MOUNT_ID || id === ROOT_ID_PREFIX || id.indexOf(ROOT_ID_PREFIX + '-') === 0) return true;
     try {
-      if (el.closest && el.closest('#' + ROOT_ID)) return true;
+      if (el.classList && el.classList.contains(ROOT_CLASS)) return true;
+      if (el.closest && el.closest('.' + ROOT_CLASS)) return true;
     } catch (e) {}
     return false;
   }
@@ -412,28 +415,28 @@
     var style = document.createElement('style');
     style.id = 'g7-custom-ad-float-style';
     style.textContent = [
-      '#g7-custom-ad-float{--g7-ad-width:180px;--g7-ad-height:180px;--g7-ad-offset:24px;--g7-ad-v-offset:24px;--g7-ad-z:9990;--g7-ad-radius:10px;position:fixed;z-index:var(--g7-ad-z);box-sizing:border-box;display:none;font-family:inherit}',
-      '#g7-custom-ad-float.is-ready{display:block}',
-      '#g7-custom-ad-float.is-left,#g7-custom-ad-float.is-right{left:auto;right:auto}',
-      '#g7-custom-ad-float.is-v-middle{top:50%;transform:translateY(calc(-50% + var(--g7-ad-v-offset, 0px)))}',
-      '#g7-custom-ad-float.is-v-top{top:var(--g7-ad-v-offset, 24px)}',
-      '#g7-custom-ad-float.is-v-bottom{bottom:var(--g7-ad-v-offset, 24px);top:auto}',
-      '#g7-custom-ad-float.is-top{top:var(--g7-ad-offset);left:50%;transform:translateX(-50%)}',
-      '#g7-custom-ad-float.is-bottom{bottom:var(--g7-ad-offset);left:50%;transform:translateX(-50%)}',
-      '#g7-custom-ad-float .g7-ad-frame{position:relative;width:var(--g7-ad-width);height:var(--g7-ad-height);overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.10);border-radius:var(--g7-ad-radius);box-shadow:0 8px 30px rgba(0,0,0,.18)}',
-      '#g7-custom-ad-float .g7-ad-track{width:100%;height:100%;display:flex;transition:transform .45s ease}',
-      '#g7-custom-ad-float .g7-ad-track.vertical{flex-direction:column}',
-      '#g7-custom-ad-float .g7-ad-slide{flex:0 0 100%;width:100%;height:100%;display:block}',
-      '#g7-custom-ad-float .g7-ad-slide img{display:block;width:100%;height:100%;object-fit:cover}',
-      '#g7-custom-ad-float .g7-ad-nav{position:absolute;inset:0;pointer-events:none}',
-      '#g7-custom-ad-float button{position:absolute;top:50%;width:28px;height:28px;margin-top:-14px;border:0;border-radius:50%;background:rgba(0,0,0,.48);color:#fff;cursor:pointer;line-height:28px;text-align:center;padding:0;pointer-events:auto;font-size:16px}',
-      '#g7-custom-ad-float .g7-ad-prev{left:7px}',
-      '#g7-custom-ad-float .g7-ad-next{right:7px}',
-      '#g7-custom-ad-float .g7-ad-dots{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);display:flex;gap:5px}',
-      '#g7-custom-ad-float .g7-ad-dot{position:static;width:7px;height:7px;margin:0;padding:0;border-radius:50%;background:rgba(255,255,255,.55)}',
-      '#g7-custom-ad-float .g7-ad-dot.is-active{background:#fff}',
-      '#g7-custom-ad-float .g7-ad-close{top:6px;right:6px;left:auto;margin:0;width:24px;height:24px;line-height:24px;z-index:3}',
-      '@media (max-width:767px){#g7-custom-ad-float.g7-mobile-hide{display:none!important}#g7-custom-ad-float.g7-mobile-show .g7-ad-frame{max-width:calc(100vw - 24px);max-height:calc(100vh - 48px)}}'
+      '.g7-custom-ad-float{--g7-ad-width:180px;--g7-ad-height:180px;--g7-ad-offset:24px;--g7-ad-v-offset:24px;--g7-ad-z:9990;--g7-ad-radius:10px;position:fixed;z-index:var(--g7-ad-z);box-sizing:border-box;display:none;font-family:inherit}',
+      '.g7-custom-ad-float.is-ready{display:block}',
+      '.g7-custom-ad-float.is-left,.g7-custom-ad-float.is-right{left:auto;right:auto}',
+      '.g7-custom-ad-float.is-v-middle{top:50%;transform:translateY(calc(-50% + var(--g7-ad-v-offset, 0px)))}',
+      '.g7-custom-ad-float.is-v-top{top:var(--g7-ad-v-offset, 24px)}',
+      '.g7-custom-ad-float.is-v-bottom{bottom:var(--g7-ad-v-offset, 24px);top:auto}',
+      '.g7-custom-ad-float.is-top{top:var(--g7-ad-offset);left:50%;transform:translateX(-50%)}',
+      '.g7-custom-ad-float.is-bottom{bottom:var(--g7-ad-offset);left:50%;transform:translateX(-50%)}',
+      '.g7-custom-ad-float .g7-ad-frame{position:relative;width:var(--g7-ad-width);height:var(--g7-ad-height);overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.10);border-radius:var(--g7-ad-radius);box-shadow:0 8px 30px rgba(0,0,0,.18)}',
+      '.g7-custom-ad-float .g7-ad-track{width:100%;height:100%;display:flex;transition:transform .45s ease}',
+      '.g7-custom-ad-float .g7-ad-track.vertical{flex-direction:column}',
+      '.g7-custom-ad-float .g7-ad-slide{flex:0 0 100%;width:100%;height:100%;display:block}',
+      '.g7-custom-ad-float .g7-ad-slide img{display:block;width:100%;height:100%;object-fit:cover}',
+      '.g7-custom-ad-float .g7-ad-nav{position:absolute;inset:0;pointer-events:none}',
+      '.g7-custom-ad-float button{position:absolute;top:50%;width:28px;height:28px;margin-top:-14px;border:0;border-radius:50%;background:rgba(0,0,0,.48);color:#fff;cursor:pointer;line-height:28px;text-align:center;padding:0;pointer-events:auto;font-size:16px}',
+      '.g7-custom-ad-float .g7-ad-prev{left:7px}',
+      '.g7-custom-ad-float .g7-ad-next{right:7px}',
+      '.g7-custom-ad-float .g7-ad-dots{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);display:flex;gap:5px}',
+      '.g7-custom-ad-float .g7-ad-dot{position:static;width:7px;height:7px;margin:0;padding:0;border-radius:50%;background:rgba(255,255,255,.55)}',
+      '.g7-custom-ad-float .g7-ad-dot.is-active{background:#fff}',
+      '.g7-custom-ad-float .g7-ad-close{top:6px;right:6px;left:auto;margin:0;width:24px;height:24px;line-height:24px;z-index:3}',
+      '@media (max-width:767px){.g7-custom-ad-float.g7-mobile-hide{display:none!important}.g7-custom-ad-float.g7-mobile-show .g7-ad-frame{max-width:calc(100vw - 24px);max-height:calc(100vh - 48px)}}'
     ].join('');
     document.head.appendChild(style);
   }
@@ -445,22 +448,64 @@
     return !!value;
   }
 
+  function windowId(raw, index) {
+    var id = String(raw || '').replace(/[^A-Za-z0-9_-]/g, '');
+    return id || ('p' + (index + 1));
+  }
+
+  function closeCookieKey(config, id) {
+    var base = (config && config.close_cookie_key) || 'g7_custom_ad_float_closed';
+    if (!id || id === 'default') return base;
+    return base + '_' + id;
+  }
+
+  function windowsFromPayload(payload) {
+    if (payload && Array.isArray(payload.windows)) {
+      return payload.windows;
+    }
+    return [{
+      id: 'default',
+      settings: (payload && payload.settings) || {},
+      items: (payload && payload.items) || []
+    }];
+  }
+
+  function alreadyMounted() {
+    try {
+      return !!document.querySelector('.' + ROOT_CLASS);
+    } catch (e) {
+      return !!document.getElementById(ROOT_ID_PREFIX);
+    }
+  }
+
   function render(payload) {
-    if (document.getElementById(ROOT_ID)) return;
+    if (alreadyMounted()) return;
+    var global = (payload && payload.settings) || {};
+    if (global.enabled === false) return;
+    if (global.home_only && !isHomePath()) return;
 
-    var config = (payload && payload.settings) || {};
-    var items = Array.isArray(payload && payload.items) ? payload.items : [];
-    if (!config.enabled || !items.length) return;
-    if (config.home_only && !isHomePath()) return;
-
-    var closeKey = config.close_cookie_key || 'g7_custom_ad_float_closed';
-    if (alreadyClosed(closeKey)) return;
-
+    var windows = windowsFromPayload(payload);
+    if (!windows.length) return;
     ensureStyle();
+    windows.forEach(function (win, index) {
+      renderWindow(win || {}, index, global);
+    });
+  }
+
+  function renderWindow(win, index, global) {
+    var config = win.settings || global || {};
+    var items = Array.isArray(win.items) ? win.items : [];
+    if (!items.length) return;
+    if (config.enabled === false) return;
+
+    var id = windowId(win.id, index);
+    var closeKey = closeCookieKey(config, id);
+    if (alreadyClosed(closeKey)) return;
+    if (document.getElementById(ROOT_ID_PREFIX + '-' + id)) return;
 
     var root = document.createElement('div');
-    root.id = ROOT_ID;
-    root.className = 'g7-custom-ad-float';
+    root.id = ROOT_ID_PREFIX + '-' + id;
+    root.className = ROOT_CLASS;
     var pos = config.position || 'right';
     var valign = verticalAlign(config.vertical_align);
     root.style.setProperty('--g7-ad-width', Math.max(80, num(config.width_px, 180)) + 'px');
@@ -506,7 +551,6 @@
     frame.appendChild(track);
 
     var prevBtn, nextBtn, dotsWrap;
-    // Single-slide carousels never show chrome. false / 0 / "0" / "false" hide arrows/dots.
     if (items.length > 1 && settingOn(config.show_arrows)) {
       var nav = document.createElement('div');
       nav.className = 'g7-ad-nav';
@@ -528,12 +572,12 @@
     if (items.length > 1 && settingOn(config.show_dots)) {
       dotsWrap = document.createElement('div');
       dotsWrap.className = 'g7-ad-dots';
-      items.forEach(function (_, index) {
+      items.forEach(function (_, dotIndex) {
         var dot = document.createElement('button');
         dot.type = 'button';
-        dot.className = 'g7-ad-dot' + (index === 0 ? ' is-active' : '');
-        dot.setAttribute('aria-label', (index + 1) + '번 광고');
-        dot.dataset.index = String(index);
+        dot.className = 'g7-ad-dot' + (dotIndex === 0 ? ' is-active' : '');
+        dot.setAttribute('aria-label', (dotIndex + 1) + '번 광고');
+        dot.dataset.index = String(dotIndex);
         dotsWrap.appendChild(dot);
       });
       frame.appendChild(dotsWrap);
@@ -562,27 +606,27 @@
       document.body.appendChild(root);
     }
 
-    var index = 0;
+    var slideIndex = 0;
     var timer = null;
     var vertical = config.direction === 'vertical';
 
     function paint() {
-      var offset = -(index * 100);
+      var offset = -(slideIndex * 100);
       track.style.transform = vertical
         ? 'translate3d(0,' + offset + '%,0)'
         : 'translate3d(' + offset + '%,0,0)';
       if (dotsWrap) {
         Array.prototype.forEach.call(dotsWrap.children, function (dot, i) {
-          dot.classList.toggle('is-active', i === index);
+          dot.classList.toggle('is-active', i === slideIndex);
         });
       }
-      if (isAdVisible(root) && items[index] && items[index].id) {
-        trackImpression(items[index].id);
+      if (isAdVisible(root) && items[slideIndex] && items[slideIndex].id) {
+        trackImpression(items[slideIndex].id);
       }
     }
 
     function go(delta) {
-      index = (index + delta + items.length) % items.length;
+      slideIndex = (slideIndex + delta + items.length) % items.length;
       paint();
     }
 
@@ -596,7 +640,7 @@
     function start() {
       if (!config.autoplay || items.length < 2) return;
       stop();
-      var seconds = Number(items[index] && items[index].display_seconds) || (Number(config.interval_ms || 4000) / 1000);
+      var seconds = Number(items[slideIndex] && items[slideIndex].display_seconds) || (Number(config.interval_ms || 4000) / 1000);
       timer = window.setTimeout(function () {
         go(1);
         start();
@@ -609,7 +653,7 @@
       dotsWrap.addEventListener('click', function (event) {
         var dot = event.target.closest('.g7-ad-dot');
         if (!dot) return;
-        index = Number(dot.dataset.index || 0);
+        slideIndex = Number(dot.dataset.index || 0);
         paint();
         start();
       });
@@ -622,8 +666,8 @@
     root.addEventListener('click', function (event) {
       var link = event.target.closest('.g7-ad-link');
       if (!link) return;
-      var id = Number(link.getAttribute('data-item-id') || (items[index] && items[index].id) || 0);
-      trackClick(id);
+      var itemId = Number(link.getAttribute('data-item-id') || (items[slideIndex] && items[slideIndex].id) || 0);
+      trackClick(itemId);
     }, true);
 
     paint();
@@ -632,7 +676,7 @@
   }
 
   function boot() {
-    if (document.getElementById(ROOT_ID)) return;
+    if (alreadyMounted()) return;
     fetch(API, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
       .then(function (r) { return r.json(); })
       .then(function (json) {

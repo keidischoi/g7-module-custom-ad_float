@@ -129,6 +129,171 @@ class AdminPayload
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    public static function placementNestedRules(): array
+    {
+        return [
+            'placements' => ['nullable', 'array', 'max:8'],
+            'placements.*.id' => ['nullable', 'string', 'max:40'],
+            'placements.*.enabled' => ['nullable'],
+            'placements.*.item_ids' => ['nullable', 'array'],
+            'placements.*.item_ids.*' => ['integer', 'min:1'],
+            'placements.*.position' => ['nullable', 'in:left,right,top,bottom'],
+            'placements.*.direction' => ['nullable', 'in:horizontal,vertical'],
+            'placements.*.interval_ms' => ['nullable', 'integer', 'min:1000', 'max:60000'],
+            'placements.*.width_px' => ['nullable', 'integer', 'min:80', 'max:1200'],
+            'placements.*.height_px' => ['nullable', 'integer', 'min:80', 'max:1200'],
+            'placements.*.radius_px' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'placements.*.offset_px' => ['nullable', 'integer', 'min:-500', 'max:500'],
+            'placements.*.vertical_align' => ['nullable', 'in:top,middle,bottom'],
+            'placements.*.vertical_offset_px' => ['nullable', 'integer', 'min:-500', 'max:500'],
+            'placements.*.z_index' => ['nullable', 'integer', 'min:100', 'max:2147483647'],
+            'placements.*.max_items' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'placements.*.mobile_mode' => ['nullable', 'in:hide,show'],
+            'placements.*.autoplay' => ['nullable'],
+            'placements.*.show_arrows' => ['nullable'],
+            'placements.*.show_dots' => ['nullable'],
+            'placements.*.show_close' => ['nullable'],
+            'placements.*.pause_on_hover' => ['nullable'],
+            'placements.*.open_new_tab' => ['nullable'],
+        ];
+    }
+
+    /**
+     * @param  mixed  $raw
+     * @return array<int, array<string, mixed>>
+     */
+    public static function normalizePlacements(mixed $raw): array
+    {
+        if (is_string($raw)) {
+            $decoded = json_decode($raw, true);
+            $raw = is_array($decoded) ? $decoded : [];
+        }
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        $out = [];
+        $used = [];
+        foreach (array_values($raw) as $i => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            if (! empty($row['_deleted']) || ! empty($row['deleted'])) {
+                continue;
+            }
+            $visual = self::extractVisual($row, true);
+            $itemIds = self::normalizeItemIds($row);
+            $id = self::sanitizePlacementId($row['id'] ?? null, $i, $used);
+            $used[$id] = true;
+            $out[] = array_merge($visual, [
+                'id' => $id,
+                'enabled' => self::scheduleRowEnabled($row),
+                'item_ids' => $itemIds,
+            ]);
+            if (count($out) >= 8) {
+                break;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<string, true>  $used
+     */
+    public static function sanitizePlacementId(mixed $id, int $index, array $used = []): string
+    {
+        $raw = is_string($id) ? trim($id) : '';
+        $raw = preg_replace('/[^A-Za-z0-9_-]/', '', $raw) ?? '';
+        if ($raw === '' || strcasecmp($raw, 'new') === 0 || isset($used[$raw])) {
+            $n = $index + 1;
+            do {
+                $raw = 'p'.$n;
+                $n++;
+            } while (isset($used[$raw]));
+        }
+
+        return substr($raw, 0, 40);
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     * @param  array<string, mixed>  $base
+     * @return array<string, mixed>
+     */
+    public static function placementToForm(array $row, int $index = 0, array $base = []): array
+    {
+        $visual = self::extractVisual(array_merge(self::visualDefaults(), $base, $row), true);
+        $itemIds = self::normalizeItemIds($row);
+        $form = array_merge($visual, [
+            'id' => self::sanitizePlacementId($row['id'] ?? null, $index, []),
+            'enabled' => self::scheduleRowEnabled($row),
+            'item_ids' => $itemIds,
+            '_deleted' => false,
+        ]);
+        foreach ($itemIds as $id) {
+            $form['sel_'.$id] = true;
+        }
+
+        return $form;
+    }
+
+    /**
+     * Decode placements JSON and blank nested numbers before Laravel validate.
+     */
+    public static function preparePlacementsRequest(Request $request): void
+    {
+        if (! $request->exists('placements')) {
+            return;
+        }
+        $raw = $request->input('placements');
+        if (is_string($raw)) {
+            if (self::isBlank($raw)) {
+                $request->merge(['placements' => []]);
+
+                return;
+            }
+            $decoded = json_decode($raw, true);
+            $raw = is_array($decoded) ? $decoded : [];
+        }
+        if (! is_array($raw)) {
+            $request->merge(['placements' => []]);
+
+            return;
+        }
+
+        $numeric = [
+            'interval_ms', 'width_px', 'height_px', 'radius_px', 'offset_px',
+            'vertical_offset_px', 'z_index', 'max_items',
+        ];
+        $rows = [];
+        foreach ($raw as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            foreach ($numeric as $key) {
+                if (array_key_exists($key, $row) && self::isBlank($row[$key])) {
+                    $row[$key] = null;
+                }
+            }
+            if (array_key_exists('item_ids', $row) && is_string($row['item_ids'])) {
+                if (self::isBlank($row['item_ids'])) {
+                    $row['item_ids'] = [];
+                } else {
+                    $decoded = json_decode($row['item_ids'], true);
+                    if (is_array($decoded)) {
+                        $row['item_ids'] = $decoded;
+                    }
+                }
+            }
+            $rows[] = $row;
+        }
+        $request->merge(['placements' => $rows]);
+    }
+
     public static function nullifyScheduleBlanks(Request $request): void
     {
         if (! $request->exists('schedules')) {
@@ -647,8 +812,13 @@ class AdminPayload
     public static function normalizeItemIds(array $row): array
     {
         $ids = [];
-        if (isset($row['item_ids']) && is_array($row['item_ids'])) {
-            foreach ($row['item_ids'] as $id) {
+        $rawIds = $row['item_ids'] ?? null;
+        if (is_string($rawIds)) {
+            $decoded = json_decode($rawIds, true);
+            $rawIds = is_array($decoded) ? $decoded : [];
+        }
+        if (is_array($rawIds)) {
+            foreach ($rawIds as $id) {
                 if (is_numeric($id) && (int) $id > 0) {
                     $ids[] = (int) $id;
                 }

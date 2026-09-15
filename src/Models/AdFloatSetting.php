@@ -16,7 +16,7 @@ class AdFloatSetting extends Model
         'enabled', 'home_only', 'position', 'direction', 'interval_ms', 'width_px', 'height_px',
         'radius_px', 'offset_px', 'vertical_align', 'vertical_offset_px', 'z_index', 'autoplay', 'show_arrows', 'show_dots', 'show_close',
         'pause_on_hover', 'open_new_tab', 'mobile_mode', 'max_items', 'close_cookie_key',
-        'start_at', 'end_at', 'schedules', 'schedules_enabled',
+        'start_at', 'end_at', 'schedules', 'schedules_enabled', 'placements',
     ];
 
     protected $casts = [
@@ -26,6 +26,7 @@ class AdFloatSetting extends Model
         'schedules_enabled' => 'boolean',
         'start_at' => 'datetime', 'end_at' => 'datetime',
         'schedules' => 'array',
+        'placements' => 'array',
     ];
 
     public static function current(): self
@@ -48,6 +49,9 @@ class AdFloatSetting extends Model
         }
         if (static::hasVerticalOffsetColumn()) {
             $defaults['vertical_offset_px'] = 24;
+        }
+        if (static::hasPlacementsColumn()) {
+            $defaults['placements'] = [];
         }
 
         return static::query()->firstOrCreate(['id' => 1], $defaults);
@@ -257,7 +261,56 @@ class AdFloatSetting extends Model
             'end_at' => optional($this->end_at)->format('Y-m-d\TH:i'),
             'schedules_enabled' => $this->schedulesEnabled(),
             'schedules' => $this->schedulesForAdmin(),
+            'placements' => $this->placementsForAdmin(),
         ];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function placementsForAdmin(): array
+    {
+        if (! static::hasPlacementsColumn()) {
+            return [];
+        }
+        $raw = $this->placements;
+        if (is_string($raw)) {
+            $decoded = json_decode($raw, true);
+            $raw = is_array($decoded) ? $decoded : [];
+        }
+        if (! is_array($raw) || $raw === []) {
+            return [];
+        }
+        $rows = [];
+        foreach (array_values($raw) as $i => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $rows[] = AdminPayload::placementToForm($row, $i, $this->visualBase());
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function normalizedPlacements(): array
+    {
+        if (! static::hasPlacementsColumn()) {
+            return [];
+        }
+
+        return AdminPayload::normalizePlacements($this->placements);
+    }
+
+    public static function hasPlacementsColumn(): bool
+    {
+        try {
+            return Schema::hasColumn('custom_ad_float_settings', 'placements');
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     public static function hasSchedulesColumn(): bool

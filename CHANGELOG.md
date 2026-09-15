@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.18
+- Multiple floating **광고창** at once via `placements` JSON on settings (migration `2026_09_15_000008`, max 8). Empty `placements` keeps the legacy single-window payload from root settings + all enabled items.
+- Admin section 「광고창」: enable toggle, position/visual fields, carousel options, per-window ad multi-select, remove, 「+ 광고창 추가」 (copies 기본 설정 defaults).
+- Public payload `windows: [{ id, settings, items }]`. Front JS mounts `g7-custom-ad-float-{id}` per window. Close cookie is `close_cookie_key + '_' + id` (legacy `default` window still uses the unsuffixed key).
+- Reservation ON still matches schedule for which items may show; each placement then filters by its `item_ids` (empty = all schedule-allowed items). Placement visuals are used so windows are not collapsed to the reservation’s single position.
+- Combine/carousel groups still apply inside each window’s item list. Stats remain per `item_id` + page.
+
 ## 0.1.17
 - Admin labels: `show_arrows` → 「슬라이딩 버튼」 (hint: 이전/다음 화살표 표시), `show_dots` → 「DOT 표시」 (hint: 캐러셀 인디케이터 점). Grouped with **자동재생** as Toggle controls in 기본 설정 and per-reservation rows.
 - Front JS still hides arrows/dots when the flag is false (also `0` / `"false"`), and when there is only one slide (`items.length > 1`).

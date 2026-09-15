@@ -19,39 +19,112 @@ class AdFloatService
         $settings = $resolved['settings'];
 
         if (! empty($resolved['hide']) || empty($settings['enabled'])) {
-            return ['settings' => ['enabled' => false], 'items' => []];
+            return [
+                'settings' => ['enabled' => false],
+                'items' => [],
+                'windows' => [],
+            ];
         }
 
-        $itemsQuery = AdFloatItem::query()
-            ->where('enabled', true)
-            ->orderBy('sort_order')
-            ->orderBy('id');
-        $itemIds = $resolved['item_ids'] ?? [];
-        if (is_array($itemIds) && $itemIds !== []) {
-            $itemsQuery->whereIn('id', $itemIds);
+        $allowedIds = $resolved['item_ids'] ?? [];
+        $allItems = $this->orderItemsForCarousel(
+            AdFloatItem::query()->where('enabled', true)->orderBy('sort_order')->orderBy('id')->get()
+        );
+        if (is_array($allowedIds) && $allowedIds !== []) {
+            $allow = array_fill_keys(array_map('intval', $allowedIds), true);
+            $allItems = $allItems->filter(fn (AdFloatItem $item) => isset($allow[(int) $item->id]))->values();
         }
-        $items = $this->orderItemsForCarousel($itemsQuery->get())
-            ->take(max(1, (int) ($settings['max_items'] ?? $row->max_items)));
+
+        $placements = $row->normalizedPlacements();
+        // Reservation visuals would force every window to one position. With
+        // placements, schedule match only gates which items are allowed.
+        $windowBase = $placements === [] ? $settings : $row->toPublicSettingsArray();
+        $windowBase['enabled'] = true;
+
+        $windows = $this->payloadWindows($placements, $windowBase, $allItems);
+        if ($windows === []) {
+            return [
+                'settings' => ['enabled' => false],
+                'items' => [],
+                'windows' => [],
+            ];
+        }
+        $first = $windows[0];
 
         return [
-            'settings' => $settings,
-            'items' => $items->map(function (AdFloatItem $item) {
-                $row = [
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'image_url' => $item->imageUrl(),
-                    'target_url' => $item->target_url,
-                    'alt_text' => $item->alt_text ?: $item->title,
-                    'display_seconds' => $item->display_seconds,
-                    'sort_order' => (int) $item->sort_order,
-                ];
-                if (AdFloatItem::hasCarouselGroupColumn()) {
-                    $row['carousel_group'] = $item->carousel_group;
-                }
-
-                return $row;
-            })->values()->all(),
+            'settings' => $first['settings'],
+            'items' => $first['items'],
+            'windows' => $windows,
         ];
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $placements
+     * @param  Collection<int, AdFloatItem>  $allItems
+     * @param  array<string, mixed>  $settings
+     * @return array<int, array{id:string,settings:array<string,mixed>,items:array<int, array<string, mixed>>}>
+     */
+    private function payloadWindows(array $placements, array $settings, Collection $allItems): array
+    {
+        if ($placements === []) {
+            $items = $allItems->take(max(1, (int) ($settings['max_items'] ?? 20)));
+
+            return [[
+                'id' => 'default',
+                'settings' => $settings,
+                'items' => $items->map(fn (AdFloatItem $item) => $this->publicItemArray($item))->values()->all(),
+            ]];
+        }
+
+        $windows = [];
+        foreach ($placements as $placement) {
+            if (empty($placement['enabled'])) {
+                continue;
+            }
+            $windowSettings = AdminPayload::overlayVisual($settings, $placement);
+            $windowSettings['enabled'] = true;
+            $windowSettings['home_only'] = (bool) ($settings['home_only'] ?? true);
+            $windowSettings['close_cookie_key'] = (string) ($settings['close_cookie_key'] ?? AdFloatSetting::DEFAULT_CLOSE_COOKIE_KEY);
+            $ids = $placement['item_ids'] ?? [];
+            $items = $allItems;
+            if (is_array($ids) && $ids !== []) {
+                $allow = array_fill_keys(array_map('intval', $ids), true);
+                $items = $items->filter(fn (AdFloatItem $item) => isset($allow[(int) $item->id]))->values();
+            }
+            $items = $this->orderItemsForCarousel($items)
+                ->take(max(1, (int) ($windowSettings['max_items'] ?? 20)));
+            if ($items->isEmpty()) {
+                continue;
+            }
+            $windows[] = [
+                'id' => (string) ($placement['id'] ?? 'p'.(count($windows) + 1)),
+                'settings' => $windowSettings,
+                'items' => $items->map(fn (AdFloatItem $item) => $this->publicItemArray($item))->values()->all(),
+            ];
+        }
+
+        return $windows;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function publicItemArray(AdFloatItem $item): array
+    {
+        $row = [
+            'id' => $item->id,
+            'title' => $item->title,
+            'image_url' => $item->imageUrl(),
+            'target_url' => $item->target_url,
+            'alt_text' => $item->alt_text ?: $item->title,
+            'display_seconds' => $item->display_seconds,
+            'sort_order' => (int) $item->sort_order,
+        ];
+        if (AdFloatItem::hasCarouselGroupColumn()) {
+            $row['carousel_group'] = $item->carousel_group;
+        }
+
+        return $row;
     }
 
     public function updateSettings(array $data): AdFloatSetting
@@ -94,6 +167,13 @@ class AdFloatService
             $ends = array_values(array_filter(array_column($schedules, 'end_at')));
             $data['start_at'] = $starts[0] ?? null;
             $data['end_at'] = $ends !== [] ? $ends[count($ends) - 1] : null;
+        }
+        if (array_key_exists('placements', $data)) {
+            if (AdFloatSetting::hasPlacementsColumn()) {
+                $data['placements'] = AdminPayload::normalizePlacements($data['placements']);
+            } else {
+                unset($data['placements']);
+            }
         }
         $settings->update($data);
 
