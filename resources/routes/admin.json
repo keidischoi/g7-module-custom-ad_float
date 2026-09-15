@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "routes": [
+    {
+      "path": "*/admin/ad-float",
+      "layout": "admin_ad_float",
+      "auth_required": true,
+      "meta": {
+        "title": "$t:custom-ad_float.admin.title"
+      }
+    }
+  ]
+}

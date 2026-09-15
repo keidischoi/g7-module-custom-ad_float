@@ -1,0 +1,32 @@
+{
+  "_comment": "Mount + JS for floating ads on all _user_base pages. JS fetches payload and self-hides when disabled/empty/home_only.",
+  "target_layout": "_user_base",
+  "priority": 88,
+  "data_sources": [],
+  "injections": [
+    {
+      "target_id": "main_content_area",
+      "position": "append_child",
+      "components": [
+        {
+          "id": "g7_custom_ad_float_mount",
+          "type": "basic",
+          "name": "Div",
+          "props": {
+            "className": "g7-custom-ad-float-mount",
+            "data-caf-role": "mount"
+          },
+          "children": []
+        },
+        {
+          "id": "g7_custom_ad_float_script",
+          "type": "basic",
+          "name": "Script",
+          "props": {
+            "src": "/api/modules/custom-ad_float/assets/ad-float.js?v=0.1.9"
+          }
+        }
+      ]
+    }
+  ]
+}
