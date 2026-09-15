@@ -101,21 +101,6 @@
     return v === 'top' || v === 'bottom' ? v : 'middle';
   }
 
-  var CONTENT_SELECTORS = [
-    '#main_content',
-    '#main_content_area [id="main_content"]',
-    '[id="main_content"]',
-    '[id*="main_content"]',
-    '[id*="main-content"]',
-    '#container',
-    '#wrapper',
-    '#content',
-    'main',
-    '#user_layout_root .container',
-    '.container',
-    '[class*="container"]'
-  ];
-
   function isAdNode(el) {
     if (!el) return true;
     if (el.id === ROOT_ID || el.id === MOUNT_ID) return true;
@@ -125,97 +110,136 @@
     return false;
   }
 
-  function isUsableBox(el) {
+  function classNameOf(el) {
+    if (!el || !el.className) return '';
+    return el.className.toString ? el.className.toString() : String(el.className);
+  }
+
+  function viewportWidth() {
+    return window.innerWidth || document.documentElement.clientWidth || 0;
+  }
+
+  /**
+   * A content column must be narrower than the viewport so side ads can sit
+   * in the leftover gutters. Full-bleed wrappers (#main_content_area, home
+   * slot Containers with only px-*) must never win — using them + clamp is
+   * what pins ads to the viewport walls.
+   */
+  function isContentColumn(el) {
     if (!el || isAdNode(el)) return false;
     var tag = (el.tagName || '').toLowerCase();
-    if (tag === 'header' || tag === 'footer' || tag === 'nav' || tag === 'script' || tag === 'style' || tag === 'svg') {
+    if (tag === 'header' || tag === 'footer' || tag === 'nav' || tag === 'script' || tag === 'style' || tag === 'svg' || tag === 'html' || tag === 'body') {
       return false;
     }
     var id = el.id || '';
+    var cls = classNameOf(el);
     if (/^(header|footer|nav|mobile_|desktop_header|user_global_)/i.test(id) && !/content/i.test(id)) {
+      return false;
+    }
+    if (/\b(fixed|sticky)\b/.test(cls) && !/content|container|max-w-/i.test(cls + id)) {
       return false;
     }
     var rect;
     try {
       rect = el.getBoundingClientRect();
-    } catch (e2) {
-      return false;
-    }
-    return rect.width >= 200 && rect.height >= 40;
-  }
-
-  function isFullBleed(el) {
-    var vw = window.innerWidth || 0;
-    if (!vw) return false;
-    try {
-      return el.getBoundingClientRect().width >= vw - 16;
     } catch (e) {
       return false;
     }
+    var vw = viewportWidth();
+    if (rect.width < 280 || rect.height < 40) return false;
+    if (vw > 0 && rect.width >= vw - 32) return false;
+    return true;
   }
 
-  function pickCenteredChild(root) {
-    if (!root || !root.querySelectorAll) return null;
-    var nodes;
+  function columnScore(el) {
+    if (!isContentColumn(el)) return 0;
+    var vw = viewportWidth();
+    var rect = el.getBoundingClientRect();
+    var style;
     try {
-      nodes = root.querySelectorAll('div, main, section, article');
+      style = window.getComputedStyle(el);
     } catch (e) {
-      return null;
+      return 0;
     }
-    var vw = window.innerWidth || 0;
-    var best = null;
-    var bestScore = 0;
-    var limit = Math.min(nodes.length, 400);
-    for (var i = 0; i < limit; i++) {
-      var el = nodes[i];
-      if (!isUsableBox(el) || isFullBleed(el)) continue;
-      var rect = el.getBoundingClientRect();
-      var style;
-      try {
-        style = window.getComputedStyle(el);
-      } catch (e2) {
-        continue;
-      }
-      var maxW = style.maxWidth;
-      var hasMax = maxW && maxW !== 'none' && parseFloat(maxW) > 0;
-      var mxAuto = style.marginLeft === 'auto' && style.marginRight === 'auto';
-      var centered = vw > 0 && Math.abs((vw - rect.width) / 2 - rect.left) < 32;
-      var id = el.id || '';
-      var cls = (el.className && el.className.toString) ? el.className.toString() : '';
-      var score = rect.width + Math.min(rect.height, 800) * 0.15;
-      if (hasMax) score += 400;
-      if (mxAuto || centered) score += 300;
-      if (/content|container|wrapper/i.test(id) || /max-w-|container|mx-auto/i.test(cls)) score += 500;
-      if (id === 'main_content') score += 1000;
-      if (score > bestScore) {
-        bestScore = score;
-        best = el;
-      }
-    }
-    return best;
+    var cls = classNameOf(el);
+    var id = el.id || '';
+    var score = rect.width;
+    var maxW = style.maxWidth;
+    if (maxW && maxW !== 'none' && parseFloat(maxW) > 0) score += 900;
+    if (/max-w-7xl/.test(cls)) score += 2500;
+    if (/max-w-6xl|max-w-5xl|max-w-4xl|max-w-screen/.test(cls)) score += 1800;
+    if (/max-w-/.test(cls)) score += 500;
+    if (/mx-auto/.test(cls) || (style.marginLeft === 'auto' && style.marginRight === 'auto')) score += 500;
+    if (vw > 0 && Math.abs((vw - rect.width) / 2 - rect.left) < 48) score += 400;
+    if (id === 'main_content') score += 2000;
+    else if (/main_content|main-content/.test(id)) score += 1200;
+    if (/header|footer|drawer|overlay|toast/i.test(id + ' ' + cls) && !/content/i.test(id)) score -= 2500;
+    try {
+      if (el.closest && el.closest('#main_content, #main_content_area, #user_layout_root')) score += 250;
+    } catch (e2) {}
+    return score;
   }
 
-  function considerBox(el) {
-    if (!isUsableBox(el)) return null;
-    if (isFullBleed(el)) {
-      return pickCenteredChild(el) || el;
-    }
-    return el;
+  function collectScope(el, into) {
+    if (!el || into.indexOf(el) !== -1) return;
+    into.push(el);
   }
 
   function findContentBox() {
-    var i, el, found;
-    for (i = 0; i < CONTENT_SELECTORS.length; i++) {
+    var scopes = [];
+    var selectors = [
+      '#main_content',
+      '[id="main_content"]',
+      '[data-id="main_content"]',
+      '[data-layout-id="main_content"]',
+      '#main_content_area',
+      '[id*="main_content"]',
+      '[id*="main-content"]',
+      '#user_layout_root',
+      'main'
+    ];
+    var i;
+    for (i = 0; i < selectors.length; i++) {
       try {
-        el = document.querySelector(CONTENT_SELECTORS[i]);
-      } catch (e) {
-        el = null;
-      }
-      found = considerBox(el);
-      if (found) return found;
+        collectScope(document.querySelector(selectors[i]), scopes);
+      } catch (e) {}
     }
-    var root = document.getElementById('user_layout_root') || document.body;
-    return pickCenteredChild(root);
+    if (scopes.length === 0) {
+      collectScope(document.body, scopes);
+    }
+
+    var candidates = [];
+    function add(el) {
+      if (!el || isAdNode(el) || candidates.indexOf(el) !== -1) return;
+      candidates.push(el);
+    }
+
+    var classSel = '[class*="max-w-7xl"],[class*="max-w-6xl"],[class*="max-w-5xl"],[class*="max-w-4xl"],[class*="max-w-screen"],[class*="mx-auto"]';
+    for (i = 0; i < scopes.length; i++) {
+      add(scopes[i]);
+      try {
+        var tagged = scopes[i].querySelectorAll(classSel);
+        var t;
+        for (t = 0; t < tagged.length && t < 80; t++) add(tagged[t]);
+      } catch (e2) {}
+      try {
+        var nodes = scopes[i].querySelectorAll('div, main, section, article, [class*="container"]');
+        var n = Math.min(nodes.length, 220);
+        var j;
+        for (j = 0; j < n; j++) add(nodes[j]);
+      } catch (e3) {}
+    }
+
+    var best = null;
+    var bestScore = 0;
+    for (i = 0; i < candidates.length; i++) {
+      var score = columnScore(candidates[i]);
+      if (score > bestScore) {
+        bestScore = score;
+        best = candidates[i];
+      }
+    }
+    return bestScore > 0 ? best : null;
   }
 
   function clamp(n, min, max) {
@@ -229,52 +253,61 @@
     var valign = verticalAlign(config.vertical_align);
     var voff = num(config.vertical_offset_px, 24);
     var adW = root.offsetWidth || Math.max(80, num(config.width_px, 180));
-    var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+    var vw = viewportWidth();
 
-    root.style.left = '';
-    root.style.right = '';
     root.style.top = '';
     root.style.bottom = '';
     root.style.transform = '';
+    root.style.removeProperty('left');
+    root.style.removeProperty('right');
 
     if (pos === 'top' || pos === 'bottom') {
       root.style.left = '50%';
+      root.style.right = 'auto';
       root.style.transform = 'translateX(-50%)';
       if (pos === 'top') root.style.top = gap + 'px';
       else root.style.bottom = gap + 'px';
+      root.removeAttribute('data-caf-box');
       return;
     }
 
     if (valign === 'top') {
-      root.style.top = Math.max(0, voff) + 'px';
+      root.style.setProperty('top', Math.max(0, voff) + 'px', 'important');
+      root.style.setProperty('bottom', 'auto', 'important');
+      root.style.setProperty('transform', 'none', 'important');
     } else if (valign === 'bottom') {
-      root.style.bottom = Math.max(0, voff) + 'px';
-    } else if (voff) {
-      root.style.top = '50%';
-      root.style.transform = 'translateY(calc(-50% + ' + voff + 'px))';
+      root.style.setProperty('bottom', Math.max(0, voff) + 'px', 'important');
+      root.style.setProperty('top', 'auto', 'important');
+      root.style.setProperty('transform', 'none', 'important');
     } else {
-      root.style.top = '50%';
-      root.style.transform = 'translateY(-50%)';
+      root.style.setProperty('top', '50%', 'important');
+      root.style.setProperty('bottom', 'auto', 'important');
+      root.style.setProperty('transform', voff
+        ? 'translateY(calc(-50% + ' + voff + 'px))'
+        : 'translateY(-50%)', 'important');
     }
 
     var box = findContentBox();
     var leftPx;
     if (box) {
       var rect = box.getBoundingClientRect();
+      root.setAttribute('data-caf-box', box.id || box.className || 'column');
+      // Outside the content box: left ad’s right edge at rect.left - gap,
+      // right ad’s left edge at rect.right + gap. getBoundingClientRect is
+      // viewport coords, matching position:fixed.
       if (pos === 'left') {
         leftPx = rect.left - gap - adW;
       } else {
         leftPx = rect.right + gap;
       }
-    } else if (pos === 'left') {
-      leftPx = gap;
     } else {
-      leftPx = vw - gap - adW;
+      root.setAttribute('data-caf-box', 'viewport');
+      leftPx = pos === 'left' ? gap : (vw - gap - adW);
     }
 
     leftPx = clamp(leftPx, 0, Math.max(0, vw - adW));
-    root.style.left = Math.round(leftPx) + 'px';
-    root.style.right = 'auto';
+    root.style.setProperty('left', Math.round(leftPx) + 'px', 'important');
+    root.style.setProperty('right', 'auto', 'important');
   }
 
   function watchPlacement(root, config) {
@@ -288,8 +321,8 @@
     }
     applyPlacement(root, config);
     window.addEventListener('resize', schedule);
-    window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('orientationchange', schedule);
+    window.addEventListener('scroll', schedule, { passive: true });
     if (window.ResizeObserver) {
       try {
         var ro = new ResizeObserver(schedule);
@@ -298,7 +331,14 @@
         if (box) ro.observe(box);
       } catch (e) {}
     }
-    [100, 300, 1000, 3000].forEach(function (ms) {
+    if (window.MutationObserver && document.body) {
+      try {
+        var mo = new MutationObserver(schedule);
+        mo.observe(document.body, { childList: true, subtree: true });
+        window.setTimeout(function () { try { mo.disconnect(); } catch (e2) {} }, 5000);
+      } catch (e3) {}
+    }
+    [50, 150, 400, 1000, 2500].forEach(function (ms) {
       window.setTimeout(schedule, ms);
     });
   }
@@ -310,7 +350,7 @@
     style.textContent = [
       '#g7-custom-ad-float{--g7-ad-width:180px;--g7-ad-height:180px;--g7-ad-offset:24px;--g7-ad-v-offset:24px;--g7-ad-z:9990;--g7-ad-radius:10px;position:fixed;z-index:var(--g7-ad-z);box-sizing:border-box;display:none;font-family:inherit}',
       '#g7-custom-ad-float.is-ready{display:block}',
-      '#g7-custom-ad-float.is-left,#g7-custom-ad-float.is-right{left:var(--g7-ad-offset)}',
+      '#g7-custom-ad-float.is-left,#g7-custom-ad-float.is-right{left:auto;right:auto}',
       '#g7-custom-ad-float.is-v-middle{top:50%;transform:translateY(calc(-50% + var(--g7-ad-v-offset, 0px)))}',
       '#g7-custom-ad-float.is-v-top{top:var(--g7-ad-v-offset, 24px)}',
       '#g7-custom-ad-float.is-v-bottom{bottom:var(--g7-ad-v-offset, 24px);top:auto}',

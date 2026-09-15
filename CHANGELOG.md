@@ -1,7 +1,7 @@
 # Changelog
 
 ## 0.1.13
-- Left/right ads align to the **main content box** (not the viewport): `#main_content`, `#main_content_area`, `[id*=main_content]`, `.container`, then a max-width centered column under `user_layout_root`. Viewport fallback if none is found.
+- Left/right ads align to the **main content column** via `getBoundingClientRect()` (not `left/right: var(--g7-ad-offset)` viewport walls). Finder prefers `#main_content` / `max-w-7xl` / centered max-width under `user_layout_root` and **never** treats a full-bleed wrapper as the box (that clamp looked like viewport walls). Gap (`offset_px`) is **outside** the column. Recompute on resize/orientation/scroll (rAF). `left`/`right` are set with `!important` so leftover CSS cannot pin to the viewport.
 - `offset_px` is the horizontal gap from the content box edge for left/right (admin label: 본문 박스 좌우 여백). Top/bottom still use it as viewport inset.
 - New settings `vertical_align` (`top` | `middle` | `bottom`, default `middle`) and `vertical_offset_px` (default 24) for left/right ads. Top = `top: px`; middle = center plus optional px nudge (positive = down); bottom = `bottom: px`.
 - Placement updates on resize/scroll (rAF) and ResizeObserver; ads are clamped on-screen if the content box is flush or wider than the viewport.
