@@ -1,0 +1,115 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {
+    require dirname(__DIR__).'/src/Support/AdminPayload.php';
+
+    use Modules\Custom\AdFloat\Support\AdminPayload;
+
+    $failed = 0;
+    $passed = 0;
+
+    function expect(string $label, mixed $actual, mixed $expected): void
+    {
+        global $failed, $passed;
+        if ($actual === $expected) {
+            $passed++;
+            echo "ok  {$label}\n";
+
+            return;
+        }
+        $failed++;
+        echo "FAIL {$label}\n  expected ".json_encode($expected)."\n  actual   ".json_encode($actual)."\n";
+    }
+
+    $tueNoon = new DateTimeImmutable('2026-09-15 12:00:00'); // Tuesday = 2
+
+    $left = [
+        'enabled' => true,
+        'position' => 'left',
+        'item_ids' => [1, 2],
+        'weekdays' => [],
+        'start_at' => '2026-09-01T00:00:00',
+        'end_at' => '2026-09-30T23:59:59',
+        'width_px' => 120,
+    ];
+    $right = [
+        'enabled' => true,
+        'position' => 'right',
+        'item_ids' => [3],
+        'weekdays' => [],
+        'start_at' => '2026-09-01T00:00:00',
+        'end_at' => '2026-09-30T23:59:59',
+        'width_px' => 200,
+    ];
+    $leftLater = [
+        'enabled' => true,
+        'position' => 'left',
+        'item_ids' => [2, 9],
+        'weekdays' => [],
+        'start_at' => '2026-09-01T00:00:00',
+        'end_at' => '2026-09-30T23:59:59',
+        'width_px' => 999,
+    ];
+    $disabled = [
+        'enabled' => false,
+        'position' => 'top',
+        'item_ids' => [8],
+        'weekdays' => [],
+        'start_at' => '2026-09-01T00:00:00',
+        'end_at' => '2026-09-30T23:59:59',
+    ];
+    $weekdayMismatch = [
+        'enabled' => true,
+        'position' => 'bottom',
+        'item_ids' => [7],
+        'weekdays' => [0], // Sunday only
+        'start_at' => '2026-09-01T00:00:00',
+        'end_at' => '2026-09-30T23:59:59',
+    ];
+    $future = [
+        'enabled' => true,
+        'position' => 'top',
+        'item_ids' => [6],
+        'weekdays' => [],
+        'start_at' => '2026-12-01T00:00:00',
+        'end_at' => '2026-12-31T23:59:59',
+    ];
+
+    $matches = AdminPayload::matchingSchedules(
+        [$left, $disabled, $right, $weekdayMismatch, $future, $leftLater],
+        $tueNoon
+    );
+    expect('matches left+right+leftLater only', array_column($matches, 'position'), ['left', 'right', 'left']);
+    expect('first matching is left', (AdminPayload::firstMatchingSchedule([$left, $right], $tueNoon)['position'] ?? null), 'left');
+    expect('no match when all future', AdminPayload::matchingSchedules([$future], $tueNoon), []);
+
+    $base = array_merge(AdminPayload::visualDefaults(), [
+        'enabled' => true,
+        'home_only' => true,
+        'position' => 'right',
+        'close_cookie_key' => 'g7_custom_ad_float_closed',
+    ]);
+
+    $windows = AdminPayload::windowsFromMatchingSchedules($matches, $base);
+    expect('one window per position', array_column($windows, 'id'), ['left', 'right']);
+    expect('left visuals from first left row', $windows[0]['settings']['width_px'] ?? null, 120);
+    expect('left items merged unique', $windows[0]['item_ids'], [1, 2, 9]);
+    expect('right keeps own items', $windows[1]['item_ids'], [3]);
+    expect('right width from right row', $windows[1]['settings']['width_px'] ?? null, 200);
+
+    $emptyUnion = AdminPayload::windowsFromMatchingSchedules([
+        ['enabled' => true, 'position' => 'left', 'item_ids' => [1], 'weekdays' => []],
+        ['enabled' => true, 'position' => 'left', 'item_ids' => [], 'weekdays' => []],
+    ], $base);
+    expect('empty item_ids means all ads at that position', $emptyUnion[0]['item_ids'], []);
+
+    $inherit = AdminPayload::windowsFromMatchingSchedules([
+        ['enabled' => true, 'item_ids' => [4], 'weekdays' => []],
+    ], $base);
+    expect('missing position inherits base', $inherit[0]['id'] ?? null, 'right');
+
+    echo "\n{$passed} passed, {$failed} failed\n";
+    exit($failed === 0 ? 0 : 1);
+}

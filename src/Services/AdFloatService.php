@@ -15,39 +15,67 @@ class AdFloatService
     public function payload(): array
     {
         $row = AdFloatSetting::current();
-        $resolved = $row->resolvePublicSettings(now());
-        $settings = $resolved['settings'];
-
-        if (! empty($resolved['hide']) || empty($settings['enabled'])) {
-            return [
-                'settings' => ['enabled' => false],
-                'items' => [],
-                'windows' => [],
-            ];
+        $base = $row->toPublicSettingsArray();
+        if (empty($base['enabled'])) {
+            return $this->emptyPayload();
         }
 
-        $allowedIds = $resolved['item_ids'] ?? [];
         $allItems = $this->orderItemsForCarousel(
             AdFloatItem::query()->where('enabled', true)->orderBy('sort_order')->orderBy('id')->get()
         );
-        if (is_array($allowedIds) && $allowedIds !== []) {
-            $allow = array_fill_keys(array_map('intval', $allowedIds), true);
-            $allItems = $allItems->filter(fn (AdFloatItem $item) => isset($allow[(int) $item->id]))->values();
+
+        if (! $row->schedulesEnabled()) {
+            return $this->payloadFromWindows([
+                $this->windowFromItems('default', $base, $allItems),
+            ]);
         }
 
-        $placements = $row->normalizedPlacements();
-        // Reservation visuals would force every window to one position. With
-        // placements, schedule match only gates which items are allowed.
-        $windowBase = $placements === [] ? $settings : $row->toPublicSettingsArray();
-        $windowBase['enabled'] = true;
+        $schedules = AdFloatSetting::hasSchedulesColumn()
+            ? AdminPayload::normalizeSchedules($row->schedules)
+            : [];
+        $matches = AdminPayload::matchingSchedules($schedules, now());
+        if ($matches === []) {
+            return $this->emptyPayload();
+        }
 
-        $windows = $this->payloadWindows($placements, $windowBase, $allItems);
+        $windows = [];
+        foreach (AdminPayload::windowsFromMatchingSchedules($matches, $base) as $group) {
+            $items = $allItems;
+            $ids = $group['item_ids'] ?? [];
+            if (is_array($ids) && $ids !== []) {
+                $allow = array_fill_keys(array_map('intval', $ids), true);
+                $items = $items->filter(fn (AdFloatItem $item) => isset($allow[(int) $item->id]))->values();
+            }
+            $window = $this->windowFromItems((string) $group['id'], $group['settings'], $items);
+            if ($window['items'] === []) {
+                continue;
+            }
+            $windows[] = $window;
+        }
+
+        return $this->payloadFromWindows($windows);
+    }
+
+    /**
+     * @return array{settings:array<string,mixed>,items:array<int, mixed>,windows:array<int, mixed>}
+     */
+    private function emptyPayload(): array
+    {
+        return [
+            'settings' => ['enabled' => false],
+            'items' => [],
+            'windows' => [],
+        ];
+    }
+
+    /**
+     * @param  array<int, array{id:string,settings:array<string,mixed>,items:array<int, array<string, mixed>>}>  $windows
+     * @return array{settings:array<string,mixed>,items:array<int, mixed>,windows:array<int, mixed>}
+     */
+    private function payloadFromWindows(array $windows): array
+    {
         if ($windows === []) {
-            return [
-                'settings' => ['enabled' => false],
-                'items' => [],
-                'windows' => [],
-            ];
+            return $this->emptyPayload();
         }
         $first = $windows[0];
 
@@ -59,51 +87,21 @@ class AdFloatService
     }
 
     /**
-     * @param  array<int, array<string, mixed>>  $placements
-     * @param  Collection<int, AdFloatItem>  $allItems
+     * @param  Collection<int, AdFloatItem>  $items
      * @param  array<string, mixed>  $settings
-     * @return array<int, array{id:string,settings:array<string,mixed>,items:array<int, array<string, mixed>>}>
+     * @return array{id:string,settings:array<string,mixed>,items:array<int, array<string, mixed>>}
      */
-    private function payloadWindows(array $placements, array $settings, Collection $allItems): array
+    private function windowFromItems(string $id, array $settings, Collection $items): array
     {
-        if ($placements === []) {
-            $items = $allItems->take(max(1, (int) ($settings['max_items'] ?? 20)));
+        $settings['enabled'] = true;
+        $items = $this->orderItemsForCarousel($items)
+            ->take(max(1, (int) ($settings['max_items'] ?? 20)));
 
-            return [[
-                'id' => 'default',
-                'settings' => $settings,
-                'items' => $items->map(fn (AdFloatItem $item) => $this->publicItemArray($item))->values()->all(),
-            ]];
-        }
-
-        $windows = [];
-        foreach ($placements as $placement) {
-            if (empty($placement['enabled'])) {
-                continue;
-            }
-            $windowSettings = AdminPayload::overlayVisual($settings, $placement);
-            $windowSettings['enabled'] = true;
-            $windowSettings['home_only'] = (bool) ($settings['home_only'] ?? true);
-            $windowSettings['close_cookie_key'] = (string) ($settings['close_cookie_key'] ?? AdFloatSetting::DEFAULT_CLOSE_COOKIE_KEY);
-            $ids = $placement['item_ids'] ?? [];
-            $items = $allItems;
-            if (is_array($ids) && $ids !== []) {
-                $allow = array_fill_keys(array_map('intval', $ids), true);
-                $items = $items->filter(fn (AdFloatItem $item) => isset($allow[(int) $item->id]))->values();
-            }
-            $items = $this->orderItemsForCarousel($items)
-                ->take(max(1, (int) ($windowSettings['max_items'] ?? 20)));
-            if ($items->isEmpty()) {
-                continue;
-            }
-            $windows[] = [
-                'id' => (string) ($placement['id'] ?? 'p'.(count($windows) + 1)),
-                'settings' => $windowSettings,
-                'items' => $items->map(fn (AdFloatItem $item) => $this->publicItemArray($item))->values()->all(),
-            ];
-        }
-
-        return $windows;
+        return [
+            'id' => $id,
+            'settings' => $settings,
+            'items' => $items->map(fn (AdFloatItem $item) => $this->publicItemArray($item))->values()->all(),
+        ];
     }
 
     /**
@@ -167,13 +165,6 @@ class AdFloatService
             $ends = array_values(array_filter(array_column($schedules, 'end_at')));
             $data['start_at'] = $starts[0] ?? null;
             $data['end_at'] = $ends !== [] ? $ends[count($ends) - 1] : null;
-        }
-        if (array_key_exists('placements', $data)) {
-            if (AdFloatSetting::hasPlacementsColumn()) {
-                $data['placements'] = AdminPayload::normalizePlacements($data['placements']);
-            } else {
-                unset($data['placements']);
-            }
         }
         $settings->update($data);
 

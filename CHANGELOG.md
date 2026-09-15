@@ -1,11 +1,11 @@
 # Changelog
 
 ## 0.1.18
-- Multiple floating **광고창** at once via `placements` JSON on settings (migration `2026_09_15_000008`, max 8). Empty `placements` keeps the legacy single-window payload from root settings + all enabled items.
-- Admin section 「광고창」: enable toggle, position/visual fields, carousel options, per-window ad multi-select, remove, 「+ 광고창 추가」 (copies 기본 설정 defaults).
-- Public payload `windows: [{ id, settings, items }]`. Front JS mounts `g7-custom-ad-float-{id}` per window. Close cookie is `close_cookie_key + '_' + id` (legacy `default` window still uses the unsuffixed key).
-- Reservation ON still matches schedule for which items may show; each placement then filters by its `item_ids` (empty = all schedule-allowed items). Placement visuals are used so windows are not collapsed to the reservation’s single position.
-- Combine/carousel groups still apply inside each window’s item list. Stats remain per `item_id` + page.
+- When **예약 사용 ON**, apply **every** matching reservation (not only the first). Each distinct `position` mounts its own float root (`g7-custom-ad-float-{left|right|top|bottom}`).
+- Matching rows that share a position merge into **one** carousel: first row’s visuals, union of `item_ids` (empty = all enabled ads).
+- **예약 사용 OFF** stays a single window from 기본 설정. Close cookie is per-position (`close_cookie_key + '_' + position`); the legacy `default` window keeps the unsuffixed key.
+- Admin hint under 예약: 「같은 시간대에 위치만 다른 예약을 여러 개 두면 동시에 여러 곳에 표시됩니다.」
+- Payload `windows: [{ id, settings, items }]` plus first window as `settings`/`items` for old JS. Combine/carousel and stats (per `item_id` + page) unchanged.
 
 ## 0.1.17
 - Admin labels: `show_arrows` → 「슬라이딩 버튼」 (hint: 이전/다음 화살표 표시), `show_dots` → 「DOT 표시」 (hint: 캐러셀 인디케이터 점). Grouped with **자동재생** as Toggle controls in 기본 설정 and per-reservation rows.

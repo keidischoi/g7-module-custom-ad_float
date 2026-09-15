@@ -37,7 +37,6 @@ return new class extends Migration
                 $table->timestamp('end_at')->nullable();
                 $table->json('schedules')->nullable();
                 $table->boolean('schedules_enabled')->default(false);
-                $table->json('placements')->nullable();
                 $table->timestamps();
             });
         }
