@@ -105,7 +105,7 @@
     "delete_success": "Deleted.",
     "edit_loaded": "Loaded the selected ad into the form.",
     "image_url_hint": "Enter a public image URL (https://... or /storage/...).",
-    "image_file_hint": "Choose one or more jpg, png, gif, or webp files (max 10MB each).",
+    "image_file_hint": "Drop or choose jpg, png, gif, or webp in the upload box (up to 10 files, 10MB each).",
     "source_hint": "Choose either file upload or an image URL. Only one applies.",
     "reset_closed_success": "Visitor close records were invalidated, so ads will show again.",
     "reset_closed_hint": "Close state is stored per browser in a cookie and localStorage. This button changes the cookie key so ads show again for everyone.",
@@ -129,6 +129,7 @@
     "show_arrows_hint": "Previous/next arrows",
     "show_dots_hint": "Carousel indicator dots",
     "show_close_hint": "Show the ad close (×) control",
+    "show_close_global_hint": "The X button follows default settings. Reservations do not override it.",
     "stats": {
       "title": "Floating ad stats",
       "description": "Impressions and clicks by ad, by page, and by ad × page.",

@@ -241,7 +241,7 @@ class AdminPayload
         if (is_string($source) && in_array($source, [self::SOURCE_UPLOAD, self::SOURCE_URL], true)) {
             return $source;
         }
-        if ($request->hasFile('image')) {
+        if (self::collectUploadedFiles($request) !== []) {
             return self::SOURCE_UPLOAD;
         }
         if (! self::isBlank($request->input('image_url'))) {
@@ -252,13 +252,105 @@ class AdminPayload
     }
 
     /**
+     * G7 FileUploader / file inputs may send empty strings or FileList junk as
+     * `image` / `images`. Drop those so Laravel `image` rules never see them.
+     */
+    public static function dropNonFileUploadFields(Request $request): void
+    {
+        foreach (['image', 'images', 'file', 'files', 'FileUploader'] as $key) {
+            if (self::hasValidUpload($request, $key)) {
+                continue;
+            }
+            if ($request->exists($key) || (isset($request->files) && $request->files->has($key))) {
+                if (isset($request->files)) {
+                    $request->files->remove($key);
+                }
+                $request->merge([$key => null]);
+            }
+        }
+    }
+
+    /**
+     * If files were posted under images[] / file / FileUploader, copy the first
+     * valid file onto `image` so older single-file paths still work.
+     *
+     * @param  array<int, \Illuminate\Http\UploadedFile>  $files
+     */
+    public static function assignPrimaryUpload(Request $request, array $files): void
+    {
+        if ($files === []) {
+            return;
+        }
+        $current = $request->file('image');
+        if ($current instanceof \Illuminate\Http\UploadedFile && $current->isValid()) {
+            return;
+        }
+        if (isset($request->files)) {
+            $request->files->set('image', $files[0]);
+        }
+    }
+
+    /**
+     * Collect image files from G7 FileUploader and plain file inputs.
+     *
+     * @return array<int, \Illuminate\Http\UploadedFile>
+     */
+    public static function collectUploadedFiles(Request $request): array
+    {
+        $out = [];
+        $seen = [];
+        $add = function ($file) use (&$out, &$seen) {
+            if (! $file instanceof \Illuminate\Http\UploadedFile || ! $file->isValid()) {
+                return;
+            }
+            $token = $file->getRealPath() ?: ($file->getClientOriginalName().':'.$file->getSize());
+            if (isset($seen[$token])) {
+                return;
+            }
+            $seen[$token] = true;
+            $out[] = $file;
+        };
+
+        $all = method_exists($request, 'allFiles') ? $request->allFiles() : [];
+        foreach ($all as $key => $file) {
+            $name = is_string($key) ? $key : '';
+            if ($name !== '' && ! preg_match('/^(image|images|file|files|FileUploader)/i', $name)) {
+                continue;
+            }
+            if (is_array($file)) {
+                foreach ($file as $one) {
+                    $add($one);
+                }
+            } else {
+                $add($file);
+            }
+        }
+
+        return $out;
+    }
+
+    private static function hasValidUpload(Request $request, string $key): bool
+    {
+        if (! $request->hasFile($key)) {
+            return false;
+        }
+        $file = $request->file($key);
+        $list = is_array($file) ? $file : [$file];
+        foreach ($list as $one) {
+            if ($one instanceof \Illuminate\Http\UploadedFile && $one->isValid()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public static function itemRules(string $source, bool $isCreate): array
     {
-        $imageRule = $source === self::SOURCE_UPLOAD && $isCreate
-            ? ['required', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240']
-            : ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'];
+        $imageRule = ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'];
 
         $imageUrlRule = $source === self::SOURCE_URL && $isCreate
             ? ['required', 'string', 'max:1000']
@@ -275,7 +367,7 @@ class AdminPayload
             'image_source' => ['nullable', 'in:upload,url'],
             'image_url' => $imageUrlRule,
             'image' => $imageRule,
-            'images' => ['nullable', 'array', 'max:30'],
+            'images' => ['nullable'],
             'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'],
             'image_urls' => ['nullable', 'array', 'max:30'],
             'image_urls.*' => ['nullable', 'string', 'max:1000'],
@@ -608,7 +700,13 @@ class AdminPayload
      */
     public static function overlayVisual(array $base, array $row): array
     {
-        return self::coerceSettingFlags(array_merge($base, self::extractVisual($row, false)));
+        $merged = self::coerceSettingFlags(array_merge($base, self::extractVisual($row, false)));
+        // X button is global (기본 설정). Reservation rows must not override it.
+        if (array_key_exists('show_close', $base)) {
+            $merged['show_close'] = self::toBool($base['show_close'], true);
+        }
+
+        return $merged;
     }
 
     /**

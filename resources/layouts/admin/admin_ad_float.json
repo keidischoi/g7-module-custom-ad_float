@@ -202,7 +202,7 @@
                                 "open_new_tab": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true' ? 1 : 0}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
                                 "schedules_enabled": "{{_local.form?.schedules_enabled ? 1 : 0}}",
-                                "schedules": "{{_local.form?.schedules ?? []}}"
+                                "schedules": "{{_local.form.schedules || []}}"
                               }
                             },
                             "onSuccess": [
@@ -1533,7 +1533,7 @@
                 "type": "basic",
                 "name": "H2",
                 "props": {
-                  "className": "text-lg font-semibold mb-4"
+                  "className": "text-lg font-semibold mb-2"
                 },
                 "text": "$t:custom-ad_float.admin.sections.items"
               },
@@ -1661,25 +1661,26 @@
                     "text": "$t:custom-ad_float.admin.image_file_hint"
                   },
                   {
-                    "type": "basic",
-                    "name": "Input",
+                    "id": "caf_create_images_uploader",
+                    "type": "composite",
+                    "name": "FileUploader",
                     "props": {
-                      "type": "file",
-                      "name": "images",
-                      "accept": "image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp",
-                      "className": "input w-full",
-                      "autoBinding": false,
-                      "multiple": true
+                      "name": "FileUploader",
+                      "maxFiles": 10,
+                      "maxSize": 10,
+                      "accept": "image/jpeg,image/png,image/gif,image/webp,image/*",
+                      "autoUpload": false,
+                      "className": "mt-1"
                     },
                     "actions": [
                       {
-                        "type": "change",
+                        "type": "onFilesChange",
                         "handler": "setState",
                         "params": {
                           "target": "local",
-                          "create.image": "{{$event.target?.files?.[0] ?? $event}}",
-                          "create.images": "{{$event.target?.files ?? null}}",
-                          "create.image_count": "{{$event.target?.files?.length || 0}}"
+                          "create.image": "{{($event[0] && ($event[0].file || $event[0])) || null}}",
+                          "create.images": "{{($event || []).map(function(p) { return p.file || p; })}}",
+                          "create.image_count": "{{($event && $event.length) || 0}}"
                         }
                       }
                     ]
@@ -1753,7 +1754,7 @@
                       "type": "text",
                       "name": "image_url",
                       "className": "input w-full",
-                      "value": "{{_local.create?.image_url ?? ''}}",
+                      "value": "{{_local.create.image_url || ''}}",
                       "autoBinding": false
                     },
                     "actions": [
@@ -1794,7 +1795,7 @@
                       "className": "flex gap-2 mb-2"
                     },
                     "iteration": {
-                      "source": "{{_local.create?.extra_urls ?? []}}",
+                      "source": "{{_local.create.extra_urls || []}}",
                       "item_var": "urow",
                       "index_var": "uidx"
                     },
@@ -1806,7 +1807,7 @@
                           "type": "text",
                           "name": "extra_url_{{uidx}}",
                           "className": "input w-full",
-                          "value": "{{urow.url ?? ''}}",
+                      "value": "{{urow.url || ''}}",
                           "placeholder": "$t:custom-ad_float.admin.fields.image_url",
                           "autoBinding": false
                         },
@@ -2136,7 +2137,7 @@
                 "type": "basic",
                 "name": "Div",
                 "props": {
-                  "className": "flex flex-wrap justify-end gap-2 mt-4"
+                  "className": "flex flex-wrap justify-end gap-1.5 mt-2"
                 },
                 "children": [
                   {
@@ -2218,7 +2219,7 @@
                                 "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}",
                                 "enabled": 1,
                                 "combine": "{{_local.create?.combine ? 1 : 0}}",
-                                "extra_urls": "{{_local.create?.extra_urls ?? []}}"
+                                "extra_urls": "{{_local.create.extra_urls || []}}"
                               }
                             },
                             "onSuccess": [
@@ -2275,7 +2276,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "{{error.message}}"
+                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : (error.errors?.[0] || error.message || error.data?.message)}}"
                                 }
                               }
                             ]
@@ -2291,7 +2292,7 @@
                     "if": "{{!_local.editingId && _local.create?.source === 'upload'}}",
                     "props": {
                       "type": "button",
-                      "disabled": "{{_local.creating || !_local.create?.image}}",
+                      "disabled": "{{_local.creating || !(_local.create?.image || (_local.create?.image_count || 0) > 0)}}",
                       "className": "btn btn-primary disabled:opacity-50"
                     },
                     "text": "$t:custom-ad_float.admin.actions.create",
@@ -2315,16 +2316,16 @@
                               "method": "POST",
                               "body": {
                                 "source": "upload",
+                                "image_source": "upload",
                                 "image": "{{_local.create.image}}",
-                                "title": "{{_local.create?.title || ''}}",
-                                "alt_text": "{{_local.create?.alt_text || ''}}",
-                                "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
-                                "sort_order": "{{_local.create?.sort_order || 0}}",
-                                "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}",
+                                "title": "{{_local.create.title || ''}}",
+                                "alt_text": "{{_local.create.alt_text || ''}}",
+                                "target_url": "{{_local.create.target_url ? _local.create.target_url : undefined}}",
+                                "sort_order": "{{_local.create.sort_order || 0}}",
+                                "display_seconds": "{{_local.create.display_seconds ? _local.create.display_seconds : undefined}}",
                                 "enabled": 1,
-                                "images": "{{_local.create?.images}}",
-                                "extra_urls": "{{_local.create?.extra_urls ?? []}}",
-                                "combine": "{{_local.create?.combine ? 1 : 0}}"
+                                "images": "{{_local.create.images}}",
+                                "combine": "{{_local.create.combine ? 1 : 0}}"
                               },
                               "contentType": "multipart/form-data"
                             },
@@ -2382,7 +2383,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "{{error.message}}"
+                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : (error.errors?.[0] || error.message || error.data?.message)}}"
                                 }
                               }
                             ]
@@ -2484,7 +2485,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "{{error.message}}"
+                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : (error.errors?.[0] || error.message || error.data?.message)}}"
                                 }
                               }
                             ]
@@ -2524,20 +2525,13 @@
                               "method": "POST",
                               "body": {
                                 "source": "upload",
-                                "image": "{{_local.create?.image ? _local.create.image : undefined}}",
-                                "title": "{{_local.create?.title || ''}}",
-                                "alt_text": "{{_local.create?.alt_text || ''}}",
-                                "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
-                                "sort_order": "{{_local.create?.sort_order || 0}}",
-                                "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}",
-                                "images": null,
-                                "image_count": 0,
-                                "extra_urls": [
-                                  {
-                                    "url": ""
-                                  }
-                                ],
-                                "combine": false
+                                "image_source": "upload",
+                                "image": "{{_local.create.image ? _local.create.image : undefined}}",
+                                "title": "{{_local.create.title || ''}}",
+                                "alt_text": "{{_local.create.alt_text || ''}}",
+                                "target_url": "{{_local.create.target_url ? _local.create.target_url : undefined}}",
+                                "sort_order": "{{_local.create.sort_order || 0}}",
+                                "display_seconds": "{{_local.create.display_seconds ? _local.create.display_seconds : undefined}}"
                               },
                               "contentType": "multipart/form-data"
                             },
@@ -2595,7 +2589,7 @@
                                 "handler": "toast",
                                 "params": {
                                   "type": "error",
-                                  "message": "{{error.message}}"
+                                  "message": "{{(error.errors && error.errors.join) ? error.errors.join(' / ') : (error.errors?.[0] || error.message || error.data?.message)}}"
                                 }
                               }
                             ]
@@ -2610,7 +2604,7 @@
                 "type": "basic",
                 "name": "Div",
                 "props": {
-                  "className": "flex items-center justify-between mb-4"
+                  "className": "flex items-center justify-between mb-2"
                 },
                 "children": [
                   {
@@ -2663,7 +2657,7 @@
                 "name": "Div",
                 "if": "{{(items?.data?.data ?? []).length > 0}}",
                 "props": {
-                  "className": "flex flex-wrap items-center gap-2 mb-3"
+                  "className": "flex flex-wrap items-center gap-1.5 mb-2"
                 },
                 "children": [
                   {
@@ -2828,7 +2822,7 @@
                 "name": "Div",
                 "if": "{{(items?.data?.data ?? []).length > 0}}",
                 "props": {
-                  "className": "flex flex-col gap-3"
+                  "className": "flex flex-col gap-1.5"
                 },
                 "iteration": {
                   "source": "{{items?.data?.data ?? []}}",
@@ -2841,7 +2835,7 @@
                     "type": "basic",
                     "name": "Div",
                     "props": {
-                      "className": "p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-4"
+                      "className": "p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-3"
                     },
                     "children": [
                       {
@@ -4545,49 +4539,16 @@
                                             "type": "basic",
                                             "name": "Div",
                                             "props": {
-                                              "className": "flex items-center justify-between gap-2 py-1.5"
+                                              "className": "md:col-span-2 py-1.5"
                                             },
                                             "children": [
                                               {
                                                 "type": "basic",
-                                                "name": "Div",
-                                                "children": [
-                                                  {
-                                                    "type": "basic",
-                                                    "name": "Span",
-                                                    "props": {
-                                                      "className": "text-xs"
-                                                    },
-                                                    "text": "$t:custom-ad_float.admin.fields.show_close"
-                                                  },
-                                                  {
-                                                    "type": "basic",
-                                                    "name": "P",
-                                                    "props": {
-                                                      "className": "text-xs text-gray-500"
-                                                    },
-                                                    "text": "$t:custom-ad_float.admin.show_close_hint"
-                                                  }
-                                                ]
-                                              },
-                                              {
-                                                "type": "basic",
-                                                "name": "Toggle",
+                                                "name": "P",
                                                 "props": {
-                                                  "name": "sch_show_close_{{sidx}}",
-                                                  "autoBinding": false,
-                                                  "checked": "{{sch.show_close === true || sch.show_close === 1 || sch.show_close === '1' || sch.show_close === 'true'}}"
+                                                  "className": "text-xs text-gray-500"
                                                 },
-                                                "actions": [
-                                                  {
-                                                    "type": "change",
-                                                    "handler": "setState",
-                                                    "params": {
-                                                      "target": "local",
-                                                      "form.schedules.{{sidx}}.show_close": "{{$event.target.checked === true}}"
-                                                    }
-                                                  }
-                                                ]
+                                                "text": "$t:custom-ad_float.admin.show_close_global_hint"
                                               }
                                             ]
                                           },
@@ -4752,6 +4713,7 @@
                       {
                         "type": "basic",
                         "name": "Button",
+                        "id": "btn_add_schedule",
                         "props": {
                           "type": "button",
                           "className": "text-sm text-gray-600 hover:text-gray-900"
@@ -4763,7 +4725,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.schedules": "{{(_local.form?.schedules || []).concat([{id:'new',enabled:true,start_date:'',start_time:'',end_date:'',end_time:'',item_ids:[],d0:true,d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,_deleted:false,position:(_local.form?.position||'right'),direction:(_local.form?.direction||'horizontal'),interval_ms:(Number(_local.form?.interval_ms)||4000),width_px:(Number(_local.form?.width_px)||180),height_px:(Number(_local.form?.height_px)||180),radius_px:(Number(_local.form?.radius_px)||10),offset_px:(Number(_local.form?.offset_px)||24),vertical_align:(_local.form?.vertical_align||'middle'),vertical_offset_px:(Number(_local.form?.vertical_offset_px??24)),z_index:(Number(_local.form?.z_index)||9990),max_items:(Number(_local.form?.max_items)||20),mobile_mode:(_local.form?.mobile_mode||'hide'),autoplay:(_local.form?.autoplay===true||_local.form?.autoplay===1||_local.form?.autoplay==='1'||_local.form?.autoplay==='true'),show_arrows:(_local.form?.show_arrows===true||_local.form?.show_arrows===1||_local.form?.show_arrows==='1'||_local.form?.show_arrows==='true'),show_dots:(_local.form?.show_dots===true||_local.form?.show_dots===1||_local.form?.show_dots==='1'||_local.form?.show_dots==='true'),show_close:(_local.form?.show_close===true||_local.form?.show_close===1||_local.form?.show_close==='1'||_local.form?.show_close==='true'),pause_on_hover:(_local.form?.pause_on_hover===true||_local.form?.pause_on_hover===1||_local.form?.pause_on_hover==='1'||_local.form?.pause_on_hover==='true'),open_new_tab:(_local.form?.open_new_tab===true||_local.form?.open_new_tab===1||_local.form?.open_new_tab==='1'||_local.form?.open_new_tab==='true')}])}}"
+                              "form.schedules": "{{(_local.form.schedules || []).concat([{id: 's' + Date.now(), enabled: true, start_date: '', start_time: '', end_date: '', end_time: '', item_ids: [], d0: true, d1: true, d2: true, d3: true, d4: true, d5: true, d6: true, _deleted: false, position: (_local.form.position || 'right')}])}}"
                             }
                           }
                         ]
@@ -4831,7 +4793,7 @@
                                 "open_new_tab": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true' ? 1 : 0}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
                                 "schedules_enabled": "{{_local.form?.schedules_enabled ? 1 : 0}}",
-                                "schedules": "{{_local.form?.schedules ?? []}}"
+                                "schedules": "{{_local.form.schedules || []}}"
                               }
                             },
                             "onSuccess": [

@@ -34,7 +34,9 @@ class AdFloatItemController extends AdminBaseController
     {
         try {
             AdminPayload::nullifyEmpty($request, AdminPayload::itemNullableKeys());
-            $files = $this->uploadedImages($request);
+            AdminPayload::dropNonFileUploadFields($request);
+            $files = AdminPayload::collectUploadedFiles($request);
+            AdminPayload::assignPrimaryUpload($request, $files);
             $source = AdminPayload::resolveSource($request);
             $preview = $request->all();
             $urls = AdminPayload::collectImageUrls($preview);
@@ -139,59 +141,26 @@ class AdFloatItemController extends AdminBaseController
         return 'custom-ad_float::messages.items.'.$fallback;
     }
 
-    /**
-     * @return array<int, \Illuminate\Http\UploadedFile>
-     */
-    private function uploadedImages(Request $request): array
-    {
-        $out = [];
-        $seen = [];
-        $add = function ($file) use (&$out, &$seen) {
-            if (! $file instanceof \Illuminate\Http\UploadedFile) {
-                return;
-            }
-            $token = $file->getRealPath() ?: ($file->getClientOriginalName().':'.$file->getSize());
-            if (isset($seen[$token])) {
-                return;
-            }
-            $seen[$token] = true;
-            $out[] = $file;
-        };
-
-        foreach ($request->allFiles() as $key => $file) {
-            $name = is_string($key) ? $key : '';
-            if ($name !== 'image' && $name !== 'images' && ! str_starts_with($name, 'images')) {
-                continue;
-            }
-            if (is_array($file)) {
-                foreach ($file as $one) {
-                    $add($one);
-                }
-            } else {
-                $add($file);
-            }
-        }
-
-        return $out;
-    }
-
     public function update(Request $request, int $id): JsonResponse
     {
         try {
             $item = AdFloatItem::query()->findOrFail($id);
             AdminPayload::nullifyEmpty($request, AdminPayload::itemNullableKeys());
+            AdminPayload::dropNonFileUploadFields($request);
+            $files = AdminPayload::collectUploadedFiles($request);
+            AdminPayload::assignPrimaryUpload($request, $files);
             $source = AdminPayload::resolveSource($request, $item->resolvedSource());
             $data = $request->validate(AdminPayload::itemRules($source, false));
             $data['image_source'] = $source;
 
-            if ($source === AdminPayload::SOURCE_UPLOAD && ! $request->hasFile('image') && $item->resolvedSource() !== AdminPayload::SOURCE_UPLOAD) {
+            if ($source === AdminPayload::SOURCE_UPLOAD && $files === [] && $item->resolvedSource() !== AdminPayload::SOURCE_UPLOAD) {
                 return $this->error('custom-ad_float::messages.items.file_required', 422);
             }
             if ($source === AdminPayload::SOURCE_URL && empty($data['image_url']) && $item->resolvedSource() !== AdminPayload::SOURCE_URL) {
                 return $this->error('custom-ad_float::messages.items.url_required', 422);
             }
 
-            $item = $this->service->updateItem($item, $data, $request->file('image'));
+            $item = $this->service->updateItem($item, $data, $files[0] ?? $request->file('image'));
 
             return $this->success('custom-ad_float::messages.items.update_success', $item->toAdminArray());
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
