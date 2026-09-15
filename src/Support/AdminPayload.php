@@ -642,12 +642,18 @@ class AdminPayload
             $weekdays = self::normalizeWeekdays($row);
             $visual = self::extractVisual($row);
             $itemIds = self::normalizeItemIds($row);
+            $rawId = $row['id'] ?? null;
+            $hasId = is_string($rawId) ? trim($rawId) !== '' : ($rawId !== null && $rawId !== '');
             if ($start === null && $end === null && $weekdays === [] && $visual === [] && $itemIds === []) {
-                continue;
+                // Keep admin-created rows (id / enabled / position) so 예약 추가 survives save.
+                if (! $hasId && ! array_key_exists('enabled', $row) && empty($row['position'])) {
+                    continue;
+                }
             }
             $splitStart = self::splitDateTime($start);
             $splitEnd = self::splitDateTime($end);
             $out[] = array_merge($visual, [
+                'id' => $hasId ? (string) $rawId : ('s'.count($out)),
                 'enabled' => self::scheduleRowEnabled($row),
                 'start_at' => $start,
                 'end_at' => $end,

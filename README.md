@@ -48,6 +48,14 @@ php artisan cache:clear
 - **전체 다시 노출:** `/admin/ad-float` 기본 설정에서 **닫힘 상태 초기화** / **다시 보이게 하기**. 서버가 쿠키 키를 새 값으로 바꿔 예전 기록을 무효화합니다. (`POST /api/modules/custom-ad_float/admin/settings/reset-closed`)
 - **한 브라우저만 테스트:** 개발자 도구에서 해당 키의 쿠키와 localStorage를 지우면 됩니다. 방문자마다 수동으로 지울 필요는 없습니다.
 
+## 업그레이드 (0.1.22)
+
+```bash
+php artisan cache:clear
+```
+
+마이그레이션은 없습니다. 관리자 **예약**에서 아무 버튼이나 누르면 카드가 사라지던 문제와 「예약 추가」가 안 되던 문제를 고칩니다. 프론트 `ad-float.js` 캐시 쿼리는 `?v=0.1.22` 입니다.
+
 ## 업그레이드 (0.1.21)
 
 ```bash
@@ -145,4 +153,4 @@ php artisan cache:clear
 | identifier | `custom-ad_float` |
 | vendor | `custom` |
 | namespace | `Modules\\Custom\\AdFloat` |
-| version | `0.1.21` |
+| version | `0.1.22` |
