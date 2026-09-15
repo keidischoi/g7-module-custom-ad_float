@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Modules\Custom\AdFloat\Models\AdFloatItem;
 use Modules\Custom\AdFloat\Models\AdFloatSetting;
 use Modules\Custom\AdFloat\Support\AdminPayload;
+use Modules\Custom\AdFloat\Support\ImageUrl;
 
 class AdFloatService
 {
@@ -110,10 +111,12 @@ class AdFloatService
      */
     private function publicItemArray(AdFloatItem $item): array
     {
+        $url = $item->imageUrl();
         $row = [
             'id' => $item->id,
             'title' => $item->title,
-            'image_url' => $item->imageUrl(),
+            'image_url' => $url,
+            'download_url' => $url,
             'target_url' => $item->target_url,
             'alt_text' => $item->alt_text ?: $item->title,
             'display_seconds' => $item->display_seconds,
@@ -520,11 +523,21 @@ class AdFloatService
     private function deleteStoredImage(AdFloatItem $item): void
     {
         $path = (string) $item->image_path;
-        if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '//') || str_starts_with($path, '/')) {
+        if ($path === '' || ImageUrl::isRemoteUrl($path)) {
+            return;
+        }
+        $relative = ImageUrl::diskRelativePath($path);
+        if ($relative === null) {
+            if (str_starts_with(str_replace('\\', '/', $path), '/')) {
+                return;
+            }
+            $relative = ltrim(str_replace('\\', '/', $path), '/');
+        }
+        if (! ImageUrl::isSafePublicRelativePath($relative)) {
             return;
         }
         try {
-            Storage::disk('public')->delete($path);
+            Storage::disk('public')->delete($relative);
         } catch (\Throwable $e) {
             // ignore
         }

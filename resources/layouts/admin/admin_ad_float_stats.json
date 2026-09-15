@@ -395,9 +395,9 @@
                       {
                         "type": "basic",
                         "name": "Img",
-                        "if": "{{!!row.image_url}}",
+                        "if": "{{!!(row.image_url || row.download_url)}}",
                         "props": {
-                          "src": "{{row.image_url}}",
+                          "src": "{{row.image_url || row.download_url}}",
                           "alt": "{{row.title || ''}}",
                           "className": "w-14 h-14 object-cover rounded-md border"
                         }

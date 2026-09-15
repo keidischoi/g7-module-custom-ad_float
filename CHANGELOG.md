@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.29
+- Fix uploaded ads showing a broken image (끊김) after a successful FileUploader register. `store('custom-ad-float', 'public')` still saves `custom-ad-float/{file}` on the public disk (`storage/app/public/custom-ad-float`). `imageUrl()` used `Storage::disk('public')->url()`, which prefixes `APP_URL` (often an internal Synology Web Station host/port such as `:8482`) so `<img src>` points off the public reverse-proxy origin.
+- Uploaded `image_path` values now become a same-origin relative URL: `/api/modules/custom-ad_float/media/custom-ad-float/{file}` (Laravel-served, no `APP_URL`). Equivalent public-disk web path is `/storage/custom-ad-float/{file}`. http(s) URL-mode paths are unchanged.
+- Admin 광고 목록, FileUploader `download_url` / `url` / `thumbnail_url`, stats thumbnails, and front `ad-float.js` all use that same URL (`image_url || download_url`) so the Attachment-shaped upload response and `toAdminArray()` list payload no longer disagree.
+- Ops: run `php artisan storage:link` if `/storage/custom-ad-float/...` should also be served as static files, then `php artisan cache:clear`. The module media route works even when the symlink is missing. FileUploader box UI is unchanged.
+
 ## 0.1.28
 - Root cause of production 422 「이미지 파일을 선택해 주세요」 (`collectUploadedFiles === []`): 0.1.27 copied `PendingFile.file` into `_local.uploadFile` / `create.image` via `setState`, then POSTed those fields in a later multipart `apiCall`. G7 local state does not keep a real browser `File` across that round-trip (a truthy placeholder still enables the button). FileUploader keeps Files internally; `onFilesChange` now only sets `image_count` / `image_name` flags.
 - Fix (same pattern as G7 FileUploader / custom-digital_product): `apiEndpoints.upload` → `POST /admin/items` (controller already returns Attachment-shaped `hash` / `download_url`), `autoUpload: false`, `uploadTriggerEvent`. 「광고 등록」 `emitEvent` so the component posts top-level `file` itself. URL mode unchanged. Uploader box look unchanged.

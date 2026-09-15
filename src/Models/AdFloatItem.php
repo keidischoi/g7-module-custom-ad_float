@@ -4,8 +4,8 @@ namespace Modules\Custom\AdFloat\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Storage;
 use Modules\Custom\AdFloat\Support\AdminPayload;
+use Modules\Custom\AdFloat\Support\ImageUrl;
 
 class AdFloatItem extends Model
 {
@@ -24,22 +24,7 @@ class AdFloatItem extends Model
 
     public function imageUrl(): string
     {
-        $path = (string) $this->image_path;
-        if ($path === '') {
-            return '';
-        }
-        if (preg_match('#^https?://#i', $path) || str_starts_with($path, '//')) {
-            return $path;
-        }
-        if (str_starts_with($path, '/')) {
-            return $path;
-        }
-
-        try {
-            return Storage::disk('public')->url($path);
-        } catch (\Throwable $e) {
-            return '/storage/'.ltrim($path, '/');
-        }
+        return ImageUrl::publicUrl((string) $this->image_path);
     }
 
     public function resolvedSource(): string
@@ -49,20 +34,30 @@ class AdFloatItem extends Model
             return $source;
         }
         $path = (string) $this->image_path;
+        if (ImageUrl::isRemoteUrl($path)) {
+            return AdminPayload::SOURCE_URL;
+        }
+        if (ImageUrl::diskRelativePath($path) !== null) {
+            return AdminPayload::SOURCE_UPLOAD;
+        }
 
-        return (preg_match('#^https?://#i', $path) || str_starts_with($path, '//') || str_starts_with($path, '/'))
+        return str_starts_with(str_replace('\\', '/', $path), '/')
             ? AdminPayload::SOURCE_URL
             : AdminPayload::SOURCE_UPLOAD;
     }
 
     public function toAdminArray(): array
     {
+        $url = $this->imageUrl();
         $row = [
             'id' => $this->id,
             'title' => $this->title,
             'alt_text' => $this->alt_text,
             'image_path' => $this->image_path,
-            'image_url' => $this->imageUrl(),
+            'image_url' => $url,
+            'download_url' => $url,
+            'url' => $url,
+            'thumbnail_url' => $url,
             'image_source' => $this->resolvedSource(),
             'source' => $this->resolvedSource(),
             'target_url' => $this->target_url,

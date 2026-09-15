@@ -733,7 +733,7 @@
         }
       }
       var img = document.createElement('img');
-      img.src = item.image_url;
+      img.src = item.image_url || item.download_url || '';
       img.alt = item.alt_text || item.title || '';
       img.loading = 'lazy';
       link.appendChild(img);

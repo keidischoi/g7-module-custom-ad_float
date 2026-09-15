@@ -137,6 +137,8 @@ namespace {
     expect('url create onError does not use .join', str_contains((string) $urlJson, 'error.errors.join'), false);
 
     expect('layout has no error.errors.join toast', str_contains((string) $raw, 'error.errors.join'), false);
+    expect('list thumbnail falls back to download_url', str_contains((string) $raw, 'ad.image_url || ad.download_url'), true);
+    expect('FileUploader upload endpoint unchanged', str_contains((string) $raw, '"upload": "/api/modules/custom-ad_float/admin/items"'), true);
 
     echo "\n{$passed} passed, {$failed} failed\n";
     exit($failed === 0 ? 0 : 1);

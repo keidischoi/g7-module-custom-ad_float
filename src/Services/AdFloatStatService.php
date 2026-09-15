@@ -113,6 +113,7 @@ class AdFloatStatService
                     'item_id' => $itemId ?: null,
                     'title' => $item ? ($item->title ?: __('custom-ad_float::messages.stats.untitled')) : __('custom-ad_float::messages.stats.deleted_item', ['id' => $itemId]),
                     'image_url' => $item ? $item->imageUrl() : '',
+                    'download_url' => $item ? $item->imageUrl() : '',
                 ]);
             })->values()->all(),
             'by_page' => $byPageRows->map(function ($row) {
@@ -133,6 +134,7 @@ class AdFloatStatService
                     'item_id' => $itemId ?: null,
                     'title' => $item ? ($item->title ?: __('custom-ad_float::messages.stats.untitled')) : __('custom-ad_float::messages.stats.deleted_item', ['id' => $itemId]),
                     'image_url' => $item ? $item->imageUrl() : '',
+                    'download_url' => $item ? $item->imageUrl() : '',
                     'page_path' => (string) $row->page_path,
                 ]);
             })->values()->all(),
