@@ -5,6 +5,7 @@ use Modules\Custom\AdFloat\Http\Controllers\Admin\AdFloatItemController;
 use Modules\Custom\AdFloat\Http\Controllers\Admin\AdFloatSettingController;
 use Modules\Custom\AdFloat\Http\Controllers\Admin\AdFloatStatController;
 use Modules\Custom\AdFloat\Http\Controllers\Public\AssetController;
+use Modules\Custom\AdFloat\Http\Controllers\Public\MediaController;
 use Modules\Custom\AdFloat\Http\Controllers\Public\PayloadController;
 use Modules\Custom\AdFloat\Http\Controllers\Public\TrackController;
 
@@ -22,6 +23,11 @@ Route::get('assets/ad-float.js', [AssetController::class, 'adFloatJs'])
 Route::get('assets/ad-float', [AssetController::class, 'adFloatJs'])
     ->middleware(['throttle:600,1'])
     ->name('assets.ad_float.alias');
+
+Route::get('media/{path}', [MediaController::class, 'show'])
+    ->where('path', '.*')
+    ->middleware(['throttle:600,1'])
+    ->name('media.show');
 
 Route::post('track', [TrackController::class, 'store'])
     ->middleware(['throttle:120,1'])

@@ -181,6 +181,8 @@ class AdFloatItemController extends AdminBaseController
             'size' => $file instanceof \Illuminate\Http\UploadedFile ? (int) $file->getSize() : 0,
             'size_formatted' => '',
             'download_url' => $item->imageUrl(),
+            'url' => $item->imageUrl(),
+            'thumbnail_url' => $item->imageUrl(),
             'order' => (int) $item->sort_order,
             'is_image' => true,
         ]);

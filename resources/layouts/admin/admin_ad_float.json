@@ -3223,9 +3223,9 @@
                           {
                             "type": "basic",
                             "name": "Img",
-                            "if": "{{!!ad.image_url}}",
+                            "if": "{{!!(ad.image_url || ad.download_url)}}",
                             "props": {
-                              "src": "{{ad.image_url}}",
+                              "src": "{{ad.image_url || ad.download_url}}",
                               "alt": "{{ad.alt_text || ad.title || ''}}",
                               "className": "w-24 h-24 object-cover rounded-md border"
                             }
@@ -4096,11 +4096,11 @@
                                                 "type": "basic",
                                                 "name": "Img",
                                                 "props": {
-                                                  "src": "{{ad.image_url}}",
+                                                  "src": "{{ad.image_url || ad.download_url}}",
                                                   "alt": "{{ad.title || ''}}",
                                                   "className": "w-10 h-10 object-cover rounded"
                                                 },
-                                                "if": "{{!!ad.image_url}}"
+                                                "if": "{{!!(ad.image_url || ad.download_url)}}"
                                               },
                                               {
                                                 "type": "basic",
