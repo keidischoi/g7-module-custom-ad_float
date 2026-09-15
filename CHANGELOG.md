@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.21
+- Admin dark theme: 「캐러셀 옵션」 boxes no longer use `bg-gray-50` (G7 often does not apply Tailwind `dark:` fills, so the block stayed near-white and labels vanished). Main settings and per-reservation boxes are transparent with the same border as sibling toggle rows (X 버튼). Headings stay `text-sm font-semibold` / inherit.
+- Same-screen filled cards that relied on `bg-white dark:bg-gray-800` (ad list rows, stats summary/by-item cards) drop the light fill so they match dark admin. Secondary admin buttons drop `bg-white` / `bg-gray-100` fills and keep a border only.
+
 ## 0.1.20
 - Admin sidebar: **플로팅 광고** is a parent with children **광고 설정** (`/admin/ad-float`) and **통계** (`/admin/ad-float/stats`), same `children` pattern as `custom-digital_product`.
 - Both admin layouts have a top tab bar **광고 설정 | 통계** (active underline). The old 「통계 보기」 / 「설정으로」 header buttons are replaced by those tabs.

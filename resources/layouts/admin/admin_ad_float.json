@@ -1049,7 +1049,7 @@
                             "props": {
                               "type": "button",
                               "disabled": "{{_local.resettingClosed}}",
-                              "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 disabled:opacity-50"
+                              "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 disabled:opacity-50"
                             },
                             "text": "$t:custom-ad_float.admin.actions.reset_closed",
                             "actions": [
@@ -1123,7 +1123,7 @@
                             "props": {
                               "type": "button",
                               "disabled": "{{_local.resettingClosed}}",
-                              "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 disabled:opacity-50"
+                              "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 disabled:opacity-50"
                             },
                             "text": "$t:custom-ad_float.admin.actions.show_again",
                             "actions": [
@@ -1217,7 +1217,7 @@
                 "name": "Div",
                 "id": "caf_carousel_options",
                 "props": {
-                  "className": "mt-2 mb-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40"
+                  "className": "mt-2 mb-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700"
                 },
                 "children": [
                   {
@@ -2841,7 +2841,7 @@
                     "type": "basic",
                     "name": "Div",
                     "props": {
-                      "className": "p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-4"
+                      "className": "p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-4"
                     },
                     "children": [
                       {
@@ -2974,7 +2974,7 @@
                             "name": "Button",
                             "props": {
                               "type": "button",
-                              "className": "px-3 py-1.5 text-sm rounded-md bg-gray-100 dark:bg-gray-700"
+                              "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600"
                             },
                             "text": "{{ad.enabled ? '중지' : '사용'}}",
                             "actions": [
@@ -3018,7 +3018,7 @@
                             "name": "Button",
                             "props": {
                               "type": "button",
-                              "className": "px-3 py-1.5 text-sm rounded-md bg-gray-100 dark:bg-gray-700"
+                              "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600"
                             },
                             "text": "$t:custom-ad_float.admin.actions.edit",
                             "actions": [
@@ -4368,14 +4368,14 @@
                                         "type": "basic",
                                         "name": "Div",
                                         "props": {
-                                          "className": "mt-3 p-3 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30"
+                                          "className": "mt-3 p-3 rounded-md border border-gray-200 dark:border-gray-700"
                                         },
                                         "children": [
                                           {
                                             "type": "basic",
                                             "name": "Div",
                                             "props": {
-                                              "className": "text-sm font-medium"
+                                              "className": "text-sm font-semibold"
                                             },
                                             "text": "$t:custom-ad_float.admin.carousel_options"
                                           },
@@ -4405,7 +4405,7 @@
                                                     "type": "basic",
                                                     "name": "Span",
                                                     "props": {
-                                                      "className": "text-sm"
+                                                      "className": "text-sm font-medium"
                                                     },
                                                     "text": "$t:custom-ad_float.admin.fields.autoplay"
                                                   },
@@ -4445,7 +4445,7 @@
                                                         "type": "basic",
                                                         "name": "Span",
                                                         "props": {
-                                                          "className": "text-sm"
+                                                          "className": "text-sm font-medium"
                                                         },
                                                         "text": "$t:custom-ad_float.admin.fields.show_arrows"
                                                       },
@@ -4495,7 +4495,7 @@
                                                         "type": "basic",
                                                         "name": "Span",
                                                         "props": {
-                                                          "className": "text-sm"
+                                                          "className": "text-sm font-medium"
                                                         },
                                                         "text": "$t:custom-ad_float.admin.fields.show_dots"
                                                       },
