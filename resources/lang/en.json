@@ -49,6 +49,7 @@
       "show_close": "Close / X button",
       "pause_on_hover": "Pause on hover",
       "open_new_tab": "Open links in new tab",
+      "link_open_mode": "How links open",
       "title": "Title",
       "alt_text": "Alt text",
       "target_url": "Click URL",
@@ -130,6 +131,13 @@
     "show_dots_hint": "Carousel indicator dots",
     "show_close_hint": "Show the ad close (×) control",
     "show_close_global_hint": "The X button follows default settings. Reservations do not override it.",
+    "link_open_mode_hint": "How an ad click opens its URL. Popup modal uses an in-page iframe. If the site blocks iframes, use Open in new tab inside the modal.",
+    "link_open_global_hint": "Link open mode follows default settings. Reservations do not override it.",
+    "link_open": {
+      "same": "Same tab",
+      "new_tab": "New tab",
+      "modal": "Popup modal"
+    },
     "stats": {
       "title": "Floating ad stats",
       "description": "Impressions and clicks by ad, by page, and by ad × page.",

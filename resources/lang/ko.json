@@ -49,6 +49,7 @@
       "show_close": "X 버튼",
       "pause_on_hover": "마우스 오버 시 정지",
       "open_new_tab": "링크 새 창",
+      "link_open_mode": "링크 열기 방식",
       "title": "광고명",
       "alt_text": "대체 텍스트",
       "target_url": "클릭 URL",
@@ -130,6 +131,13 @@
     "show_dots_hint": "캐러셀 인디케이터 점",
     "show_close_hint": "광고 닫기(×) 표시",
     "show_close_global_hint": "X 버튼은 기본 설정 기준입니다. 예약이 덮어쓰지 않습니다.",
+    "link_open_mode_hint": "광고를 클릭했을 때 링크를 여는 방법입니다. 팝업 모달은 페이지 위 레이어(iframe)로 엽니다. 상대 사이트가 iframe을 막으면 모달의 「새 창으로 열기」를 쓰세요.",
+    "link_open_global_hint": "링크 열기 방식은 기본 설정 기준입니다. 예약이 덮어쓰지 않습니다.",
+    "link_open": {
+      "same": "현재 창",
+      "new_tab": "새 창",
+      "modal": "팝업 모달"
+    },
     "stats": {
       "title": "플로팅 광고 통계",
       "description": "광고 노출·클릭을 광고별, 페이지별, 광고×페이지로 봅니다.",

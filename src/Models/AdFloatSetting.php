@@ -15,7 +15,7 @@ class AdFloatSetting extends Model
     protected $fillable = [
         'enabled', 'home_only', 'position', 'direction', 'interval_ms', 'width_px', 'height_px',
         'radius_px', 'offset_px', 'vertical_align', 'vertical_offset_px', 'z_index', 'autoplay', 'show_arrows', 'show_dots', 'show_close',
-        'pause_on_hover', 'open_new_tab', 'mobile_mode', 'max_items', 'close_cookie_key',
+        'pause_on_hover', 'open_new_tab', 'link_open_mode', 'mobile_mode', 'max_items', 'close_cookie_key',
         'start_at', 'end_at', 'schedules', 'schedules_enabled',
     ];
 
@@ -48,6 +48,9 @@ class AdFloatSetting extends Model
         }
         if (static::hasVerticalOffsetColumn()) {
             $defaults['vertical_offset_px'] = 24;
+        }
+        if (static::hasLinkOpenModeColumn()) {
+            $defaults['link_open_mode'] = 'new_tab';
         }
 
         return static::query()->firstOrCreate(['id' => 1], $defaults);
@@ -215,7 +218,8 @@ class AdFloatSetting extends Model
             'show_arrows' => $this->rawFlag('show_arrows', true),
             'show_dots' => $this->rawFlag('show_dots', true),
             'pause_on_hover' => $this->rawFlag('pause_on_hover', true),
-            'open_new_tab' => $this->rawFlag('open_new_tab', true),
+            'open_new_tab' => $this->linkOpenMode() === 'new_tab',
+            'link_open_mode' => $this->linkOpenMode(),
             'mobile_mode' => $this->mobile_mode,
             'max_items' => (int) $this->max_items,
             'show_close' => $this->rawFlag('show_close', true),
@@ -251,7 +255,8 @@ class AdFloatSetting extends Model
             'show_dots' => $this->rawFlag('show_dots', true),
             'show_close' => $this->rawFlag('show_close', true),
             'pause_on_hover' => $this->rawFlag('pause_on_hover', true),
-            'open_new_tab' => $this->rawFlag('open_new_tab', true),
+            'open_new_tab' => $this->linkOpenMode() === 'new_tab',
+            'link_open_mode' => $this->linkOpenMode(),
             'mobile_mode' => $this->mobile_mode,
             'close_cookie_key' => $this->close_cookie_key,
             'start_at' => optional($this->start_at)->format('Y-m-d\TH:i'),
@@ -272,6 +277,31 @@ class AdFloatSetting extends Model
         }
 
         return AdminPayload::toBool($this->{$key} ?? null, $default);
+    }
+
+    /**
+     * same | new_tab | modal. Falls back to open_new_tab when the column is missing.
+     */
+    public function linkOpenMode(): string
+    {
+        $openNewTab = $this->rawFlag('open_new_tab', true);
+        if (static::hasLinkOpenModeColumn()) {
+            $attrs = $this->getAttributes();
+            if (array_key_exists('link_open_mode', $attrs) && ! AdminPayload::isBlank($attrs['link_open_mode'])) {
+                return AdminPayload::normalizeLinkOpenMode($attrs['link_open_mode'], $openNewTab);
+            }
+        }
+
+        return AdminPayload::normalizeLinkOpenMode(null, $openNewTab);
+    }
+
+    public static function hasLinkOpenModeColumn(): bool
+    {
+        try {
+            return Schema::hasColumn('custom_ad_float_settings', 'link_open_mode');
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     public static function hasSchedulesColumn(): bool

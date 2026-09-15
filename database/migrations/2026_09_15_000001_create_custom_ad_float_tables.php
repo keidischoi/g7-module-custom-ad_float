@@ -32,6 +32,7 @@ return new class extends Migration
                 $table->string('close_cookie_key', 100)->default('g7_custom_ad_float_closed');
                 $table->boolean('pause_on_hover')->default(true);
                 $table->boolean('open_new_tab')->default(true);
+                $table->string('link_open_mode', 20)->default('new_tab');
                 $table->string('mobile_mode', 20)->default('hide');
                 $table->timestamp('start_at')->nullable();
                 $table->timestamp('end_at')->nullable();
@@ -81,6 +82,7 @@ return new class extends Migration
                 'close_cookie_key' => 'g7_custom_ad_float_closed',
                 'pause_on_hover' => true,
                 'open_new_tab' => true,
+                'link_open_mode' => 'new_tab',
                 'mobile_mode' => 'hide',
                 'show_arrows' => true,
                 'created_at' => now(),

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.23
+- Admin 기본 설정 **링크 열기 방식**: 「현재 창」 (`same`) / 「새 창」 (`new_tab`) / 「팝업 모달」 (`modal`). New field `link_open_mode`; `open_new_tab true` → `new_tab`, false → `same`. `open_new_tab` stays derived for old JS.
+- Link open mode is **global** (like X 버튼). Reservations do not override it; the per-row toggle is a hint only.
+- Front: `modal` click still tracks, then opens a dimmed full-viewport overlay with iframe + 「새 창으로 열기」 + backdrop/×/Escape to close.
+
 ## 0.1.22
 - Admin **예약** cards no longer vanish on click. List iteration is `{{_local.form.schedules || []}}` (no `??` / `?.` — G7 often fails those and re-renders an empty list).
 - **예약 추가** uses a short `concat` with `id: 's' + length + '_' + schSeq` (no `Date.now()`). New rows include enabled, dates, weekdays d0–d6, position, `_deleted: false`.
