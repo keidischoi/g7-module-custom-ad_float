@@ -34,18 +34,35 @@ class AdFloatItemController extends AdminBaseController
     {
         try {
             AdminPayload::nullifyEmpty($request, AdminPayload::itemNullableKeys());
+            $files = $this->uploadedImages($request);
             $source = AdminPayload::resolveSource($request);
+            $preview = $request->all();
+            $urls = AdminPayload::collectImageUrls($preview);
+            $isBatch = count($files) > 1 || count($urls) > 1 || $request->boolean('combine');
+
+            if ($isBatch) {
+                $data = $request->validate(AdminPayload::itemBatchRules());
+                $data['image_source'] = $source;
+                $items = $this->service->createItemsFromRequest($data, $files);
+                $payload = array_map(fn ($item) => $item->toAdminArray(), $items);
+
+                return $this->success('custom-ad_float::messages.items.create_success', [
+                    'data' => $payload,
+                    'meta' => ['total' => count($payload)],
+                ]);
+            }
+
             $data = $request->validate(AdminPayload::itemRules($source, true));
             $data['image_source'] = $source;
 
-            if ($source === AdminPayload::SOURCE_UPLOAD && ! $request->hasFile('image')) {
+            if ($source === AdminPayload::SOURCE_UPLOAD && $files === []) {
                 return $this->error('custom-ad_float::messages.items.file_required', 422);
             }
-            if ($source === AdminPayload::SOURCE_URL && empty($data['image_url'])) {
+            if ($source === AdminPayload::SOURCE_URL && $urls === []) {
                 return $this->error('custom-ad_float::messages.items.url_required', 422);
             }
 
-            $item = $this->service->createItem($data, $request->file('image'));
+            $item = $this->service->createItem($data, $files[0] ?? $request->file('image'));
 
             return $this->success('custom-ad_float::messages.items.create_success', $item->toAdminArray());
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -55,6 +72,77 @@ class AdFloatItemController extends AdminBaseController
         } catch (\Exception $e) {
             return $this->error('custom-ad_float::messages.items.create_failed', 500, $e->getMessage());
         }
+    }
+
+    public function combine(Request $request): JsonResponse
+    {
+        try {
+            $ids = AdminPayload::selectedItemIds($request->input('item_ids'), $request->input('sels'));
+            $items = $this->service->combineItems($ids)->map->toAdminArray()->values()->all();
+
+            return $this->success('custom-ad_float::messages.items.combine_success', [
+                'data' => $items,
+                'meta' => ['total' => count($items)],
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return $this->error('custom-ad_float::messages.items.combine_failed', 422, $e->getMessage());
+        } catch (\Exception $e) {
+            return $this->error('custom-ad_float::messages.items.combine_failed', 500, $e->getMessage());
+        }
+    }
+
+    public function uncombine(Request $request): JsonResponse
+    {
+        try {
+            $ids = AdminPayload::selectedItemIds($request->input('item_ids'), $request->input('sels'));
+            if ($ids === []) {
+                return $this->error('custom-ad_float::messages.items.uncombine_min', 422);
+            }
+            $items = $this->service->uncombineItems($ids)->map->toAdminArray()->values()->all();
+
+            return $this->success('custom-ad_float::messages.items.uncombine_success', [
+                'data' => $items,
+                'meta' => ['total' => count($items)],
+            ]);
+        } catch (\Exception $e) {
+            return $this->error('custom-ad_float::messages.items.uncombine_failed', 500, $e->getMessage());
+        }
+    }
+
+    /**
+     * @return array<int, \Illuminate\Http\UploadedFile>
+     */
+    private function uploadedImages(Request $request): array
+    {
+        $out = [];
+        $seen = [];
+        $add = function ($file) use (&$out, &$seen) {
+            if (! $file instanceof \Illuminate\Http\UploadedFile) {
+                return;
+            }
+            $token = $file->getRealPath() ?: ($file->getClientOriginalName().':'.$file->getSize());
+            if (isset($seen[$token])) {
+                return;
+            }
+            $seen[$token] = true;
+            $out[] = $file;
+        };
+
+        foreach ($request->allFiles() as $key => $file) {
+            $name = is_string($key) ? $key : '';
+            if ($name !== 'image' && $name !== 'images' && ! str_starts_with($name, 'images')) {
+                continue;
+            }
+            if (is_array($file)) {
+                foreach ($file as $one) {
+                    $add($one);
+                }
+            } else {
+                $add($file);
+            }
+        }
+
+        return $out;
     }
 
     public function update(Request $request, int $id): JsonResponse

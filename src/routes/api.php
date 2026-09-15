@@ -61,6 +61,12 @@ Route::prefix('admin/items')
         Route::post('/', [AdFloatItemController::class, 'store'])
             ->middleware('permission:admin,custom-ad_float.ads.create')
             ->name('store');
+        Route::post('/combine', [AdFloatItemController::class, 'combine'])
+            ->middleware('permission:admin,custom-ad_float.ads.update')
+            ->name('combine');
+        Route::post('/uncombine', [AdFloatItemController::class, 'uncombine'])
+            ->middleware('permission:admin,custom-ad_float.ads.update')
+            ->name('uncombine');
         Route::put('/{id}', [AdFloatItemController::class, 'update'])
             ->whereNumber('id')
             ->middleware('permission:admin,custom-ad_float.ads.update')

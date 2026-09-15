@@ -96,6 +96,38 @@
     return isFinite(n) ? n : fallback;
   }
 
+  function sortCarouselItems(items) {
+    var list = Array.isArray(items) ? items.slice() : [];
+    function key(it) {
+      var g = it && it.carousel_group ? String(it.carousel_group) : '';
+      return g ? 'g:' + g : 'id:' + (it && it.id ? it.id : '');
+    }
+    var groupMin = {};
+    list.forEach(function (it, idx) {
+      var k = key(it);
+      var so = Number(it && it.sort_order);
+      if (!isFinite(so)) so = idx;
+      var id = Number(it && it.id) || 0;
+      if (!groupMin[k] || so < groupMin[k].so || (so === groupMin[k].so && id < groupMin[k].id)) {
+        groupMin[k] = { so: so, id: id };
+      }
+    });
+    list.sort(function (a, b) {
+      var ka = key(a);
+      var kb = key(b);
+      var ga = groupMin[ka] || { so: 0, id: 0 };
+      var gb = groupMin[kb] || { so: 0, id: 0 };
+      if (ga.so !== gb.so) return ga.so - gb.so;
+      if (ga.id !== gb.id) return ga.id - gb.id;
+      if (ka !== kb) return ka < kb ? -1 : 1;
+      var sa = Number(a && a.sort_order) || 0;
+      var sb = Number(b && b.sort_order) || 0;
+      if (sa !== sb) return sa - sb;
+      return (Number(a && a.id) || 0) - (Number(b && b.id) || 0);
+    });
+    return list;
+  }
+
   function verticalAlign(value) {
     var v = String(value || '').toLowerCase();
     return v === 'top' || v === 'bottom' ? v : 'middle';
@@ -442,6 +474,7 @@
     var track = document.createElement('div');
     track.className = 'g7-ad-track ' + ((config.direction || 'horizontal') === 'vertical' ? 'vertical' : '');
 
+    items = sortCarouselItems(items);
     items.forEach(function (item) {
       var slide = document.createElement('div');
       slide.className = 'g7-ad-slide';

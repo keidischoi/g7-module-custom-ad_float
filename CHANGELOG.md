@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.14
+- Multi-image create: file input accepts several images; extra image URL rows; one submit creates N items. Optional 「결합하여 캐러셀로 등록」 shares a `carousel_group` uuid and consecutive `sort_order`.
+- Ad list: select rows and **결합** / **결합 해제**. Combined rows show a 「캐러셀 A」 badge.
+- Public payload includes `carousel_group`. Front JS flattens into one carousel ordered by group (min sort_order), then sort_order, then id. Stats remain per `item_id`.
+- Migration `2026_09_15_000007` adds nullable `carousel_group`. `POST /admin/items/combine` and `/uncombine`.
+
 ## 0.1.13
 - Left/right ads align to the **main content column** via `getBoundingClientRect()` (not `left/right: var(--g7-ad-offset)` viewport walls). Finder prefers `#main_content` / `max-w-7xl` / centered max-width under `user_layout_root` and **never** treats a full-bleed wrapper as the box (that clamp looked like viewport walls). Recompute on resize/orientation/scroll (rAF). `left`/`right` are set with `!important` so leftover CSS cannot pin to the viewport.
 - `offset_px` / `vertical_offset_px` accept **negatives** (−500…500). Horizontal: positive = outside into the side margin, negative = inward over the content. Vertical: opposite-direction nudge. JS no longer `Math.max(0)` the offsets; final position is only nudged back if the ad would fully leave the viewport.

@@ -86,8 +86,17 @@
           "display_seconds": "",
           "source": "url",
           "original_source": "",
-          "image": null
-        }
+          "image": null,
+          "images": null,
+          "image_count": 0,
+          "extra_urls": [
+            {
+              "url": ""
+            }
+          ],
+          "combine": false
+        },
+        "itemSel": {}
       }
     }
   ],
@@ -150,105 +159,105 @@
                     },
                     "text": "$t:custom-ad_float.admin.stats.view"
                   },
-              {
-                "type": "basic",
-                "name": "Button",
-                "id": "btn_save_settings_top",
-                "props": {
-                  "type": "button",
-                  "disabled": "{{_local.saving}}",
-                  "className": "btn btn-primary disabled:opacity-50"
-                },
-                "text": "$t:custom-ad_float.admin.save",
-                "actions": [
                   {
-                    "type": "click",
-                    "handler": "sequence",
+                    "type": "basic",
+                    "name": "Button",
+                    "id": "btn_save_settings_top",
+                    "props": {
+                      "type": "button",
+                      "disabled": "{{_local.saving}}",
+                      "className": "btn btn-primary disabled:opacity-50"
+                    },
+                    "text": "$t:custom-ad_float.admin.save",
                     "actions": [
                       {
-                        "handler": "setState",
-                        "params": {
-                          "target": "local",
-                          "saving": true,
-                          "errors": null
-                        }
-                      },
-                      {
-                        "handler": "apiCall",
-                        "auth_required": true,
-                        "target": "/api/modules/custom-ad_float/admin/settings",
-                        "params": {
-                          "method": "PUT",
-                          "body": {
-                            "enabled": "{{_local.form?.enabled === true || _local.form?.enabled === 1 || _local.form?.enabled === '1' || _local.form?.enabled === 'true' ? 1 : 0}}",
-                            "home_only": "{{_local.form?.home_only ? 1 : 0}}",
-                            "position": "{{_local.form?.position || 'right'}}",
-                            "direction": "{{_local.form?.direction || 'horizontal'}}",
-                            "interval_ms": "{{Number(_local.form?.interval_ms) || 4000}}",
-                            "width_px": "{{Number(_local.form?.width_px) || 180}}",
-                            "height_px": "{{Number(_local.form?.height_px) || 180}}",
-                            "radius_px": "{{Number(_local.form?.radius_px) || 10}}",
-                            "offset_px": "{{Number(_local.form?.offset_px ?? 24)}}",
-                            "vertical_align": "{{_local.form?.vertical_align || 'middle'}}",
-                            "vertical_offset_px": "{{Number(_local.form?.vertical_offset_px ?? 24)}}",
-                            "z_index": "{{Number(_local.form?.z_index) || 9990}}",
-                            "max_items": "{{Number(_local.form?.max_items) || 20}}",
-                            "close_cookie_key": "{{_local.form?.close_cookie_key || 'g7_custom_ad_float_closed'}}",
-                            "autoplay": "{{_local.form?.autoplay ? 1 : 0}}",
-                            "show_arrows": "{{_local.form?.show_arrows ? 1 : 0}}",
-                            "show_dots": "{{_local.form?.show_dots ? 1 : 0}}",
-                            "show_close": "{{_local.form?.show_close ? 1 : 0}}",
-                            "pause_on_hover": "{{_local.form?.pause_on_hover ? 1 : 0}}",
-                            "open_new_tab": "{{_local.form?.open_new_tab ? 1 : 0}}",
-                            "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
-                            "schedules_enabled": "{{_local.form?.schedules_enabled ? 1 : 0}}",
-                            "schedules": "{{_local.form?.schedules ?? []}}"
-                          }
-                        },
-                        "onSuccess": [
+                        "type": "click",
+                        "handler": "sequence",
+                        "actions": [
                           {
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "saving": false,
-                              "hasChanges": false
+                              "saving": true,
+                              "errors": null
                             }
                           },
                           {
-                            "handler": "toast",
+                            "handler": "apiCall",
+                            "auth_required": true,
+                            "target": "/api/modules/custom-ad_float/admin/settings",
                             "params": {
-                              "type": "success",
-                              "message": "$t:custom-ad_float.admin.save_success"
-                            }
-                          },
-                          {
-                            "handler": "refetchDataSource",
-                            "params": {
-                              "dataSourceId": "settings"
-                            }
-                          }
-                        ],
-                        "onError": [
-                          {
-                            "handler": "setState",
-                            "params": {
-                              "target": "local",
-                              "saving": false
-                            }
-                          },
-                          {
-                            "handler": "toast",
-                            "params": {
-                              "type": "error",
-                              "message": "{{error.message}}"
-                            }
+                              "method": "PUT",
+                              "body": {
+                                "enabled": "{{_local.form?.enabled === true || _local.form?.enabled === 1 || _local.form?.enabled === '1' || _local.form?.enabled === 'true' ? 1 : 0}}",
+                                "home_only": "{{_local.form?.home_only ? 1 : 0}}",
+                                "position": "{{_local.form?.position || 'right'}}",
+                                "direction": "{{_local.form?.direction || 'horizontal'}}",
+                                "interval_ms": "{{Number(_local.form?.interval_ms) || 4000}}",
+                                "width_px": "{{Number(_local.form?.width_px) || 180}}",
+                                "height_px": "{{Number(_local.form?.height_px) || 180}}",
+                                "radius_px": "{{Number(_local.form?.radius_px) || 10}}",
+                                "offset_px": "{{Number(_local.form?.offset_px ?? 24)}}",
+                                "vertical_align": "{{_local.form?.vertical_align || 'middle'}}",
+                                "vertical_offset_px": "{{Number(_local.form?.vertical_offset_px ?? 24)}}",
+                                "z_index": "{{Number(_local.form?.z_index) || 9990}}",
+                                "max_items": "{{Number(_local.form?.max_items) || 20}}",
+                                "close_cookie_key": "{{_local.form?.close_cookie_key || 'g7_custom_ad_float_closed'}}",
+                                "autoplay": "{{_local.form?.autoplay ? 1 : 0}}",
+                                "show_arrows": "{{_local.form?.show_arrows ? 1 : 0}}",
+                                "show_dots": "{{_local.form?.show_dots ? 1 : 0}}",
+                                "show_close": "{{_local.form?.show_close ? 1 : 0}}",
+                                "pause_on_hover": "{{_local.form?.pause_on_hover ? 1 : 0}}",
+                                "open_new_tab": "{{_local.form?.open_new_tab ? 1 : 0}}",
+                                "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
+                                "schedules_enabled": "{{_local.form?.schedules_enabled ? 1 : 0}}",
+                                "schedules": "{{_local.form?.schedules ?? []}}"
+                              }
+                            },
+                            "onSuccess": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "saving": false,
+                                  "hasChanges": false
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "success",
+                                  "message": "$t:custom-ad_float.admin.save_success"
+                                }
+                              },
+                              {
+                                "handler": "refetchDataSource",
+                                "params": {
+                                  "dataSourceId": "settings"
+                                }
+                              }
+                            ],
+                            "onError": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "saving": false
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "error",
+                                  "message": "{{error.message}}"
+                                }
+                              }
+                            ]
                           }
                         ]
                       }
                     ]
                   }
-                ]
-              }
                 ]
               }
             ]
@@ -1412,10 +1421,11 @@
                     "name": "Input",
                     "props": {
                       "type": "file",
-                      "name": "image",
+                      "name": "images",
                       "accept": "image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp",
                       "className": "input w-full",
-                      "autoBinding": false
+                      "autoBinding": false,
+                      "multiple": true
                     },
                     "actions": [
                       {
@@ -1423,7 +1433,9 @@
                         "handler": "setState",
                         "params": {
                           "target": "local",
-                          "create.image": "{{$event.target?.files?.[0] ?? $event}}"
+                          "create.image": "{{$event.target?.files?.[0] ?? $event}}",
+                          "create.images": "{{$event.target?.files ?? null}}",
+                          "create.image_count": "{{$event.target?.files?.length || 0}}"
                         }
                       }
                     ]
@@ -1446,6 +1458,16 @@
                       "alt": "",
                       "className": "mt-2 w-24 h-24 object-cover rounded-md border"
                     }
+                  },
+                  {
+                    "id": "n_image_count",
+                    "type": "basic",
+                    "name": "P",
+                    "if": "{{(_local.create?.image_count || 0) > 1}}",
+                    "props": {
+                      "className": "text-xs text-gray-500 mt-1"
+                    },
+                    "text": "{{(_local.create?.image_count || 0) + ' '}} $t:custom-ad_float.admin.files_selected"
                   }
                 ]
               },
@@ -1497,6 +1519,81 @@
                         "params": {
                           "target": "local",
                           "create.image_url": "{{$event.target.value}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "n_extra_urls",
+                "type": "basic",
+                "name": "Div",
+                "if": "{{!_local.editingId && (_local.create?.source || 'url') !== 'upload'}}",
+                "props": {
+                  "className": "form-group w-full mb-4"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-xs text-gray-500 mb-1"
+                    },
+                    "text": "$t:custom-ad_float.admin.extra_urls_hint"
+                  },
+                  {
+                    "id": "caf_extra_url_{{uidx}}",
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "flex gap-2 mb-2"
+                    },
+                    "iteration": {
+                      "source": "{{_local.create?.extra_urls ?? []}}",
+                      "item_var": "urow",
+                      "index_var": "uidx"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Input",
+                        "props": {
+                          "type": "text",
+                          "name": "extra_url_{{uidx}}",
+                          "className": "input w-full",
+                          "value": "{{urow.url ?? ''}}",
+                          "placeholder": "$t:custom-ad_float.admin.fields.image_url",
+                          "autoBinding": false
+                        },
+                        "actions": [
+                          {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "create.extra_urls.{{uidx}}.url": "{{$event.target.value}}"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Button",
+                    "props": {
+                      "type": "button",
+                      "className": "text-sm text-gray-600 hover:text-gray-900"
+                    },
+                    "text": "$t:custom-ad_float.admin.actions.add_url",
+                    "actions": [
+                      {
+                        "type": "click",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "create.extra_urls": "{{(_local.create?.extra_urls || []).concat([{url:''}])}}"
                         }
                       }
                     ]
@@ -1738,6 +1835,60 @@
                 ]
               },
               {
+                "id": "n_combine",
+                "type": "basic",
+                "name": "Div",
+                "if": "{{!_local.editingId}}",
+                "props": {
+                  "className": "flex items-center justify-between gap-4 py-3 mt-2 border-t border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "props": {
+                          "className": "text-sm font-medium"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.combine_on_create"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-1"
+                        },
+                        "text": "$t:custom-ad_float.admin.combine_on_create_hint"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Input",
+                    "props": {
+                      "type": "checkbox",
+                      "name": "combine_on_create",
+                      "className": "h-4 w-4 cursor-pointer",
+                      "autoBinding": false,
+                      "checked": "{{_local.create?.combine === true || _local.create?.combine === 1 || _local.create?.combine === '1' || _local.create?.combine === 'true'}}"
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "create.combine": "{{$event.target.checked === true}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
                 "type": "basic",
                 "name": "Div",
                 "props": {
@@ -1770,7 +1921,15 @@
                             "display_seconds": "",
                             "source": "url",
                             "original_source": "",
-                            "image": null
+                            "image": null,
+                            "images": null,
+                            "image_count": 0,
+                            "extra_urls": [
+                              {
+                                "url": ""
+                              }
+                            ],
+                            "combine": false
                           }
                         }
                       }
@@ -1813,7 +1972,9 @@
                                 "image_url": "{{_local.create?.image_url || ''}}",
                                 "sort_order": "{{_local.create?.sort_order || 0}}",
                                 "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}",
-                                "enabled": 1
+                                "enabled": 1,
+                                "combine": "{{_local.create?.combine ? 1 : 0}}",
+                                "extra_urls": "{{_local.create?.extra_urls ?? []}}"
                               }
                             },
                             "onSuccess": [
@@ -1832,7 +1993,15 @@
                                     "display_seconds": "",
                                     "source": "url",
                                     "original_source": "",
-                                    "image": null
+                                    "image": null,
+                                    "images": null,
+                                    "image_count": 0,
+                                    "extra_urls": [
+                                      {
+                                        "url": ""
+                                      }
+                                    ],
+                                    "combine": false
                                   }
                                 }
                               },
@@ -1908,7 +2077,10 @@
                                 "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
                                 "sort_order": "{{_local.create?.sort_order || 0}}",
                                 "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}",
-                                "enabled": 1
+                                "enabled": 1,
+                                "images": "{{_local.create?.images}}",
+                                "extra_urls": "{{_local.create?.extra_urls ?? []}}",
+                                "combine": "{{_local.create?.combine ? 1 : 0}}"
                               },
                               "contentType": "multipart/form-data"
                             },
@@ -1928,7 +2100,15 @@
                                     "display_seconds": "",
                                     "source": "url",
                                     "original_source": "",
-                                    "image": null
+                                    "image": null,
+                                    "images": null,
+                                    "image_count": 0,
+                                    "extra_urls": [
+                                      {
+                                        "url": ""
+                                      }
+                                    ],
+                                    "combine": false
                                   }
                                 }
                               },
@@ -2022,7 +2202,15 @@
                                     "display_seconds": "",
                                     "source": "url",
                                     "original_source": "",
-                                    "image": null
+                                    "image": null,
+                                    "images": null,
+                                    "image_count": 0,
+                                    "extra_urls": [
+                                      {
+                                        "url": ""
+                                      }
+                                    ],
+                                    "combine": false
                                   }
                                 }
                               },
@@ -2097,7 +2285,15 @@
                                 "alt_text": "{{_local.create?.alt_text || ''}}",
                                 "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
                                 "sort_order": "{{_local.create?.sort_order || 0}}",
-                                "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}"
+                                "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}",
+                                "images": null,
+                                "image_count": 0,
+                                "extra_urls": [
+                                  {
+                                    "url": ""
+                                  }
+                                ],
+                                "combine": false
                               },
                               "contentType": "multipart/form-data"
                             },
@@ -2117,7 +2313,15 @@
                                     "display_seconds": "",
                                     "source": "url",
                                     "original_source": "",
-                                    "image": null
+                                    "image": null,
+                                    "images": null,
+                                    "image_count": 0,
+                                    "extra_urls": [
+                                      {
+                                        "url": ""
+                                      }
+                                    ],
+                                    "combine": false
                                   }
                                 }
                               },
@@ -2210,6 +2414,133 @@
                 ]
               },
               {
+                "id": "caf_item_bulk",
+                "type": "basic",
+                "name": "Div",
+                "if": "{{(items?.data?.data ?? []).length > 0}}",
+                "props": {
+                  "className": "flex flex-wrap items-center gap-2 mb-3"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Button",
+                    "props": {
+                      "type": "button",
+                      "className": "px-3 py-1.5 text-sm rounded-md border"
+                    },
+                    "text": "$t:custom-ad_float.admin.actions.combine",
+                    "actions": [
+                      {
+                        "type": "click",
+                        "handler": "apiCall",
+                        "auth_required": true,
+                        "target": "/api/modules/custom-ad_float/admin/items/combine",
+                        "params": {
+                          "method": "POST",
+                          "body": {
+                            "sels": "{{_local.itemSel ?? {}}}"
+                          }
+                        },
+                        "onSuccess": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "itemSel": {}
+                            }
+                          },
+                          {
+                            "handler": "toast",
+                            "params": {
+                              "type": "success",
+                              "message": "$t:custom-ad_float.admin.combine_success"
+                            }
+                          },
+                          {
+                            "handler": "refetchDataSource",
+                            "params": {
+                              "dataSourceId": "items"
+                            }
+                          }
+                        ],
+                        "onError": [
+                          {
+                            "handler": "toast",
+                            "params": {
+                              "type": "error",
+                              "message": "{{error.message}}"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Button",
+                    "props": {
+                      "type": "button",
+                      "className": "px-3 py-1.5 text-sm rounded-md border"
+                    },
+                    "text": "$t:custom-ad_float.admin.actions.uncombine",
+                    "actions": [
+                      {
+                        "type": "click",
+                        "handler": "apiCall",
+                        "auth_required": true,
+                        "target": "/api/modules/custom-ad_float/admin/items/uncombine",
+                        "params": {
+                          "method": "POST",
+                          "body": {
+                            "sels": "{{_local.itemSel ?? {}}}"
+                          }
+                        },
+                        "onSuccess": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "itemSel": {}
+                            }
+                          },
+                          {
+                            "handler": "toast",
+                            "params": {
+                              "type": "success",
+                              "message": "$t:custom-ad_float.admin.uncombine_success"
+                            }
+                          },
+                          {
+                            "handler": "refetchDataSource",
+                            "params": {
+                              "dataSourceId": "items"
+                            }
+                          }
+                        ],
+                        "onError": [
+                          {
+                            "handler": "toast",
+                            "params": {
+                              "type": "error",
+                              "message": "{{error.message}}"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-xs text-gray-500"
+                    },
+                    "text": "$t:custom-ad_float.admin.combine_hint"
+                  }
+                ]
+              },
+              {
                 "id": "caf_items_{{idx}}",
                 "type": "basic",
                 "name": "Div",
@@ -2231,6 +2562,37 @@
                       "className": "p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-4"
                     },
                     "children": [
+                      {
+                        "id": "caf_item_sel",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                          "className": "shrink-0"
+                        },
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": {
+                              "type": "checkbox",
+                              "name": "item_sel_{{ad.id}}",
+                              "className": "h-4 w-4 cursor-pointer",
+                              "autoBinding": false,
+                              "checked": "{{_local.itemSel?.[String(ad.id)] === true || _local.itemSel?.[ad.id] === true}}"
+                            },
+                            "actions": [
+                              {
+                                "type": "change",
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "itemSel.{{ad.id}}": "{{$event.target.checked === true}}"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
                       {
                         "type": "basic",
                         "name": "Img",
@@ -2271,6 +2633,15 @@
                               "className": "text-xs text-gray-400 truncate"
                             },
                             "text": "{{(ad.source || ad.image_source) === 'upload' ? '이미지 업로드' : '웹주소로 연결'}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "if": "{{!!ad.carousel_badge}}",
+                            "props": {
+                              "className": "inline-flex mt-1 mr-1 px-2 py-0.5 rounded text-xs bg-indigo-100 text-indigo-800"
+                            },
+                            "text": "$t:custom-ad_float.admin.carousel_badge {{ad.carousel_badge}}"
                           },
                           {
                             "type": "basic",

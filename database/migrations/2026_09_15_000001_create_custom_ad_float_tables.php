@@ -52,9 +52,11 @@ return new class extends Migration
                 $table->unsignedInteger('sort_order')->default(0);
                 $table->unsignedInteger('display_seconds')->nullable();
                 $table->boolean('enabled')->default(true);
+                $table->string('carousel_group', 36)->nullable();
                 $table->timestamps();
 
                 $table->index(['enabled', 'sort_order']);
+                $table->index(['carousel_group', 'sort_order']);
             });
         }
 
