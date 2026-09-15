@@ -5,7 +5,7 @@
 - Same-screen filled cards that relied on `bg-white dark:bg-gray-800` (ad list rows, stats summary/by-item cards) drop the light fill so they match dark admin. Secondary admin buttons drop `bg-white` / `bg-gray-100` fills and keep a border only.
 - Admin 「예약 추가」 no longer concatenates a huge template (with `??` and `id:'new'`). New rows are a short object with `id: 's' + Date.now()` and `position` only, so the page does not freeze and each card is unique.
 - **X 버튼은 기본 설정 기준. 예약이 덮어쓰지 않음.** `overlayVisual` pins `show_close` from base settings. Reservation cards hide the X toggle.
-- 광고 목록: tighter row gap (`gap-1.5`), card padding (`p-3`), and 광고 등록 / 새로고침 header spacing.
+- 광고 목록: cards sit in a non-iterated `flex flex-col gap-1` parent (G7 `iteration` on the flex node did not space siblings). Card padding `p-2.5`. **광고 등록** and **새로고침** share one compact `gap-1` row above the list.
 - Admin create/edit uses G7 **FileUploader** (업로드 박스) instead of a raw file input. Store/update drop empty `image`/`images` strings before validate (`image` is nullable); missing files return 「이미지 파일을 선택해 주세요.」 Validation toasts show the full errors list.
 
 ## 0.1.20

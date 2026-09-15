@@ -2137,7 +2137,7 @@
                 "type": "basic",
                 "name": "Div",
                 "props": {
-                  "className": "flex flex-wrap justify-end gap-1.5 mt-2"
+                  "className": "flex flex-wrap items-center justify-end gap-1 mt-1 mb-1"
                 },
                 "children": [
                   {
@@ -2597,25 +2597,9 @@
                         ]
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "type": "basic",
-                "name": "Div",
-                "props": {
-                  "className": "flex items-center justify-between mb-2"
-                },
-                "children": [
-                  {
-                    "type": "basic",
-                    "name": "H2",
-                    "props": {
-                      "className": "text-lg font-semibold"
-                    },
-                    "text": "$t:custom-ad_float.admin.sections.items"
                   },
                   {
+                    "id": "btn_refresh_items",
                     "type": "basic",
                     "name": "Button",
                     "props": {
@@ -2634,6 +2618,14 @@
                     ]
                   }
                 ]
+              },
+              {
+                "type": "basic",
+                "name": "H2",
+                "props": {
+                  "className": "text-lg font-semibold mt-2 mb-1"
+                },
+                "text": "$t:custom-ad_float.admin.sections.items"
               },
               {
                 "id": "caf_empty",
@@ -2657,7 +2649,7 @@
                 "name": "Div",
                 "if": "{{(items?.data?.data ?? []).length > 0}}",
                 "props": {
-                  "className": "flex flex-wrap items-center gap-1.5 mb-2"
+                  "className": "flex flex-wrap items-center gap-1 mb-1"
                 },
                 "children": [
                   {
@@ -2817,13 +2809,18 @@
                 ]
               },
               {
-                "id": "caf_items_{{idx}}",
+                "id": "caf_item_list",
                 "type": "basic",
                 "name": "Div",
                 "if": "{{(items?.data?.data ?? []).length > 0}}",
                 "props": {
-                  "className": "flex flex-col gap-1.5"
+                  "className": "flex flex-col gap-1"
                 },
+                "children": [
+              {
+                "id": "caf_items_{{idx}}",
+                "type": "basic",
+                "name": "Div",
                 "iteration": {
                   "source": "{{items?.data?.data ?? []}}",
                   "item_var": "ad",
@@ -2835,7 +2832,7 @@
                     "type": "basic",
                     "name": "Div",
                     "props": {
-                      "className": "p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-3"
+                      "className": "p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-3"
                     },
                     "children": [
                       {
@@ -3095,6 +3092,8 @@
                       }
                     ]
                   }
+                ]
+              }
                 ]
               }
             ]
