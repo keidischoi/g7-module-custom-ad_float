@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.15
+- Admin `/admin/ad-float` 기본 설정: 「닫힘 상태 초기화」 / 「다시 보이게 하기」 rotates `close_cookie_key` (e.g. `g7_custom_ad_float_closed_<unix>_<hex>`) so visitor X-close cookies/localStorage under the old key are ignored and ads show again. No need for each visitor to clear cookies.
+- `POST /api/modules/custom-ad_float/admin/settings/reset-closed` (auth + `custom-ad_float.ads.update`) saves the new key and returns updated settings. Toast: 방문자가 닫았던 기록이 무효화되어 다시 표시됩니다.
+- Editable `close_cookie_key` field kept; hint explains per-browser storage vs global key rotate. Single-browser test: DevTools clear of that key.
+- Existing X-close behavior unchanged (still writes cookie + localStorage for the current key).
+
 ## 0.1.14
 - Multi-image create: file input accepts several images; extra image URL rows; one submit creates N items. Optional 「결합하여 캐러셀로 등록」 shares a `carousel_group` uuid and consecutive `sort_order`.
 - Ad list: select rows and **결합** / **결합 해제**. Combined rows show a 「캐러셀 A」 badge.

@@ -7,7 +7,7 @@
 - 관리자 `/admin/ad-float`: **기본 설정** → **광고 목록** → **날짜 및 시간 예약**. 「통계 보기」로 `/admin/ad-float/stats` (노출·클릭, 광고별 × 페이지별)
 - 광고 이미지: **파일 업로드**(여러 장) 또는 **웹주소 연결**(여러 행). 등록 시 「결합하여 캐러셀로 등록」 가능
 - 광고 목록에서 선택 후 **결합** / **결합 해제**. 같은 그룹은 「캐러셀 A」 배지
-- 위치·캐러셀·모바일·닫기 쿠키 등 기본 표시 옵션
+- 위치·캐러셀·모바일·닫기 쿠키 등 기본 표시 옵션. 관리자 「닫힘 상태 초기화」로 방문자가 닫았던 광고를 다시 노출
 - 왼쪽/오른쪽: 본문(콘텐츠) 박스 좌우 가장자리 기준 여백, 세로 위치(위/가운데/아래) + px
 - `position: fixed` 로 스크롤 따라다님
 
@@ -38,6 +38,21 @@ php artisan cache:clear
 - `custom_ad_float_settings`
 - `custom_ad_float_items`
 - `custom_ad_float_stats` (일별 노출/클릭 롤업)
+
+## 닫기(X) 상태
+
+방문자가 플로팅 광고 **X**를 누르면 `close_cookie_key`(기본 `g7_custom_ad_float_closed`)로 **쿠키 + localStorage**에 저장되어, 그 브라우저에서는 다시 보이지 않습니다.
+
+- **전체 다시 노출:** `/admin/ad-float` 기본 설정에서 **닫힘 상태 초기화** / **다시 보이게 하기**. 서버가 쿠키 키를 새 값으로 바꿔 예전 기록을 무효화합니다. (`POST /api/modules/custom-ad_float/admin/settings/reset-closed`)
+- **한 브라우저만 테스트:** 개발자 도구에서 해당 키의 쿠키와 localStorage를 지우면 됩니다. 방문자마다 수동으로 지울 필요는 없습니다.
+
+## 업그레이드 (0.1.15)
+
+```bash
+php artisan cache:clear
+```
+
+마이그레이션은 없습니다. 프론트 `ad-float.js` 캐시 쿼리는 `?v=0.1.15` 입니다. 관리자 화면을 새로고침한 뒤 「닫힘 상태 초기화」를 쓰면 됩니다.
 
 ## 업그레이드 (0.1.14)
 
@@ -79,4 +94,4 @@ php artisan cache:clear
 | identifier | `custom-ad_float` |
 | vendor | `custom` |
 | namespace | `Modules\\Custom\\AdFloat` |
-| version | `0.1.14` |
+| version | `0.1.15` |

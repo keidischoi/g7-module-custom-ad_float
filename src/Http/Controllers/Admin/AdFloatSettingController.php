@@ -67,4 +67,15 @@ class AdFloatSettingController extends AdminBaseController
             return $this->error('custom-ad_float::messages.settings.update_failed', 500, $e->getMessage());
         }
     }
+
+    public function resetClosed(): JsonResponse
+    {
+        try {
+            $row = $this->service->resetClosedState();
+
+            return $this->success('custom-ad_float::messages.settings.reset_closed_success', $row->toAdminArray());
+        } catch (\Exception $e) {
+            return $this->error('custom-ad_float::messages.settings.reset_closed_failed', 500, $e->getMessage());
+        }
+    }
 }
