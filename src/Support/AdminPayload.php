@@ -399,6 +399,11 @@ class AdminPayload
     /**
      * Collect image files from G7 FileUploader and plain file inputs.
      *
+     * FileUploader posts the real browser File itself as top-level `file`
+     * (apiEndpoints.upload + uploadTriggerEvent). Do not copy PendingFile.file
+     * through G7 setState / apiCall — that round-trip stringifies the File and
+     * leaves this list empty (422 file_required).
+     *
      * @return array<int, \Illuminate\Http\UploadedFile>
      */
     public static function collectUploadedFiles(Request $request): array
@@ -447,6 +452,33 @@ class AdminPayload
     public static function isUploadFieldName(string $name): bool
     {
         return (bool) preg_match('/^(image|images|file|files|FileUploader|uploadFile)/i', $name);
+    }
+
+    /**
+     * Flatten Laravel's `errors` bag to a list of readable strings for G7 toasts.
+     *
+     * @param  array<string, mixed>  $errors
+     * @return array<int, string>
+     */
+    public static function flattenErrorMessages(array $errors): array
+    {
+        $out = [];
+        foreach ($errors as $value) {
+            if (is_array($value)) {
+                foreach (self::flattenErrorMessages($value) as $msg) {
+                    $out[] = $msg;
+                }
+                continue;
+            }
+            if (is_string($value)) {
+                $trimmed = trim($value);
+                if ($trimmed !== '') {
+                    $out[] = $trimmed;
+                }
+            }
+        }
+
+        return array_values(array_unique($out));
     }
 
     private static function hasValidUpload(Request $request, string $key): bool

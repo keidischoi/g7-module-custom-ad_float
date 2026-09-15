@@ -26,12 +26,16 @@ namespace {
     expect('layout json valid', is_array($layout), true);
 
     $uploader = null;
-    $scan = function ($node) use (&$scan, &$uploader): void {
+    $editUploader = null;
+    $scan = function ($node) use (&$scan, &$uploader, &$editUploader): void {
         if (! is_array($node)) {
             return;
         }
         if (($node['id'] ?? '') === 'caf_create_images_uploader') {
             $uploader = $node;
+        }
+        if (($node['id'] ?? '') === 'caf_edit_images_uploader') {
+            $editUploader = $node;
         }
         foreach ($node as $v) {
             if (is_array($v)) {
@@ -46,25 +50,39 @@ namespace {
     expect('autoUpload false', $uploader['props']['autoUpload'] ?? null, false);
     expect('accept is extensions not image/*', $uploader['props']['accept'] ?? null, '.jpg,.jpeg,.png,.gif,.webp');
     expect('maxFiles 10', $uploader['props']['maxFiles'] ?? null, 10);
+    expect('uploadTriggerEvent create', $uploader['props']['uploadTriggerEvent'] ?? null, 'upload:ad_float_create');
+    expect(
+        'apiEndpoints.upload is items store',
+        $uploader['props']['apiEndpoints']['upload'] ?? null,
+        '/api/modules/custom-ad_float/admin/items'
+    );
+    expect('uploadParams source is upload', $uploader['props']['uploadParams']['source'] ?? null, 'upload');
 
     $actionsJson = json_encode($uploader['actions'] ?? [], JSON_UNESCAPED_UNICODE);
     expect('uses event onFilesChange', str_contains((string) $actionsJson, '"event":"onFilesChange"'), true);
     expect('does not use type onFilesChange', str_contains((string) $actionsJson, '"type":"onFilesChange"'), false);
-    expect('stores $args[0][0].file', str_contains((string) $actionsJson, '$args[0][0].file'), true);
-    expect('first file is raw File not ternary', str_contains((string) $actionsJson, '"uploadFile":"{{$args[0][0].file}}"'), true);
-    expect('stores image_count from $args[0].length', str_contains((string) $actionsJson, '$args[0].length'), true);
-    expect('does not coerce File with || null', str_contains((string) $actionsJson, '.file || null'), false);
-    expect('does not coerce File with ||', str_contains((string) $actionsJson, '.file ||'), false);
-    expect('guards missing indexes with length', str_contains((string) $actionsJson, '$args[0].length > 1 ? $args[0][1].file'), true);
-    expect('stores top-level uploadFile', str_contains((string) $actionsJson, '"uploadFile"'), true);
+    expect('onFilesChange stores image_count from length', str_contains((string) $actionsJson, 'create.image_count'), true);
+    expect('onFilesChange stores original_filename not File', str_contains((string) $actionsJson, 'original_filename'), true);
+    expect('does not stash PendingFile.file in setState', str_contains((string) $actionsJson, '.file'), false);
+    expect('does not stash uploadFile File from PendingFile', str_contains((string) $actionsJson, '"uploadFile":"{{'), false);
+    expect('onUploadComplete present', str_contains((string) $actionsJson, '"event":"onUploadComplete"'), true);
+    expect('onUploadError toast present', str_contains((string) $actionsJson, '"event":"onUploadError"'), true);
+    expect('onUploadError toast uses $args[0]', str_contains((string) $actionsJson, '"message":"{{$args[0]}}"'), true);
     expect('no .map(', str_contains((string) $actionsJson, '.map('), false);
     expect('no function keyword', str_contains((string) $actionsJson, 'function'), false);
     expect('no arrow =>', str_contains((string) $actionsJson, '=>'), false);
     expect('no optional chaining', str_contains((string) $actionsJson, '?.'), false);
     expect('no nullish coalescing', str_contains((string) $actionsJson, '??'), false);
-    expect('no $event[0]', str_contains((string) $actionsJson, '$event[0]'), false);
     expect('plain file input box gone', str_contains((string) $raw, 'caf_create_images_input'), false);
     expect('plain file input box wrapper gone', str_contains((string) $raw, 'caf_create_images_box'), false);
+
+    expect('edit FileUploader present', is_array($editUploader), true);
+    expect('edit uploadTriggerEvent', $editUploader['props']['uploadTriggerEvent'] ?? null, 'upload:ad_float_update');
+    expect(
+        'edit apiEndpoints.upload uses item id',
+        $editUploader['props']['apiEndpoints']['upload'] ?? null,
+        '/api/modules/custom-ad_float/admin/items/{{_local.editingId}}'
+    );
 
     $sourceToggle = json_encode($layout, JSON_UNESCAPED_UNICODE);
     expect('createSource still used', str_contains((string) $sourceToggle, 'createSource'), true);
@@ -88,15 +106,12 @@ namespace {
     $findBtn($layout);
     expect('create upload button found', is_array($createBtn), true);
     $btnJson = json_encode($createBtn, JSON_UNESCAPED_UNICODE);
-    expect('create posts multipart', str_contains((string) $btnJson, 'multipart'), true);
-    expect('create posts source upload', str_contains((string) $btnJson, '"source":"upload"'), true);
-    expect('create posts file field', str_contains((string) $btnJson, '"file":"{{_local.uploadFile}}"'), true);
-    expect('create posts image File', str_contains((string) $btnJson, '"image":"{{_local.create.image}}"'), true);
-    expect('create posts images0 File', str_contains((string) $btnJson, '"images0":"{{_local.create.images0}}"'), true);
-    expect('create posts images9 File', str_contains((string) $btnJson, '"images9":"{{_local.create.images9}}"'), true);
-    expect('create does not post images as a File', str_contains((string) $btnJson, '"images":"{{_local.create.images}}"'), false);
-    expect('create File fields have no ||', str_contains((string) $btnJson, '"file":"{{_local.uploadFile ||'), false);
-    expect('create image field has no ||', str_contains((string) $btnJson, '"image":"{{_local.create.image ||'), false);
+    expect('create button emitEvent', str_contains((string) $btnJson, '"handler":"emitEvent"'), true);
+    expect('create button trigger event', str_contains((string) $btnJson, 'upload:ad_float_create'), true);
+    expect('create does not post _local.uploadFile', str_contains((string) $btnJson, '_local.uploadFile'), false);
+    expect('create does not post create.image File', str_contains((string) $btnJson, '"image":"{{_local.create.image}}"'), false);
+    expect('create is not a multipart apiCall', str_contains((string) $btnJson, 'multipart'), false);
+    expect('create enable uses image_count', str_contains((string) $btnJson, 'image_count'), true);
 
     $urlBtn = null;
     $findUrl = function ($node) use (&$findUrl, &$urlBtn): void {
@@ -118,6 +133,10 @@ namespace {
     expect('url create posts source url', str_contains((string) $urlJson, '"source":"url"'), true);
     expect('url create posts image_url', str_contains((string) $urlJson, 'image_url'), true);
     expect('url create is not multipart', str_contains((string) $urlJson, 'multipart'), false);
+    expect('url create onError uses error.message', str_contains((string) $urlJson, '{{error.message || error.data.message}}'), true);
+    expect('url create onError does not use .join', str_contains((string) $urlJson, 'error.errors.join'), false);
+
+    expect('layout has no error.errors.join toast', str_contains((string) $raw, 'error.errors.join'), false);
 
     echo "\n{$passed} passed, {$failed} failed\n";
     exit($failed === 0 ? 0 : 1);

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.28
+- Root cause of production 422 「이미지 파일을 선택해 주세요」 (`collectUploadedFiles === []`): 0.1.27 copied `PendingFile.file` into `_local.uploadFile` / `create.image` via `setState`, then POSTed those fields in a later multipart `apiCall`. G7 local state does not keep a real browser `File` across that round-trip (a truthy placeholder still enables the button). FileUploader keeps Files internally; `onFilesChange` now only sets `image_count` / `image_name` flags.
+- Fix (same pattern as G7 FileUploader / custom-digital_product): `apiEndpoints.upload` → `POST /admin/items` (controller already returns Attachment-shaped `hash` / `download_url`), `autoUpload: false`, `uploadTriggerEvent`. 「광고 등록」 `emitEvent` so the component posts top-level `file` itself. URL mode unchanged. Uploader box look unchanged.
+- Register/update failure toasts always show a readable message: G7 `{{error.message || error.data.message}}` (no `.join`, which emptied the toast). FileUploader `onUploadError` toasts `$args[0]`. Backend flattens Laravel `errors` into `message`.
+
 ## 0.1.27
 - Fix upload-mode 「광고 등록」 not writing a DB row. FileUploader still shows selected files, but 0.1.26 stored `$args[0][n].file || null` and always read `images1`…`images9`. G7 can stringify File through `||` (`[object File]`) and abort setState when `$args[0][1]` is missing, so multipart POST had no real File. Register now stores Files with length-guarded ternaries (no `||` / `?.` / `??` / `.map` on File), top-level `uploadFile` / `file` (G7 FormData keeps File/Blob only at the top level), and omits the `images` File field. Backend accepts `file` / `uploadFile` / any leftover upload key, validates with `file`+mimes (not Laravel `image`/getimagesize), and still creates from a staged `image_path`. URL mode unchanged.
 

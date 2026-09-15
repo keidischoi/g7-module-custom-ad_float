@@ -52,6 +52,14 @@ namespace {
     expect('FileUploader is an upload field name', AdminPayload::isUploadFieldName('FileUploader'), true);
     expect('title is not an upload field name', AdminPayload::isUploadFieldName('title'), false);
 
+    $flat = AdminPayload::flattenErrorMessages([
+        'file' => ['이미지 파일을 선택해 주세요.'],
+        'title' => ['The title field must not be greater than 120 characters.'],
+    ]);
+    expect('flatten first validation message', $flat[0] ?? null, '이미지 파일을 선택해 주세요.');
+    expect('flatten keeps later messages', count($flat), 2);
+    expect('flatten empty bag', AdminPayload::flattenErrorMessages([]), []);
+
     echo "\n{$passed} passed, {$failed} failed\n";
     exit($failed === 0 ? 0 : 1);
 }
