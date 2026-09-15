@@ -21,6 +21,13 @@ return [
         'image_required' => '이미지 파일 또는 이미지 웹주소가 필요합니다.',
         'file_required' => '이미지 파일을 선택해 주세요.',
         'url_required' => '이미지 웹주소를 입력해 주세요.',
+        'combine_success' => '선택한 광고를 캐러셀로 결합했습니다.',
+        'combine_failed' => '캐러셀 결합에 실패했습니다.',
+        'combine_min' => '결합하려면 광고를 2개 이상 선택하세요.',
+        'combine_unavailable' => '캐러셀 결합을 쓰려면 마이그레이션을 실행하세요.',
+        'uncombine_success' => '선택한 광고의 캐러셀 결합을 해제했습니다.',
+        'uncombine_failed' => '캐러셀 결합 해제에 실패했습니다.',
+        'uncombine_min' => '결합 해제할 광고를 선택하세요.',
     ],
     'stats' => [
         'fetch_success' => '광고 통계를 조회했습니다.',

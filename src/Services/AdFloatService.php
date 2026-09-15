@@ -3,7 +3,9 @@
 namespace Modules\Custom\AdFloat\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Modules\Custom\AdFloat\Models\AdFloatItem;
 use Modules\Custom\AdFloat\Models\AdFloatSetting;
 use Modules\Custom\AdFloat\Support\AdminPayload;
@@ -28,20 +30,27 @@ class AdFloatService
         if (is_array($itemIds) && $itemIds !== []) {
             $itemsQuery->whereIn('id', $itemIds);
         }
-        $items = $itemsQuery
-            ->limit(max(1, (int) ($settings['max_items'] ?? $row->max_items)))
-            ->get();
+        $items = $this->orderItemsForCarousel($itemsQuery->get())
+            ->take(max(1, (int) ($settings['max_items'] ?? $row->max_items)));
 
         return [
             'settings' => $settings,
-            'items' => $items->map(fn (AdFloatItem $item) => [
-                'id' => $item->id,
-                'title' => $item->title,
-                'image_url' => $item->imageUrl(),
-                'target_url' => $item->target_url,
-                'alt_text' => $item->alt_text ?: $item->title,
-                'display_seconds' => $item->display_seconds,
-            ])->values()->all(),
+            'items' => $items->map(function (AdFloatItem $item) {
+                $row = [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'image_url' => $item->imageUrl(),
+                    'target_url' => $item->target_url,
+                    'alt_text' => $item->alt_text ?: $item->title,
+                    'display_seconds' => $item->display_seconds,
+                    'sort_order' => (int) $item->sort_order,
+                ];
+                if (AdFloatItem::hasCarouselGroupColumn()) {
+                    $row['carousel_group'] = $item->carousel_group;
+                }
+
+                return $row;
+            })->values()->all(),
         ];
     }
 
@@ -93,7 +102,96 @@ class AdFloatService
 
     public function listItems()
     {
-        return AdFloatItem::query()->orderBy('sort_order')->orderBy('id')->get();
+        $items = AdFloatItem::query()->orderBy('sort_order')->orderBy('id')->get();
+        $labels = $this->carouselBadges($items);
+        foreach ($items as $item) {
+            $item->carousel_badge = $labels[$item->id] ?? null;
+        }
+
+        return $items;
+    }
+
+    /**
+     * @param  array<int, UploadedFile|null>  $files
+     * @return array<int, AdFloatItem>
+     */
+    public function createItemsFromRequest(array $data, array $files): array
+    {
+        $jobs = [];
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFile && $file->isValid()) {
+                $jobs[] = ['source' => AdminPayload::SOURCE_UPLOAD, 'file' => $file, 'image_url' => null];
+            }
+        }
+        foreach (AdminPayload::collectImageUrls($data) as $url) {
+            $jobs[] = ['source' => AdminPayload::SOURCE_URL, 'file' => null, 'image_url' => $url];
+        }
+        if ($jobs === []) {
+            throw new \InvalidArgumentException(__('custom-ad_float::messages.items.image_required'));
+        }
+
+        $combine = filter_var($data['combine'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $group = ($combine && count($jobs) > 1 && AdFloatItem::hasCarouselGroupColumn())
+            ? (string) Str::uuid()
+            : null;
+        $sort = (int) ($data['sort_order'] ?? 0);
+        $baseTitle = is_string($data['title'] ?? null) ? trim((string) $data['title']) : '';
+        $created = [];
+        foreach ($jobs as $i => $job) {
+            $row = $data;
+            $row['source'] = $job['source'];
+            $row['image_source'] = $job['source'];
+            $row['image_url'] = $job['image_url'];
+            $row['sort_order'] = $sort + $i;
+            if ($group) {
+                $row['carousel_group'] = $group;
+            }
+            if ($baseTitle !== '' && count($jobs) > 1) {
+                $row['title'] = $baseTitle.' ('.($i + 1).'/'.count($jobs).')';
+            }
+            $created[] = $this->createItem($row, $job['file']);
+        }
+
+        return $created;
+    }
+
+    /**
+     * @param  array<int, int>  $ids
+     * @return Collection<int, AdFloatItem>
+     */
+    public function combineItems(array $ids): Collection
+    {
+        if (! AdFloatItem::hasCarouselGroupColumn()) {
+            throw new \InvalidArgumentException(__('custom-ad_float::messages.items.combine_unavailable'));
+        }
+        $ids = array_values(array_unique(array_filter($ids, fn ($id) => (int) $id > 0)));
+        $items = AdFloatItem::query()->whereIn('id', $ids)->orderBy('sort_order')->orderBy('id')->get();
+        if ($items->count() < 2) {
+            throw new \InvalidArgumentException(__('custom-ad_float::messages.items.combine_min'));
+        }
+        $group = (string) Str::uuid();
+        foreach ($items as $item) {
+            $item->update(['carousel_group' => $group]);
+        }
+
+        return $this->listItems();
+    }
+
+    /**
+     * @param  array<int, int>  $ids
+     * @return Collection<int, AdFloatItem>
+     */
+    public function uncombineItems(array $ids): Collection
+    {
+        if (! AdFloatItem::hasCarouselGroupColumn()) {
+            return $this->listItems();
+        }
+        $ids = array_values(array_unique(array_filter($ids, fn ($id) => (int) $id > 0)));
+        if ($ids !== []) {
+            AdFloatItem::query()->whereIn('id', $ids)->update(['carousel_group' => null]);
+        }
+
+        return $this->listItems();
     }
 
     public function createItem(array $data, ?UploadedFile $image = null): AdFloatItem
@@ -161,8 +259,101 @@ class AdFloatService
         if (array_key_exists('display_seconds', $data) && AdminPayload::isBlank($data['display_seconds'])) {
             $data['display_seconds'] = null;
         }
+        unset($data['combine'], $data['extra_urls'], $data['image_urls'], $data['images'], $data['item_ids'], $data['sels']);
+        if (AdFloatItem::hasCarouselGroupColumn()) {
+            if (array_key_exists('carousel_group', $data)) {
+                $group = $data['carousel_group'];
+                $data['carousel_group'] = (is_string($group) && trim($group) !== '') ? trim($group) : null;
+            } elseif ($isCreate) {
+                $data['carousel_group'] = $data['carousel_group'] ?? null;
+            }
+        } else {
+            unset($data['carousel_group']);
+        }
 
         return $data;
+    }
+
+    /**
+     * Flatten order: groups by (min sort_order, min id), then sort_order, id.
+     * Ungrouped items are their own group.
+     *
+     * @param  Collection<int, AdFloatItem>  $items
+     * @return Collection<int, AdFloatItem>
+     */
+    private function orderItemsForCarousel(Collection $items): Collection
+    {
+        if ($items->isEmpty() || ! AdFloatItem::hasCarouselGroupColumn()) {
+            return $items->values();
+        }
+
+        $groupMin = [];
+        foreach ($items as $item) {
+            $key = $this->carouselKey($item);
+            $so = (int) $item->sort_order;
+            $id = (int) $item->id;
+            if (! isset($groupMin[$key]) || $so < $groupMin[$key]['so'] || ($so === $groupMin[$key]['so'] && $id < $groupMin[$key]['id'])) {
+                $groupMin[$key] = ['so' => $so, 'id' => $id];
+            }
+        }
+
+        return $items->sort(function (AdFloatItem $a, AdFloatItem $b) use ($groupMin) {
+            $ka = $this->carouselKey($a);
+            $kb = $this->carouselKey($b);
+            $ga = $groupMin[$ka];
+            $gb = $groupMin[$kb];
+            if ($ga['so'] !== $gb['so']) {
+                return $ga['so'] <=> $gb['so'];
+            }
+            if ($ga['id'] !== $gb['id']) {
+                return $ga['id'] <=> $gb['id'];
+            }
+            if ($ka !== $kb) {
+                return $ka <=> $kb;
+            }
+            if ((int) $a->sort_order !== (int) $b->sort_order) {
+                return (int) $a->sort_order <=> (int) $b->sort_order;
+            }
+
+            return (int) $a->id <=> (int) $b->id;
+        })->values();
+    }
+
+    private function carouselKey(AdFloatItem $item): string
+    {
+        $group = is_string($item->carousel_group) ? trim($item->carousel_group) : '';
+
+        return $group !== '' ? 'g:'.$group : 'id:'.$item->id;
+    }
+
+    /**
+     * @param  Collection<int, AdFloatItem>  $items
+     * @return array<int, string>
+     */
+    private function carouselBadges(Collection $items): array
+    {
+        if (! AdFloatItem::hasCarouselGroupColumn()) {
+            return [];
+        }
+        $order = [];
+        foreach ($items as $item) {
+            $group = is_string($item->carousel_group) ? trim($item->carousel_group) : '';
+            if ($group === '' || isset($order[$group])) {
+                continue;
+            }
+            $order[$group] = count($order);
+        }
+        $out = [];
+        foreach ($items as $item) {
+            $group = is_string($item->carousel_group) ? trim($item->carousel_group) : '';
+            if ($group === '' || ! isset($order[$group])) {
+                continue;
+            }
+            $n = $order[$group];
+            $out[$item->id] = $n < 26 ? chr(65 + $n) : (string) ($n + 1);
+        }
+
+        return $out;
     }
 
     /**
