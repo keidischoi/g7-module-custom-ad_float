@@ -1,29 +1,34 @@
 {
-  "_comment": "Mount + JS for floating ads on all _user_base pages. JS fetches payload and self-hides when disabled/empty/home_only.",
+  "_comment": "Inject ad-float.js on all _user_base pages via layout scripts + HtmlContent on user_layout_root. Do not depend on main_content_area.",
   "target_layout": "_user_base",
   "priority": 88,
+  "failOnError": false,
+  "errorHandling": "suppress",
   "data_sources": [],
+  "scripts": [
+    {
+      "id": "custom-ad_float-js",
+      "src": "/api/modules/custom-ad_float/assets/ad-float.js?v=0.1.11",
+      "async": true,
+      "defer": true,
+      "optional": true,
+      "failOnError": false,
+      "errorHandling": "suppress"
+    }
+  ],
   "injections": [
     {
-      "target_id": "main_content_area",
+      "target_id": "user_layout_root",
       "position": "append_child",
+      "failOnError": false,
       "components": [
         {
-          "id": "g7_custom_ad_float_mount",
+          "id": "g7_custom_ad_float_boot",
           "type": "basic",
-          "name": "Div",
+          "name": "HtmlContent",
+          "failOnError": false,
           "props": {
-            "className": "g7-custom-ad-float-mount",
-            "data-caf-role": "mount"
-          },
-          "children": []
-        },
-        {
-          "id": "g7_custom_ad_float_script",
-          "type": "basic",
-          "name": "Script",
-          "props": {
-            "src": "/api/modules/custom-ad_float/assets/ad-float.js?v=0.1.9"
+            "html": "<div id=\"g7_custom_ad_float_mount\" class=\"g7-custom-ad-float-mount\" hidden></div><script src=\"/api/modules/custom-ad_float/assets/ad-float.js?v=0.1.11\" async></script>"
           }
         }
       ]

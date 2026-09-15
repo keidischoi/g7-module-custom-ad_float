@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  if (window.__g7CustomAdFloatBooted) return;
+  window.__g7CustomAdFloatBooted = true;
+
   var API = '/api/modules/custom-ad_float/payload';
   var ROOT_ID = 'g7-custom-ad-float';
   var MOUNT_ID = 'g7_custom_ad_float_mount';

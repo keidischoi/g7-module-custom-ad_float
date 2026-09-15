@@ -12,43 +12,28 @@ class AdFloatService
 {
     public function payload(): array
     {
-        $settings = AdFloatSetting::current();
+        $row = AdFloatSetting::current();
+        $resolved = $row->resolvePublicSettings(now());
+        $settings = $resolved['settings'];
 
-        if (! $settings->isWithinSchedule(now())) {
+        if (! empty($resolved['hide']) || empty($settings['enabled'])) {
             return ['settings' => ['enabled' => false], 'items' => []];
         }
 
-        $items = AdFloatItem::query()
+        $itemsQuery = AdFloatItem::query()
             ->where('enabled', true)
             ->orderBy('sort_order')
-            ->orderBy('id')
-            ->limit(max(1, (int) $settings->max_items))
+            ->orderBy('id');
+        $itemIds = $resolved['item_ids'] ?? [];
+        if (is_array($itemIds) && $itemIds !== []) {
+            $itemsQuery->whereIn('id', $itemIds);
+        }
+        $items = $itemsQuery
+            ->limit(max(1, (int) ($settings['max_items'] ?? $row->max_items)))
             ->get();
 
         return [
-            'settings' => [
-                'enabled' => (bool) $settings->enabled,
-                'home_only' => (bool) $settings->home_only,
-                'position' => $settings->position,
-                'direction' => $settings->direction,
-                'interval_ms' => (int) $settings->interval_ms,
-                'width_px' => (int) $settings->width_px,
-                'height_px' => (int) $settings->height_px,
-                'radius_px' => (int) $settings->radius_px,
-                'offset_px' => (int) $settings->offset_px,
-                'z_index' => (int) $settings->z_index,
-                'autoplay' => (bool) $settings->autoplay,
-                'show_arrows' => (bool) $settings->show_arrows,
-                'show_dots' => (bool) $settings->show_dots,
-                'pause_on_hover' => (bool) $settings->pause_on_hover,
-                'open_new_tab' => (bool) $settings->open_new_tab,
-                'mobile_mode' => $settings->mobile_mode,
-                'max_items' => (int) $settings->max_items,
-                'show_close' => (bool) $settings->show_close,
-                'close_cookie_key' => $settings->close_cookie_key ?: 'g7_custom_ad_float_closed',
-                'start_at' => optional($settings->start_at)->toIso8601String(),
-                'end_at' => optional($settings->end_at)->toIso8601String(),
-            ],
+            'settings' => $settings,
             'items' => $items->map(fn (AdFloatItem $item) => [
                 'id' => $item->id,
                 'title' => $item->title,
@@ -65,7 +50,7 @@ class AdFloatService
         $settings = AdFloatSetting::current();
         foreach ([
             'enabled', 'home_only', 'autoplay', 'show_arrows', 'show_dots',
-            'show_close', 'pause_on_hover', 'open_new_tab',
+            'show_close', 'pause_on_hover', 'open_new_tab', 'schedules_enabled',
         ] as $boolKey) {
             if (array_key_exists($boolKey, $data)) {
                 $data[$boolKey] = filter_var($data[$boolKey], FILTER_VALIDATE_BOOLEAN);
@@ -75,6 +60,9 @@ class AdFloatService
             if (array_key_exists($dateKey, $data) && AdminPayload::isBlank($data[$dateKey])) {
                 $data[$dateKey] = null;
             }
+        }
+        if (array_key_exists('schedules_enabled', $data) && ! AdFloatSetting::hasSchedulesEnabledColumn()) {
+            unset($data['schedules_enabled']);
         }
         if (array_key_exists('schedules', $data)) {
             $schedules = AdminPayload::normalizeSchedules($data['schedules']);

@@ -14,13 +14,14 @@ class AdFloatSetting extends Model
         'enabled', 'home_only', 'position', 'direction', 'interval_ms', 'width_px', 'height_px',
         'radius_px', 'offset_px', 'z_index', 'autoplay', 'show_arrows', 'show_dots', 'show_close',
         'pause_on_hover', 'open_new_tab', 'mobile_mode', 'max_items', 'close_cookie_key',
-        'start_at', 'end_at', 'schedules',
+        'start_at', 'end_at', 'schedules', 'schedules_enabled',
     ];
 
     protected $casts = [
         'enabled' => 'boolean', 'home_only' => 'boolean', 'autoplay' => 'boolean',
         'show_arrows' => 'boolean', 'show_dots' => 'boolean', 'show_close' => 'boolean',
         'pause_on_hover' => 'boolean', 'open_new_tab' => 'boolean',
+        'schedules_enabled' => 'boolean',
         'start_at' => 'datetime', 'end_at' => 'datetime',
         'schedules' => 'array',
     ];
@@ -37,6 +38,9 @@ class AdFloatSetting extends Model
         if (static::hasSchedulesColumn()) {
             $defaults['schedules'] = [];
         }
+        if (static::hasSchedulesEnabledColumn()) {
+            $defaults['schedules_enabled'] = false;
+        }
 
         return static::query()->firstOrCreate(['id' => 1], $defaults);
     }
@@ -52,7 +56,7 @@ class AdFloatSetting extends Model
                     'start_at' => optional($this->start_at)->format('Y-m-d\TH:i'),
                     'end_at' => optional($this->end_at)->format('Y-m-d\TH:i'),
                     'weekdays' => [],
-                ], 0)];
+                ], 0, $this->visualBase())];
             }
 
             return [];
@@ -69,7 +73,7 @@ class AdFloatSetting extends Model
                 if (! is_array($row)) {
                     continue;
                 }
-                $rows[] = self::scheduleToForm($row, $i);
+                $rows[] = self::scheduleToForm($row, $i, $this->visualBase());
             }
             if ($rows !== []) {
                 return $rows;
@@ -80,7 +84,7 @@ class AdFloatSetting extends Model
                 'start_at' => optional($this->start_at)->format('Y-m-d\TH:i'),
                 'end_at' => optional($this->end_at)->format('Y-m-d\TH:i'),
                 'weekdays' => [],
-            ], 0)];
+            ], 0, $this->visualBase())];
         }
 
         return [];
@@ -90,15 +94,30 @@ class AdFloatSetting extends Model
      * @param  array<string, mixed>  $row
      * @return array<string, mixed>
      */
-    public static function scheduleToForm(array $row, int $index = 0): array
+    public static function scheduleToForm(array $row, int $index = 0, array $base = []): array
     {
         $weekdays = AdminPayload::normalizeWeekdays($row);
-        $form = [
+        $start = AdminPayload::combineDateTime($row['start_date'] ?? null, $row['start_time'] ?? null, $row['start_at'] ?? null);
+        $end = AdminPayload::combineDateTime($row['end_date'] ?? null, $row['end_time'] ?? null, $row['end_at'] ?? null);
+        $splitStart = AdminPayload::splitDateTime($start);
+        $splitEnd = AdminPayload::splitDateTime($end);
+        $visual = AdminPayload::extractVisual(array_merge(AdminPayload::visualDefaults(), $base, $row), true);
+        $itemIds = AdminPayload::normalizeItemIds($row);
+        $form = array_merge($visual, [
             'id' => $row['id'] ?? ('s'.$index),
-            'start_at' => AdminPayload::blankToNull($row['start_at'] ?? null) ?? '',
-            'end_at' => AdminPayload::blankToNull($row['end_at'] ?? null) ?? '',
+            'start_at' => $start ?? '',
+            'end_at' => $end ?? '',
+            'start_date' => $splitStart['date'] ?? '',
+            'start_time' => $splitStart['time'] ?? '',
+            'end_date' => $splitEnd['date'] ?? '',
+            'end_time' => $splitEnd['time'] ?? '',
             'weekdays' => $weekdays,
-        ];
+            'item_ids' => $itemIds,
+            '_deleted' => false,
+        ]);
+        foreach ($itemIds as $id) {
+            $form['sel_'.$id] = true;
+        }
         $selected = $weekdays === [] ? [0, 1, 2, 3, 4, 5, 6] : $weekdays;
         foreach ([0, 1, 2, 3, 4, 5, 6] as $d) {
             $form['d'.$d] = in_array($d, $selected, true);
@@ -107,29 +126,88 @@ class AdFloatSetting extends Model
         return $form;
     }
 
-    public function isWithinSchedule(?\DateTimeInterface $now = null): bool
+    /**
+     * @return array<string, mixed>
+     */
+    public function visualBase(): array
+    {
+        $row = [];
+        foreach (AdminPayload::visualSettingKeys() as $key) {
+            $row[$key] = $this->{$key} ?? null;
+        }
+
+        return AdminPayload::extractVisual($row, true);
+    }
+
+    public function schedulesEnabled(): bool
+    {
+        if (! static::hasSchedulesEnabledColumn()) {
+            return false;
+        }
+
+        return (bool) $this->schedules_enabled;
+    }
+
+    /**
+     * @return array{hide:bool,settings:array<string,mixed>,item_ids:array<int,int>}
+     */
+    public function resolvePublicSettings(?\DateTimeInterface $now = null): array
     {
         $now = $now ?? now();
+        $settings = $this->toPublicSettingsArray();
+        if (! $this->schedulesEnabled()) {
+            return ['hide' => false, 'settings' => $settings, 'item_ids' => []];
+        }
         $schedules = static::hasSchedulesColumn()
             ? AdminPayload::normalizeSchedules($this->schedules)
             : [];
-        if ($schedules === []) {
-            if ($this->start_at && $now < $this->start_at) {
-                return false;
-            }
-            if ($this->end_at && $now > $this->end_at) {
-                return false;
-            }
+        $match = AdminPayload::firstMatchingSchedule($schedules, $now);
+        if ($match === null) {
+            $settings['enabled'] = false;
 
-            return true;
-        }
-        foreach ($schedules as $row) {
-            if (AdminPayload::scheduleMatchesNow($row, $now)) {
-                return true;
-            }
+            return ['hide' => true, 'settings' => $settings, 'item_ids' => []];
         }
 
-        return false;
+        return [
+            'hide' => false,
+            'settings' => AdminPayload::overlayVisual($settings, $match),
+            'item_ids' => AdminPayload::normalizeItemIds($match),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toPublicSettingsArray(): array
+    {
+        return [
+            'enabled' => (bool) $this->enabled,
+            'home_only' => (bool) $this->home_only,
+            'position' => $this->position,
+            'direction' => $this->direction,
+            'interval_ms' => (int) $this->interval_ms,
+            'width_px' => (int) $this->width_px,
+            'height_px' => (int) $this->height_px,
+            'radius_px' => (int) $this->radius_px,
+            'offset_px' => (int) $this->offset_px,
+            'z_index' => (int) $this->z_index,
+            'autoplay' => (bool) $this->autoplay,
+            'show_arrows' => (bool) $this->show_arrows,
+            'show_dots' => (bool) $this->show_dots,
+            'pause_on_hover' => (bool) $this->pause_on_hover,
+            'open_new_tab' => (bool) $this->open_new_tab,
+            'mobile_mode' => $this->mobile_mode,
+            'max_items' => (int) $this->max_items,
+            'show_close' => (bool) $this->show_close,
+            'close_cookie_key' => $this->close_cookie_key ?: 'g7_custom_ad_float_closed',
+            'start_at' => optional($this->start_at)->toIso8601String(),
+            'end_at' => optional($this->end_at)->toIso8601String(),
+        ];
+    }
+
+    public function isWithinSchedule(?\DateTimeInterface $now = null): bool
+    {
+        return ! $this->resolvePublicSettings($now)['hide'];
     }
 
     public function toAdminArray(): array
@@ -156,6 +234,7 @@ class AdFloatSetting extends Model
             'close_cookie_key' => $this->close_cookie_key,
             'start_at' => optional($this->start_at)->format('Y-m-d\TH:i'),
             'end_at' => optional($this->end_at)->format('Y-m-d\TH:i'),
+            'schedules_enabled' => $this->schedulesEnabled(),
             'schedules' => $this->schedulesForAdmin(),
         ];
     }
@@ -164,6 +243,15 @@ class AdFloatSetting extends Model
     {
         try {
             return Schema::hasColumn('custom_ad_float_settings', 'schedules');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    public static function hasSchedulesEnabledColumn(): bool
+    {
+        try {
+            return Schema::hasColumn('custom_ad_float_settings', 'schedules_enabled');
         } catch (\Throwable $e) {
             return false;
         }

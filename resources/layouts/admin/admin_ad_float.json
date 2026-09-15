@@ -43,7 +43,8 @@
           "close_cookie_key": "g7_custom_ad_float_closed",
           "start_at": "",
           "end_at": "",
-          "schedules": []
+          "schedules": [],
+          "schedules_enabled": false
         }
       }
     },
@@ -101,9 +102,9 @@
         },
         "children": [
           {
-            "id": "caf_header",
             "type": "basic",
             "name": "Div",
+            "id": "caf_header",
             "props": {
               "className": "flex-between mb-6"
             },
@@ -129,6 +130,103 @@
                     "text": "$t:custom-ad_float.admin.description"
                   }
                 ]
+              },
+              {
+                "type": "basic",
+                "name": "Button",
+                "id": "btn_save_settings_top",
+                "props": {
+                  "type": "button",
+                  "disabled": "{{_local.saving}}",
+                  "className": "btn btn-primary disabled:opacity-50"
+                },
+                "text": "$t:custom-ad_float.admin.save",
+                "actions": [
+                  {
+                    "type": "click",
+                    "handler": "sequence",
+                    "actions": [
+                      {
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "saving": true,
+                          "errors": null
+                        }
+                      },
+                      {
+                        "handler": "apiCall",
+                        "auth_required": true,
+                        "target": "/api/modules/custom-ad_float/admin/settings",
+                        "params": {
+                          "method": "PUT",
+                          "body": {
+                            "enabled": "{{_local.form?.enabled === true || _local.form?.enabled === 1 || _local.form?.enabled === '1' || _local.form?.enabled === 'true' ? 1 : 0}}",
+                            "home_only": "{{_local.form?.home_only ? 1 : 0}}",
+                            "position": "{{_local.form?.position || 'right'}}",
+                            "direction": "{{_local.form?.direction || 'horizontal'}}",
+                            "interval_ms": "{{Number(_local.form?.interval_ms) || 4000}}",
+                            "width_px": "{{Number(_local.form?.width_px) || 180}}",
+                            "height_px": "{{Number(_local.form?.height_px) || 180}}",
+                            "radius_px": "{{Number(_local.form?.radius_px) || 10}}",
+                            "offset_px": "{{Number(_local.form?.offset_px) || 24}}",
+                            "z_index": "{{Number(_local.form?.z_index) || 9990}}",
+                            "max_items": "{{Number(_local.form?.max_items) || 20}}",
+                            "close_cookie_key": "{{_local.form?.close_cookie_key || 'g7_custom_ad_float_closed'}}",
+                            "autoplay": "{{_local.form?.autoplay ? 1 : 0}}",
+                            "show_arrows": "{{_local.form?.show_arrows ? 1 : 0}}",
+                            "show_dots": "{{_local.form?.show_dots ? 1 : 0}}",
+                            "show_close": "{{_local.form?.show_close ? 1 : 0}}",
+                            "pause_on_hover": "{{_local.form?.pause_on_hover ? 1 : 0}}",
+                            "open_new_tab": "{{_local.form?.open_new_tab ? 1 : 0}}",
+                            "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
+                            "schedules_enabled": "{{_local.form?.schedules_enabled ? 1 : 0}}",
+                            "schedules": "{{_local.form?.schedules ?? []}}"
+                          }
+                        },
+                        "onSuccess": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "saving": false,
+                              "hasChanges": false
+                            }
+                          },
+                          {
+                            "handler": "toast",
+                            "params": {
+                              "type": "success",
+                              "message": "$t:custom-ad_float.admin.save_success"
+                            }
+                          },
+                          {
+                            "handler": "refetchDataSource",
+                            "params": {
+                              "dataSourceId": "settings"
+                            }
+                          }
+                        ],
+                        "onError": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "saving": false
+                            }
+                          },
+                          {
+                            "handler": "toast",
+                            "params": {
+                              "type": "error",
+                              "message": "{{error.message}}"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -143,67 +241,115 @@
                 "type": "basic",
                 "name": "H2",
                 "props": {
-                  "className": "text-lg font-semibold mb-4"
+                  "className": "text-lg font-semibold mb-1"
                 },
                 "text": "$t:custom-ad_float.admin.sections.settings"
               },
               {
                 "type": "basic",
-                "name": "Div",
+                "name": "P",
                 "props": {
-                  "className": "grid grid-cols-1 md:grid-cols-2 gap-4"
+                  "className": "text-xs text-gray-500 mb-4"
+                },
+                "text": "$t:custom-ad_float.admin.settings_hint"
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "id": "tog_enabled",
+                "props": {
+                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
                 },
                 "children": [
                   {
-                    "id": "f_enabled",
                     "type": "basic",
                     "name": "Div",
-                    "props": {
-                      "className": "form-group w-full"
-                    },
                     "children": [
                       {
                         "type": "basic",
-                        "name": "Label",
+                        "name": "Span",
                         "props": {
-                          "className": "flex items-center gap-2 cursor-pointer"
+                          "className": "text-sm font-medium"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Checkbox",
-                            "props": {
-                              "name": "enabled",
-                              "autoBinding": false,
-                              "checked": "{{_local.form?.enabled === true || _local.form?.enabled === 1 || _local.form?.enabled === '1' || _local.form?.enabled === 'true'}}"
-                            },
-                            "actions": [
-                              {
-                                "type": "change",
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "form.enabled": "{{$event.target.checked === true}}"
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "props": {
-                              "className": "text-sm"
-                            },
-                            "text": "$t:custom-ad_float.admin.fields.enabled"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.enabled"
                       }
                     ]
                   },
                   {
-                    "id": "f_position",
+                    "type": "basic",
+                    "name": "Toggle",
+                    "props": {
+                      "name": "enabled",
+                      "autoBinding": false,
+                      "checked": "{{_local.form?.enabled === true || _local.form?.enabled === 1 || _local.form?.enabled === '1' || _local.form?.enabled === 'true'}}"
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "form.enabled": "{{$event.target.checked === true}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "id": "tog_home_only",
+                "props": {
+                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
                     "type": "basic",
                     "name": "Div",
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "props": {
+                          "className": "text-sm font-medium"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.home_only"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Toggle",
+                    "props": {
+                      "name": "home_only",
+                      "autoBinding": false,
+                      "checked": "{{_local.form?.home_only === true || _local.form?.home_only === 1 || _local.form?.home_only === '1' || _local.form?.home_only === 'true'}}"
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "form.home_only": "{{$event.target.checked === true}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-4"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "id": "f_position",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -212,15 +358,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.position"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.position"
                       },
                       {
                         "type": "basic",
@@ -279,9 +419,9 @@
                     ]
                   },
                   {
-                    "id": "f_direction",
                     "type": "basic",
                     "name": "Div",
+                    "id": "f_direction",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -290,15 +430,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.direction"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.direction"
                       },
                       {
                         "type": "basic",
@@ -341,9 +475,9 @@
                     ]
                   },
                   {
-                    "id": "f_interval",
                     "type": "basic",
                     "name": "Div",
+                    "id": "f_interval",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -352,15 +486,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.interval_ms"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.interval_ms"
                       },
                       {
                         "type": "basic",
@@ -380,7 +508,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.interval_ms": "{{Number($event.target.value) || 4000}}"
+                              "form.interval_ms": "{{Number($event.target.value) || 0}}"
                             }
                           }
                         ]
@@ -388,9 +516,9 @@
                     ]
                   },
                   {
-                    "id": "f_width",
                     "type": "basic",
                     "name": "Div",
+                    "id": "f_width",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -399,15 +527,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.width_px"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.width_px"
                       },
                       {
                         "type": "basic",
@@ -427,7 +549,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.width_px": "{{Number($event.target.value) || 180}}"
+                              "form.width_px": "{{Number($event.target.value) || 0}}"
                             }
                           }
                         ]
@@ -435,9 +557,9 @@
                     ]
                   },
                   {
-                    "id": "f_height",
                     "type": "basic",
                     "name": "Div",
+                    "id": "f_height",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -446,15 +568,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.height_px"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.height_px"
                       },
                       {
                         "type": "basic",
@@ -474,7 +590,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.height_px": "{{Number($event.target.value) || 180}}"
+                              "form.height_px": "{{Number($event.target.value) || 0}}"
                             }
                           }
                         ]
@@ -482,9 +598,9 @@
                     ]
                   },
                   {
-                    "id": "f_radius",
                     "type": "basic",
                     "name": "Div",
+                    "id": "f_radius",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -493,15 +609,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.radius_px"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.radius_px"
                       },
                       {
                         "type": "basic",
@@ -521,7 +631,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.radius_px": "{{Number($event.target.value) || 10}}"
+                              "form.radius_px": "{{Number($event.target.value) || 0}}"
                             }
                           }
                         ]
@@ -529,9 +639,9 @@
                     ]
                   },
                   {
-                    "id": "f_offset",
                     "type": "basic",
                     "name": "Div",
+                    "id": "f_offset",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -540,15 +650,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.offset_px"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.offset_px"
                       },
                       {
                         "type": "basic",
@@ -568,7 +672,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.offset_px": "{{Number($event.target.value) || 24}}"
+                              "form.offset_px": "{{Number($event.target.value) || 0}}"
                             }
                           }
                         ]
@@ -576,9 +680,9 @@
                     ]
                   },
                   {
-                    "id": "f_z",
                     "type": "basic",
                     "name": "Div",
+                    "id": "f_z",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -587,15 +691,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.z_index"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.z_index"
                       },
                       {
                         "type": "basic",
@@ -606,8 +704,7 @@
                           "className": "input w-full",
                           "value": "{{_local.form?.z_index ?? 9990}}",
                           "autoBinding": false,
-                          "min": 100,
-                          "max": 2147483647
+                          "min": 100
                         },
                         "actions": [
                           {
@@ -615,7 +712,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.z_index": "{{Number($event.target.value) || 9990}}"
+                              "form.z_index": "{{Number($event.target.value) || 0}}"
                             }
                           }
                         ]
@@ -623,9 +720,9 @@
                     ]
                   },
                   {
-                    "id": "f_max",
                     "type": "basic",
                     "name": "Div",
+                    "id": "f_max",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -634,15 +731,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.max_items"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.max_items"
                       },
                       {
                         "type": "basic",
@@ -662,7 +753,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.max_items": "{{Number($event.target.value) || 20}}"
+                              "form.max_items": "{{Number($event.target.value) || 0}}"
                             }
                           }
                         ]
@@ -670,9 +761,9 @@
                     ]
                   },
                   {
-                    "id": "f_mobile",
                     "type": "basic",
                     "name": "Div",
+                    "id": "f_mobile",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -681,15 +772,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.mobile_mode"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.mobile_mode"
                       },
                       {
                         "type": "basic",
@@ -732,9 +817,9 @@
                     ]
                   },
                   {
-                    "id": "f_cookie",
                     "type": "basic",
                     "name": "Div",
+                    "id": "f_cookie",
                     "props": {
                       "className": "form-group w-full"
                     },
@@ -743,15 +828,9 @@
                         "type": "basic",
                         "name": "Label",
                         "props": {
-                          "className": "form-label"
+                          "className": "form-label text-xs text-gray-500"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.close_cookie_key"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.close_cookie_key"
                       },
                       {
                         "type": "basic",
@@ -781,894 +860,256 @@
               {
                 "type": "basic",
                 "name": "Div",
+                "id": "tog_autoplay",
                 "props": {
-                  "className": "mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"
+                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
                 },
                 "children": [
                   {
                     "type": "basic",
                     "name": "Div",
-                    "props": {
-                      "className": "flex items-center justify-between mb-2"
-                    },
                     "children": [
                       {
                         "type": "basic",
-                        "name": "H3",
+                        "name": "Span",
                         "props": {
-                          "className": "text-base font-semibold"
+                          "className": "text-sm font-medium"
                         },
-                        "text": "$t:custom-ad_float.admin.sections.schedules"
-                      },
-                      {
-                        "type": "basic",
-                        "name": "Button",
-                        "props": {
-                          "type": "button",
-                          "className": "px-3 py-1.5 text-sm border rounded-lg"
-                        },
-                        "text": "$t:custom-ad_float.admin.actions.add_schedule",
-                        "actions": [
-                          {
-                            "type": "click",
-                            "handler": "setState",
-                            "params": {
-                              "target": "local",
-                              "form.schedules": "{{(_local.form?.schedules || []).concat([{id: 'new', start_at: '', end_at: '', d0: true, d1: true, d2: true, d3: true, d4: true, d5: true, d6: true, _deleted: false}])}}"
-                            }
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.fields.autoplay"
                       }
                     ]
                   },
                   {
                     "type": "basic",
-                    "name": "P",
+                    "name": "Toggle",
                     "props": {
-                      "className": "text-xs text-gray-500 mb-3"
+                      "name": "autoplay",
+                      "autoBinding": false,
+                      "checked": "{{_local.form?.autoplay === true || _local.form?.autoplay === 1 || _local.form?.autoplay === '1' || _local.form?.autoplay === 'true'}}"
                     },
-                    "text": "$t:custom-ad_float.admin.schedules_hint"
-                  },
-                  {
-                    "id": "caf_sch_{{sidx}}",
-                    "type": "basic",
-                    "name": "Div",
-                    "iteration": {
-                      "source": "{{_local.form?.schedules ?? []}}",
-                      "item_var": "sch",
-                      "index_var": "sidx"
-                    },
-                    "props": {
-                      "className": ""
-                    },
-                    "children": [
-                      {
-                        "type": "basic",
-                        "name": "Div",
-                        "if": "{{!(sch._deleted === true || sch._deleted === 1 || sch._deleted === '1' || sch._deleted === 'true')}}",
-                        "props": {
-                          "className": "mb-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Div",
-                            "props": {
-                              "className": "grid grid-cols-1 md:grid-cols-2 gap-3"
-                            },
-                            "children": [
-                              {
-                                "type": "basic",
-                                "name": "Div",
-                                "props": {
-                                  "className": "form-group w-full"
-                                },
-                                "children": [
-                                  {
-                                    "type": "basic",
-                                    "name": "Label",
-                                    "props": {
-                                      "className": "form-label"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "basic",
-                                        "name": "Span",
-                                        "text": "$t:custom-ad_float.admin.fields.start_at"
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "basic",
-                                    "name": "Input",
-                                    "props": {
-                                      "type": "datetime-local",
-                                      "name": "sch_start_{{sidx}}",
-                                      "className": "input w-full",
-                                      "value": "{{sch.start_at ?? ''}}",
-                                      "autoBinding": false
-                                    },
-                                    "actions": [
-                                      {
-                                        "type": "change",
-                                        "handler": "setState",
-                                        "params": {
-                                          "target": "local",
-                                          "form.schedules.{{sidx}}.start_at": "{{$event.target.value}}"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "basic",
-                                "name": "Div",
-                                "props": {
-                                  "className": "form-group w-full"
-                                },
-                                "children": [
-                                  {
-                                    "type": "basic",
-                                    "name": "Label",
-                                    "props": {
-                                      "className": "form-label"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "basic",
-                                        "name": "Span",
-                                        "text": "$t:custom-ad_float.admin.fields.end_at"
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "basic",
-                                    "name": "Input",
-                                    "props": {
-                                      "type": "datetime-local",
-                                      "name": "sch_end_{{sidx}}",
-                                      "className": "input w-full",
-                                      "value": "{{sch.end_at ?? ''}}",
-                                      "autoBinding": false
-                                    },
-                                    "actions": [
-                                      {
-                                        "type": "change",
-                                        "handler": "setState",
-                                        "params": {
-                                          "target": "local",
-                                          "form.schedules.{{sidx}}.end_at": "{{$event.target.value}}"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Div",
-                            "props": {
-                              "className": "mt-3"
-                            },
-                            "children": [
-                              {
-                                "type": "basic",
-                                "name": "Label",
-                                "props": {
-                                  "className": "form-label"
-                                },
-                                "text": "$t:custom-ad_float.admin.fields.weekdays"
-                              },
-                              {
-                                "type": "basic",
-                                "name": "Div",
-                                "props": {
-                                  "className": "flex flex-wrap gap-3 mt-1"
-                                },
-                                "children": [
-                                  {
-                                    "type": "basic",
-                                    "name": "Label",
-                                    "props": {
-                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "basic",
-                                        "name": "Checkbox",
-                                        "props": {
-                                          "name": "sch_{{sidx}}_d0",
-                                          "autoBinding": false,
-                                          "checked": "{{sch.d0 === true || sch.d0 === 1 || sch.d0 === '1' || sch.d0 === 'true'}}"
-                                        },
-                                        "actions": [
-                                          {
-                                            "type": "change",
-                                            "handler": "setState",
-                                            "params": {
-                                              "target": "local",
-                                              "form.schedules.{{sidx}}.d0": "{{$event.target.checked === true}}"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "basic",
-                                        "name": "Span",
-                                        "text": "$t:custom-ad_float.admin.weekdays.d0"
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "basic",
-                                    "name": "Label",
-                                    "props": {
-                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "basic",
-                                        "name": "Checkbox",
-                                        "props": {
-                                          "name": "sch_{{sidx}}_d1",
-                                          "autoBinding": false,
-                                          "checked": "{{sch.d1 === true || sch.d1 === 1 || sch.d1 === '1' || sch.d1 === 'true'}}"
-                                        },
-                                        "actions": [
-                                          {
-                                            "type": "change",
-                                            "handler": "setState",
-                                            "params": {
-                                              "target": "local",
-                                              "form.schedules.{{sidx}}.d1": "{{$event.target.checked === true}}"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "basic",
-                                        "name": "Span",
-                                        "text": "$t:custom-ad_float.admin.weekdays.d1"
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "basic",
-                                    "name": "Label",
-                                    "props": {
-                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "basic",
-                                        "name": "Checkbox",
-                                        "props": {
-                                          "name": "sch_{{sidx}}_d2",
-                                          "autoBinding": false,
-                                          "checked": "{{sch.d2 === true || sch.d2 === 1 || sch.d2 === '1' || sch.d2 === 'true'}}"
-                                        },
-                                        "actions": [
-                                          {
-                                            "type": "change",
-                                            "handler": "setState",
-                                            "params": {
-                                              "target": "local",
-                                              "form.schedules.{{sidx}}.d2": "{{$event.target.checked === true}}"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "basic",
-                                        "name": "Span",
-                                        "text": "$t:custom-ad_float.admin.weekdays.d2"
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "basic",
-                                    "name": "Label",
-                                    "props": {
-                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "basic",
-                                        "name": "Checkbox",
-                                        "props": {
-                                          "name": "sch_{{sidx}}_d3",
-                                          "autoBinding": false,
-                                          "checked": "{{sch.d3 === true || sch.d3 === 1 || sch.d3 === '1' || sch.d3 === 'true'}}"
-                                        },
-                                        "actions": [
-                                          {
-                                            "type": "change",
-                                            "handler": "setState",
-                                            "params": {
-                                              "target": "local",
-                                              "form.schedules.{{sidx}}.d3": "{{$event.target.checked === true}}"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "basic",
-                                        "name": "Span",
-                                        "text": "$t:custom-ad_float.admin.weekdays.d3"
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "basic",
-                                    "name": "Label",
-                                    "props": {
-                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "basic",
-                                        "name": "Checkbox",
-                                        "props": {
-                                          "name": "sch_{{sidx}}_d4",
-                                          "autoBinding": false,
-                                          "checked": "{{sch.d4 === true || sch.d4 === 1 || sch.d4 === '1' || sch.d4 === 'true'}}"
-                                        },
-                                        "actions": [
-                                          {
-                                            "type": "change",
-                                            "handler": "setState",
-                                            "params": {
-                                              "target": "local",
-                                              "form.schedules.{{sidx}}.d4": "{{$event.target.checked === true}}"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "basic",
-                                        "name": "Span",
-                                        "text": "$t:custom-ad_float.admin.weekdays.d4"
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "basic",
-                                    "name": "Label",
-                                    "props": {
-                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "basic",
-                                        "name": "Checkbox",
-                                        "props": {
-                                          "name": "sch_{{sidx}}_d5",
-                                          "autoBinding": false,
-                                          "checked": "{{sch.d5 === true || sch.d5 === 1 || sch.d5 === '1' || sch.d5 === 'true'}}"
-                                        },
-                                        "actions": [
-                                          {
-                                            "type": "change",
-                                            "handler": "setState",
-                                            "params": {
-                                              "target": "local",
-                                              "form.schedules.{{sidx}}.d5": "{{$event.target.checked === true}}"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "basic",
-                                        "name": "Span",
-                                        "text": "$t:custom-ad_float.admin.weekdays.d5"
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "basic",
-                                    "name": "Label",
-                                    "props": {
-                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "basic",
-                                        "name": "Checkbox",
-                                        "props": {
-                                          "name": "sch_{{sidx}}_d6",
-                                          "autoBinding": false,
-                                          "checked": "{{sch.d6 === true || sch.d6 === 1 || sch.d6 === '1' || sch.d6 === 'true'}}"
-                                        },
-                                        "actions": [
-                                          {
-                                            "type": "change",
-                                            "handler": "setState",
-                                            "params": {
-                                              "target": "local",
-                                              "form.schedules.{{sidx}}.d6": "{{$event.target.checked === true}}"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "basic",
-                                        "name": "Span",
-                                        "text": "$t:custom-ad_float.admin.weekdays.d6"
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Div",
-                            "props": {
-                              "className": "flex justify-end mt-2"
-                            },
-                            "children": [
-                              {
-                                "type": "basic",
-                                "name": "Button",
-                                "props": {
-                                  "type": "button",
-                                  "className": "px-3 py-1 text-sm rounded-md bg-red-50 text-red-700"
-                                },
-                                "text": "$t:custom-ad_float.admin.actions.remove_schedule",
-                                "actions": [
-                                  {
-                                    "type": "click",
-                                    "handler": "setState",
-                                    "params": {
-                                      "target": "local",
-                                      "form.schedules.{{sidx}}._deleted": true
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "basic",
-                "name": "Div",
-                "props": {
-                  "className": "grid grid-cols-1 md:grid-cols-2 gap-3 mt-4"
-                },
-                "children": [
-                  {
-                    "id": "c_home",
-                    "type": "basic",
-                    "name": "Div",
-                    "props": {
-                      "className": "form-group w-full"
-                    },
-                    "children": [
-                      {
-                        "type": "basic",
-                        "name": "Label",
-                        "props": {
-                          "className": "flex items-center gap-2 cursor-pointer"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Checkbox",
-                            "props": {
-                              "name": "home_only",
-                              "autoBinding": false,
-                              "checked": "{{_local.form?.home_only === true || _local.form?.home_only === 1 || _local.form?.home_only === '1' || _local.form?.home_only === 'true'}}"
-                            },
-                            "actions": [
-                              {
-                                "type": "change",
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "form.home_only": "{{$event.target.checked === true}}"
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "props": {
-                              "className": "text-sm"
-                            },
-                            "text": "$t:custom-ad_float.admin.fields.home_only"
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "id": "c_auto",
-                    "type": "basic",
-                    "name": "Div",
-                    "props": {
-                      "className": "form-group w-full"
-                    },
-                    "children": [
-                      {
-                        "type": "basic",
-                        "name": "Label",
-                        "props": {
-                          "className": "flex items-center gap-2 cursor-pointer"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Checkbox",
-                            "props": {
-                              "name": "autoplay",
-                              "autoBinding": false,
-                              "checked": "{{_local.form?.autoplay === true || _local.form?.autoplay === 1 || _local.form?.autoplay === '1' || _local.form?.autoplay === 'true'}}"
-                            },
-                            "actions": [
-                              {
-                                "type": "change",
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "form.autoplay": "{{$event.target.checked === true}}"
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "props": {
-                              "className": "text-sm"
-                            },
-                            "text": "$t:custom-ad_float.admin.fields.autoplay"
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "id": "c_arrows",
-                    "type": "basic",
-                    "name": "Div",
-                    "props": {
-                      "className": "form-group w-full"
-                    },
-                    "children": [
-                      {
-                        "type": "basic",
-                        "name": "Label",
-                        "props": {
-                          "className": "flex items-center gap-2 cursor-pointer"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Checkbox",
-                            "props": {
-                              "name": "show_arrows",
-                              "autoBinding": false,
-                              "checked": "{{_local.form?.show_arrows === true || _local.form?.show_arrows === 1 || _local.form?.show_arrows === '1' || _local.form?.show_arrows === 'true'}}"
-                            },
-                            "actions": [
-                              {
-                                "type": "change",
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "form.show_arrows": "{{$event.target.checked === true}}"
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "props": {
-                              "className": "text-sm"
-                            },
-                            "text": "$t:custom-ad_float.admin.fields.show_arrows"
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "id": "c_dots",
-                    "type": "basic",
-                    "name": "Div",
-                    "props": {
-                      "className": "form-group w-full"
-                    },
-                    "children": [
-                      {
-                        "type": "basic",
-                        "name": "Label",
-                        "props": {
-                          "className": "flex items-center gap-2 cursor-pointer"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Checkbox",
-                            "props": {
-                              "name": "show_dots",
-                              "autoBinding": false,
-                              "checked": "{{_local.form?.show_dots === true || _local.form?.show_dots === 1 || _local.form?.show_dots === '1' || _local.form?.show_dots === 'true'}}"
-                            },
-                            "actions": [
-                              {
-                                "type": "change",
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "form.show_dots": "{{$event.target.checked === true}}"
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "props": {
-                              "className": "text-sm"
-                            },
-                            "text": "$t:custom-ad_float.admin.fields.show_dots"
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "id": "c_close",
-                    "type": "basic",
-                    "name": "Div",
-                    "props": {
-                      "className": "form-group w-full"
-                    },
-                    "children": [
-                      {
-                        "type": "basic",
-                        "name": "Label",
-                        "props": {
-                          "className": "flex items-center gap-2 cursor-pointer"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Checkbox",
-                            "props": {
-                              "name": "show_close",
-                              "autoBinding": false,
-                              "checked": "{{_local.form?.show_close === true || _local.form?.show_close === 1 || _local.form?.show_close === '1' || _local.form?.show_close === 'true'}}"
-                            },
-                            "actions": [
-                              {
-                                "type": "change",
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "form.show_close": "{{$event.target.checked === true}}"
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "props": {
-                              "className": "text-sm"
-                            },
-                            "text": "$t:custom-ad_float.admin.fields.show_close"
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "id": "c_pause",
-                    "type": "basic",
-                    "name": "Div",
-                    "props": {
-                      "className": "form-group w-full"
-                    },
-                    "children": [
-                      {
-                        "type": "basic",
-                        "name": "Label",
-                        "props": {
-                          "className": "flex items-center gap-2 cursor-pointer"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Checkbox",
-                            "props": {
-                              "name": "pause_on_hover",
-                              "autoBinding": false,
-                              "checked": "{{_local.form?.pause_on_hover === true || _local.form?.pause_on_hover === 1 || _local.form?.pause_on_hover === '1' || _local.form?.pause_on_hover === 'true'}}"
-                            },
-                            "actions": [
-                              {
-                                "type": "change",
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "form.pause_on_hover": "{{$event.target.checked === true}}"
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "props": {
-                              "className": "text-sm"
-                            },
-                            "text": "$t:custom-ad_float.admin.fields.pause_on_hover"
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "id": "c_tab",
-                    "type": "basic",
-                    "name": "Div",
-                    "props": {
-                      "className": "form-group w-full"
-                    },
-                    "children": [
-                      {
-                        "type": "basic",
-                        "name": "Label",
-                        "props": {
-                          "className": "flex items-center gap-2 cursor-pointer"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Checkbox",
-                            "props": {
-                              "name": "open_new_tab",
-                              "autoBinding": false,
-                              "checked": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true'}}"
-                            },
-                            "actions": [
-                              {
-                                "type": "change",
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "form.open_new_tab": "{{$event.target.checked === true}}"
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "props": {
-                              "className": "text-sm"
-                            },
-                            "text": "$t:custom-ad_float.admin.fields.open_new_tab"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "basic",
-                "name": "Div",
-                "props": {
-                  "className": "flex justify-end mt-6"
-                },
-                "children": [
-                  {
-                    "id": "btn_save_settings",
-                    "type": "basic",
-                    "name": "Button",
-                    "props": {
-                      "type": "button",
-                      "disabled": "{{_local.saving}}",
-                      "className": "btn btn-primary disabled:opacity-50"
-                    },
-                    "text": "$t:custom-ad_float.admin.save",
                     "actions": [
                       {
-                        "type": "click",
-                        "handler": "sequence",
-                        "actions": [
-                          {
-                            "handler": "setState",
-                            "params": {
-                              "target": "local",
-                              "saving": true,
-                              "errors": null
-                            }
-                          },
-                          {
-                            "handler": "apiCall",
-                            "auth_required": true,
-                            "target": "/api/modules/custom-ad_float/admin/settings",
-                            "params": {
-                              "method": "PUT",
-                              "body": {
-                                "enabled": "{{_local.form?.enabled === true || _local.form?.enabled === 1 || _local.form?.enabled === '1' || _local.form?.enabled === 'true' ? 1 : 0}}",
-                                "home_only": "{{_local.form?.home_only ? 1 : 0}}",
-                                "position": "{{_local.form?.position || 'right'}}",
-                                "direction": "{{_local.form?.direction || 'horizontal'}}",
-                                "interval_ms": "{{Number(_local.form?.interval_ms) || 4000}}",
-                                "width_px": "{{Number(_local.form?.width_px) || 180}}",
-                                "height_px": "{{Number(_local.form?.height_px) || 180}}",
-                                "radius_px": "{{Number(_local.form?.radius_px) || 10}}",
-                                "offset_px": "{{Number(_local.form?.offset_px) || 24}}",
-                                "z_index": "{{Number(_local.form?.z_index) || 9990}}",
-                                "max_items": "{{Number(_local.form?.max_items) || 20}}",
-                                "close_cookie_key": "{{_local.form?.close_cookie_key || 'g7_custom_ad_float_closed'}}",
-                                "autoplay": "{{_local.form?.autoplay ? 1 : 0}}",
-                                "show_arrows": "{{_local.form?.show_arrows ? 1 : 0}}",
-                                "show_dots": "{{_local.form?.show_dots ? 1 : 0}}",
-                                "show_close": "{{_local.form?.show_close ? 1 : 0}}",
-                                "pause_on_hover": "{{_local.form?.pause_on_hover ? 1 : 0}}",
-                                "open_new_tab": "{{_local.form?.open_new_tab ? 1 : 0}}",
-                                "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
-                                "schedules": "{{_local.form?.schedules ?? []}}"
-                              }
-                            },
-                            "onSuccess": [
-                              {
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "saving": false,
-                                  "hasChanges": false
-                                }
-                              },
-                              {
-                                "handler": "toast",
-                                "params": {
-                                  "type": "success",
-                                  "message": "$t:custom-ad_float.admin.save_success"
-                                }
-                              },
-                              {
-                                "handler": "refetchDataSource",
-                                "params": {
-                                  "dataSourceId": "settings"
-                                }
-                              }
-                            ],
-                            "onError": [
-                              {
-                                "handler": "setState",
-                                "params": {
-                                  "target": "local",
-                                  "saving": false
-                                }
-                              },
-                              {
-                                "handler": "toast",
-                                "params": {
-                                  "type": "error",
-                                  "message": "{{error.message}}"
-                                }
-                              }
-                            ]
-                          }
-                        ]
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "form.autoplay": "{{$event.target.checked === true}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "id": "tog_show_arrows",
+                "props": {
+                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "props": {
+                          "className": "text-sm font-medium"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.show_arrows"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Toggle",
+                    "props": {
+                      "name": "show_arrows",
+                      "autoBinding": false,
+                      "checked": "{{_local.form?.show_arrows === true || _local.form?.show_arrows === 1 || _local.form?.show_arrows === '1' || _local.form?.show_arrows === 'true'}}"
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "form.show_arrows": "{{$event.target.checked === true}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "id": "tog_show_dots",
+                "props": {
+                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "props": {
+                          "className": "text-sm font-medium"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.show_dots"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Toggle",
+                    "props": {
+                      "name": "show_dots",
+                      "autoBinding": false,
+                      "checked": "{{_local.form?.show_dots === true || _local.form?.show_dots === 1 || _local.form?.show_dots === '1' || _local.form?.show_dots === 'true'}}"
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "form.show_dots": "{{$event.target.checked === true}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "id": "tog_show_close",
+                "props": {
+                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "props": {
+                          "className": "text-sm font-medium"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.show_close"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Toggle",
+                    "props": {
+                      "name": "show_close",
+                      "autoBinding": false,
+                      "checked": "{{_local.form?.show_close === true || _local.form?.show_close === 1 || _local.form?.show_close === '1' || _local.form?.show_close === 'true'}}"
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "form.show_close": "{{$event.target.checked === true}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "id": "tog_pause_on_hover",
+                "props": {
+                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "props": {
+                          "className": "text-sm font-medium"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.pause_on_hover"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Toggle",
+                    "props": {
+                      "name": "pause_on_hover",
+                      "autoBinding": false,
+                      "checked": "{{_local.form?.pause_on_hover === true || _local.form?.pause_on_hover === 1 || _local.form?.pause_on_hover === '1' || _local.form?.pause_on_hover === 'true'}}"
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "form.pause_on_hover": "{{$event.target.checked === true}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "id": "tog_open_new_tab",
+                "props": {
+                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "props": {
+                          "className": "text-sm font-medium"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.open_new_tab"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Toggle",
+                    "props": {
+                      "name": "open_new_tab",
+                      "autoBinding": false,
+                      "checked": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true'}}"
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "form.open_new_tab": "{{$event.target.checked === true}}"
+                        }
                       }
                     ]
                   }
@@ -1683,6 +1124,14 @@
               "className": "mb-8 p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
             },
             "children": [
+              {
+                "type": "basic",
+                "name": "H2",
+                "props": {
+                  "className": "text-lg font-semibold mb-4"
+                },
+                "text": "$t:custom-ad_float.admin.sections.items"
+              },
               {
                 "type": "basic",
                 "name": "H2",
@@ -2556,16 +2005,7 @@
                     ]
                   }
                 ]
-              }
-            ]
-          },
-          {
-            "type": "basic",
-            "name": "Div",
-            "props": {
-              "className": "mb-8 p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
-            },
-            "children": [
+              },
               {
                 "type": "basic",
                 "name": "Div",
@@ -2832,6 +2272,1545 @@
                                     }
                                   }
                                 ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "basic",
+            "name": "Div",
+            "props": {
+              "className": "mb-8 p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "flex items-start justify-between gap-4 mb-2"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "H2",
+                        "props": {
+                          "className": "text-lg font-semibold"
+                        },
+                        "text": "$t:custom-ad_float.admin.sections.schedules"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-1"
+                        },
+                        "text": "$t:custom-ad_float.admin.schedules_enabled_hint"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "flex items-center gap-2 shrink-0"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "props": {
+                          "className": "text-sm font-medium"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.schedules_enabled"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Toggle",
+                        "props": {
+                          "name": "schedules_enabled",
+                          "autoBinding": false,
+                          "checked": "{{_local.form?.schedules_enabled === true || _local.form?.schedules_enabled === 1 || _local.form?.schedules_enabled === '1' || _local.form?.schedules_enabled === 'true'}}"
+                        },
+                        "actions": [
+                          {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "form.schedules_enabled": "{{$event.target.checked === true}}"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "P",
+                "props": {
+                  "className": "text-xs text-gray-500 mb-3"
+                },
+                "text": "$t:custom-ad_float.admin.schedules_hint"
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "border border-gray-200 dark:border-gray-700 rounded-lg p-3"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "id": "caf_sch_{{sidx}}",
+                    "iteration": {
+                      "source": "{{_local.form?.schedules ?? []}}",
+                      "item_var": "sch",
+                      "index_var": "sidx"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                          "className": "mb-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
+                        },
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "Div",
+                            "props": {
+                              "className": "flex items-start gap-2"
+                            },
+                            "children": [
+                              {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                  "className": "text-gray-400 select-none pt-2 px-1 cursor-grab leading-none"
+                                },
+                                "text": "⋮⋮"
+                              },
+                              {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                  "className": "flex-1 min-w-0"
+                                },
+                                "children": [
+                                  {
+                                    "type": "basic",
+                                    "name": "Div",
+                                    "props": {
+                                      "className": "grid grid-cols-2 md:grid-cols-4 gap-2"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "form-group w-full min-w-0"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "basic",
+                                            "name": "Label",
+                                            "props": {
+                                              "className": "form-label text-xs text-gray-500 mb-1"
+                                            },
+                                            "text": "$t:custom-ad_float.admin.fields.start_date"
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Input",
+                                            "props": {
+                                              "type": "date",
+                                              "name": "sch_start_date_{{sidx}}",
+                                              "className": "input w-full",
+                                              "value": "{{sch.start_date ?? ''}}",
+                                              "autoBinding": false
+                                            },
+                                            "actions": [
+                                              {
+                                                "type": "change",
+                                                "handler": "setState",
+                                                "params": {
+                                                  "target": "local",
+                                                  "form.schedules.{{sidx}}.start_date": "{{$event.target.value}}"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "form-group w-full min-w-0"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "basic",
+                                            "name": "Label",
+                                            "props": {
+                                              "className": "form-label text-xs text-gray-500 mb-1"
+                                            },
+                                            "text": "$t:custom-ad_float.admin.fields.start_time"
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Input",
+                                            "props": {
+                                              "type": "time",
+                                              "name": "sch_start_time_{{sidx}}",
+                                              "className": "input w-full",
+                                              "value": "{{sch.start_time ?? ''}}",
+                                              "autoBinding": false
+                                            },
+                                            "actions": [
+                                              {
+                                                "type": "change",
+                                                "handler": "setState",
+                                                "params": {
+                                                  "target": "local",
+                                                  "form.schedules.{{sidx}}.start_time": "{{$event.target.value}}"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "form-group w-full min-w-0"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "basic",
+                                            "name": "Label",
+                                            "props": {
+                                              "className": "form-label text-xs text-gray-500 mb-1"
+                                            },
+                                            "text": "$t:custom-ad_float.admin.fields.end_date"
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Input",
+                                            "props": {
+                                              "type": "date",
+                                              "name": "sch_end_date_{{sidx}}",
+                                              "className": "input w-full",
+                                              "value": "{{sch.end_date ?? ''}}",
+                                              "autoBinding": false
+                                            },
+                                            "actions": [
+                                              {
+                                                "type": "change",
+                                                "handler": "setState",
+                                                "params": {
+                                                  "target": "local",
+                                                  "form.schedules.{{sidx}}.end_date": "{{$event.target.value}}"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "form-group w-full min-w-0"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "basic",
+                                            "name": "Label",
+                                            "props": {
+                                              "className": "form-label text-xs text-gray-500 mb-1"
+                                            },
+                                            "text": "$t:custom-ad_float.admin.fields.end_time"
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Input",
+                                            "props": {
+                                              "type": "time",
+                                              "name": "sch_end_time_{{sidx}}",
+                                              "className": "input w-full",
+                                              "value": "{{sch.end_time ?? ''}}",
+                                              "autoBinding": false
+                                            },
+                                            "actions": [
+                                              {
+                                                "type": "change",
+                                                "handler": "setState",
+                                                "params": {
+                                                  "target": "local",
+                                                  "form.schedules.{{sidx}}.end_time": "{{$event.target.value}}"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Div",
+                                    "props": {
+                                      "className": "mt-3"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "text-xs text-gray-500 mb-1"
+                                        },
+                                        "text": "$t:custom-ad_float.admin.fields.weekdays"
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "flex flex-wrap gap-3"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex flex-col items-center gap-1"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs text-gray-500"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.weekdays.d0"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_d0_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.d0 === true || sch.d0 === 1 || sch.d0 === '1' || sch.d0 === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.d0": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex flex-col items-center gap-1"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs text-gray-500"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.weekdays.d1"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_d1_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.d1 === true || sch.d1 === 1 || sch.d1 === '1' || sch.d1 === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.d1": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex flex-col items-center gap-1"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs text-gray-500"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.weekdays.d2"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_d2_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.d2 === true || sch.d2 === 1 || sch.d2 === '1' || sch.d2 === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.d2": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex flex-col items-center gap-1"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs text-gray-500"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.weekdays.d3"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_d3_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.d3 === true || sch.d3 === 1 || sch.d3 === '1' || sch.d3 === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.d3": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex flex-col items-center gap-1"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs text-gray-500"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.weekdays.d4"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_d4_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.d4 === true || sch.d4 === 1 || sch.d4 === '1' || sch.d4 === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.d4": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex flex-col items-center gap-1"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs text-gray-500"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.weekdays.d5"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_d5_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.d5 === true || sch.d5 === 1 || sch.d5 === '1' || sch.d5 === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.d5": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex flex-col items-center gap-1"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs text-gray-500"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.weekdays.d6"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_d6_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.d6 === true || sch.d6 === 1 || sch.d6 === '1' || sch.d6 === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.d6": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Div",
+                                    "props": {
+                                      "className": "mt-3"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "text-sm font-medium mb-1"
+                                        },
+                                        "text": "$t:custom-ad_float.admin.fields.item_ids"
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "P",
+                                        "props": {
+                                          "className": "text-xs text-gray-500 mb-2"
+                                        },
+                                        "text": "$t:custom-ad_float.admin.item_ids_hint"
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "text-xs text-gray-400"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "basic",
+                                            "name": "P",
+                                            "text": "$t:custom-ad_float.admin.empty"
+                                          }
+                                        ],
+                                        "if": "{{!(items?.data?.data ?? []).length}}"
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "flex flex-col gap-2"
+                                        },
+                                        "iteration": {
+                                          "source": "{{items?.data?.data ?? []}}",
+                                          "item_var": "ad",
+                                          "index_var": "aidx"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex items-center gap-3 p-2 rounded-md border border-gray-200 dark:border-gray-700"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Img",
+                                                "props": {
+                                                  "src": "{{ad.image_url}}",
+                                                  "alt": "{{ad.title || ''}}",
+                                                  "className": "w-10 h-10 object-cover rounded"
+                                                },
+                                                "if": "{{!!ad.image_url}}"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "flex-1 text-sm truncate"
+                                                },
+                                                "text": "{{ad.title || '(제목 없음)'}}"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sel_{{ad.id}}_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch['sel_' + ad.id] === true || sch['sel_' + String(ad.id)] === true}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.sel_{{ad.id}}": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Div",
+                                    "props": {
+                                      "className": "mt-4 pt-3 border-t border-gray-200 dark:border-gray-700"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "text-sm font-medium"
+                                        },
+                                        "text": "$t:custom-ad_float.admin.fields.row_settings"
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "P",
+                                        "props": {
+                                          "className": "text-xs text-gray-500 mb-2"
+                                        },
+                                        "text": "$t:custom-ad_float.admin.row_settings_hint"
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.position"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Select",
+                                                "props": {
+                                                  "name": "sch_position_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.position ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.position": "{{$event.target.value}}"
+                                                    }
+                                                  }
+                                                ],
+                                                "children": [
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "left"
+                                                    },
+                                                    "text": "왼쪽"
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "right"
+                                                    },
+                                                    "text": "오른쪽"
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "top"
+                                                    },
+                                                    "text": "상단"
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "bottom"
+                                                    },
+                                                    "text": "하단"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.direction"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Select",
+                                                "props": {
+                                                  "name": "sch_direction_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.direction ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.direction": "{{$event.target.value}}"
+                                                    }
+                                                  }
+                                                ],
+                                                "children": [
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "horizontal"
+                                                    },
+                                                    "text": "좌우"
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "vertical"
+                                                    },
+                                                    "text": "상하"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.interval_ms"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                  "type": "number",
+                                                  "name": "sch_interval_ms_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.interval_ms ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.interval_ms": "{{Number($event.target.value) || 0}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.width_px"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                  "type": "number",
+                                                  "name": "sch_width_px_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.width_px ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.width_px": "{{Number($event.target.value) || 0}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.height_px"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                  "type": "number",
+                                                  "name": "sch_height_px_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.height_px ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.height_px": "{{Number($event.target.value) || 0}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.radius_px"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                  "type": "number",
+                                                  "name": "sch_radius_px_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.radius_px ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.radius_px": "{{Number($event.target.value) || 0}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.offset_px"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                  "type": "number",
+                                                  "name": "sch_offset_px_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.offset_px ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.offset_px": "{{Number($event.target.value) || 0}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.z_index"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                  "type": "number",
+                                                  "name": "sch_z_index_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.z_index ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.z_index": "{{Number($event.target.value) || 0}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.max_items"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                  "type": "number",
+                                                  "name": "sch_max_items_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.max_items ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.max_items": "{{Number($event.target.value) || 0}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.mobile_mode"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Select",
+                                                "props": {
+                                                  "name": "sch_mobile_mode_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.mobile_mode ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.mobile_mode": "{{$event.target.value}}"
+                                                    }
+                                                  }
+                                                ],
+                                                "children": [
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "hide"
+                                                    },
+                                                    "text": "숨김"
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "show"
+                                                    },
+                                                    "text": "표시"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "grid grid-cols-1 md:grid-cols-2 gap-x-6 mt-2"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex items-center justify-between gap-2 py-1.5"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.autoplay"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_autoplay_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.autoplay === true || sch.autoplay === 1 || sch.autoplay === '1' || sch.autoplay === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.autoplay": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex items-center justify-between gap-2 py-1.5"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.show_arrows"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_show_arrows_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.show_arrows === true || sch.show_arrows === 1 || sch.show_arrows === '1' || sch.show_arrows === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.show_arrows": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex items-center justify-between gap-2 py-1.5"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.show_dots"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_show_dots_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.show_dots === true || sch.show_dots === 1 || sch.show_dots === '1' || sch.show_dots === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.show_dots": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex items-center justify-between gap-2 py-1.5"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.show_close"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_show_close_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.show_close === true || sch.show_close === 1 || sch.show_close === '1' || sch.show_close === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.show_close": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex items-center justify-between gap-2 py-1.5"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.pause_on_hover"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_pause_on_hover_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.pause_on_hover === true || sch.pause_on_hover === 1 || sch.pause_on_hover === '1' || sch.pause_on_hover === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.pause_on_hover": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "flex items-center justify-between gap-2 py-1.5"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "props": {
+                                                  "className": "text-xs"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.open_new_tab"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Toggle",
+                                                "props": {
+                                                  "name": "sch_open_new_tab_{{sidx}}",
+                                                  "autoBinding": false,
+                                                  "checked": "{{sch.open_new_tab === true || sch.open_new_tab === 1 || sch.open_new_tab === '1' || sch.open_new_tab === 'true'}}"
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.open_new_tab": "{{$event.target.checked === true}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "basic",
+                                "name": "Button",
+                                "props": {
+                                  "type": "button",
+                                  "className": "text-xl leading-none px-2 text-gray-500 hover:text-red-600"
+                                },
+                                "text": "$t:custom-ad_float.admin.actions.remove_schedule",
+                                "actions": [
+                                  {
+                                    "type": "click",
+                                    "handler": "setState",
+                                    "params": {
+                                      "target": "local",
+                                      "form.schedules.{{sidx}}._deleted": true
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "if": "{{!(sch._deleted === true || sch._deleted === 1 || sch._deleted === '1' || sch._deleted === 'true')}}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "flex justify-center pt-2"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Button",
+                        "props": {
+                          "type": "button",
+                          "className": "text-sm text-gray-600 hover:text-gray-900"
+                        },
+                        "text": "$t:custom-ad_float.admin.actions.add_schedule",
+                        "actions": [
+                          {
+                            "type": "click",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "form.schedules": "{{(_local.form?.schedules || []).concat([{id:'new',start_date:'',start_time:'',end_date:'',end_time:'',item_ids:[],d0:true,d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,_deleted:false,position:(_local.form?.position||'right'),direction:(_local.form?.direction||'horizontal'),interval_ms:(Number(_local.form?.interval_ms)||4000),width_px:(Number(_local.form?.width_px)||180),height_px:(Number(_local.form?.height_px)||180),radius_px:(Number(_local.form?.radius_px)||10),offset_px:(Number(_local.form?.offset_px)||24),z_index:(Number(_local.form?.z_index)||9990),max_items:(Number(_local.form?.max_items)||20),mobile_mode:(_local.form?.mobile_mode||'hide'),autoplay:!!_local.form?.autoplay,show_arrows:!!_local.form?.show_arrows,show_dots:!!_local.form?.show_dots,show_close:!!_local.form?.show_close,pause_on_hover:!!_local.form?.pause_on_hover,open_new_tab:!!_local.form?.open_new_tab}])}}"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "flex justify-end mt-6"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Button",
+                    "id": "btn_save_settings_bottom",
+                    "props": {
+                      "type": "button",
+                      "disabled": "{{_local.saving}}",
+                      "className": "btn btn-primary disabled:opacity-50"
+                    },
+                    "text": "$t:custom-ad_float.admin.save",
+                    "actions": [
+                      {
+                        "type": "click",
+                        "handler": "sequence",
+                        "actions": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "saving": true,
+                              "errors": null
+                            }
+                          },
+                          {
+                            "handler": "apiCall",
+                            "auth_required": true,
+                            "target": "/api/modules/custom-ad_float/admin/settings",
+                            "params": {
+                              "method": "PUT",
+                              "body": {
+                                "enabled": "{{_local.form?.enabled === true || _local.form?.enabled === 1 || _local.form?.enabled === '1' || _local.form?.enabled === 'true' ? 1 : 0}}",
+                                "home_only": "{{_local.form?.home_only ? 1 : 0}}",
+                                "position": "{{_local.form?.position || 'right'}}",
+                                "direction": "{{_local.form?.direction || 'horizontal'}}",
+                                "interval_ms": "{{Number(_local.form?.interval_ms) || 4000}}",
+                                "width_px": "{{Number(_local.form?.width_px) || 180}}",
+                                "height_px": "{{Number(_local.form?.height_px) || 180}}",
+                                "radius_px": "{{Number(_local.form?.radius_px) || 10}}",
+                                "offset_px": "{{Number(_local.form?.offset_px) || 24}}",
+                                "z_index": "{{Number(_local.form?.z_index) || 9990}}",
+                                "max_items": "{{Number(_local.form?.max_items) || 20}}",
+                                "close_cookie_key": "{{_local.form?.close_cookie_key || 'g7_custom_ad_float_closed'}}",
+                                "autoplay": "{{_local.form?.autoplay ? 1 : 0}}",
+                                "show_arrows": "{{_local.form?.show_arrows ? 1 : 0}}",
+                                "show_dots": "{{_local.form?.show_dots ? 1 : 0}}",
+                                "show_close": "{{_local.form?.show_close ? 1 : 0}}",
+                                "pause_on_hover": "{{_local.form?.pause_on_hover ? 1 : 0}}",
+                                "open_new_tab": "{{_local.form?.open_new_tab ? 1 : 0}}",
+                                "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
+                                "schedules_enabled": "{{_local.form?.schedules_enabled ? 1 : 0}}",
+                                "schedules": "{{_local.form?.schedules ?? []}}"
+                              }
+                            },
+                            "onSuccess": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "saving": false,
+                                  "hasChanges": false
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "success",
+                                  "message": "$t:custom-ad_float.admin.save_success"
+                                }
+                              },
+                              {
+                                "handler": "refetchDataSource",
+                                "params": {
+                                  "dataSourceId": "settings"
+                                }
+                              }
+                            ],
+                            "onError": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "saving": false
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "error",
+                                  "message": "{{error.message}}"
+                                }
                               }
                             ]
                           }
