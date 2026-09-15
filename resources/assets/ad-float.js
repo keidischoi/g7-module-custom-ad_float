@@ -5,12 +5,72 @@
   window.__g7CustomAdFloatBooted = true;
 
   var API = '/api/modules/custom-ad_float/payload';
+  var TRACK_API = '/api/modules/custom-ad_float/track';
   var ROOT_ID = 'g7-custom-ad-float';
   var MOUNT_ID = 'g7_custom_ad_float_mount';
 
-  function isHomePath() {
+  function pagePath() {
     var path = (window.location.pathname || '/').replace(/\/+$/, '');
-    return path === '' || path === '/';
+    return path === '' ? '/' : path;
+  }
+
+  function isHomePath() {
+    return pagePath() === '/';
+  }
+
+  function sendTrack(type, itemId) {
+    var id = Number(itemId || 0);
+    if (!id || (type !== 'impression' && type !== 'click')) return;
+    var body = JSON.stringify({
+      type: type,
+      item_id: id,
+      page_path: pagePath()
+    });
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(TRACK_API, new Blob([body], { type: 'application/json' }));
+        return;
+      }
+    } catch (e) {}
+    try {
+      fetch(TRACK_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: body,
+        keepalive: true,
+        credentials: 'same-origin'
+      }).catch(function () {});
+    } catch (e2) {}
+  }
+
+  function impressionKey(itemId) {
+    return 'caf_imp_' + itemId + '_' + pagePath();
+  }
+
+  function trackImpression(itemId) {
+    var id = Number(itemId || 0);
+    if (!id) return;
+    try {
+      if (sessionStorage.getItem(impressionKey(id))) return;
+      sessionStorage.setItem(impressionKey(id), '1');
+    } catch (e) {}
+    sendTrack('impression', id);
+  }
+
+  function trackClick(itemId) {
+    sendTrack('click', itemId);
+  }
+
+  function isAdVisible(root) {
+    if (!root || !root.isConnected) return false;
+    try {
+      var style = window.getComputedStyle(root);
+      if (style.display === 'none' || style.visibility === 'hidden') return false;
+      var rect = root.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    } catch (e) {
+      return true;
+    }
   }
 
   function alreadyClosed(key) {
@@ -95,6 +155,7 @@
       slide.className = 'g7-ad-slide';
       var link = document.createElement(item.target_url ? 'a' : 'div');
       link.className = 'g7-ad-link';
+      if (item.id) link.setAttribute('data-item-id', String(item.id));
       if (item.target_url) {
         link.href = item.target_url;
         if (config.open_new_tab) {
@@ -182,6 +243,9 @@
           dot.classList.toggle('is-active', i === index);
         });
       }
+      if (isAdVisible(root) && items[index] && items[index].id) {
+        trackImpression(items[index].id);
+      }
     }
 
     function go(delta) {
@@ -221,6 +285,13 @@
       frame.addEventListener('mouseenter', stop);
       frame.addEventListener('mouseleave', start);
     }
+
+    root.addEventListener('click', function (event) {
+      var link = event.target.closest('.g7-ad-link');
+      if (!link) return;
+      var id = Number(link.getAttribute('data-item-id') || (items[index] && items[index].id) || 0);
+      trackClick(id);
+    }, true);
 
     paint();
     start();

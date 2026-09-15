@@ -22,4 +22,10 @@ return [
         'file_required' => '이미지 파일을 선택해 주세요.',
         'url_required' => '이미지 웹주소를 입력해 주세요.',
     ],
+    'stats' => [
+        'fetch_success' => '광고 통계를 조회했습니다.',
+        'fetch_failed' => '광고 통계 조회에 실패했습니다.',
+        'untitled' => '(제목 없음)',
+        'deleted_item' => '삭제된 광고 #:id',
+    ],
 ];

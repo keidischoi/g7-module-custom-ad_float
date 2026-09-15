@@ -1,0 +1,691 @@
+{
+  "version": "1.0.0",
+  "meta": {
+    "title": "$t:custom-ad_float.admin.stats.title",
+    "description": "$t:custom-ad_float.admin.stats.description"
+  },
+  "layout_name": "admin_ad_float_stats",
+  "permissions": [
+    "custom-ad_float.ads.read"
+  ],
+  "extends": "_admin_base",
+  "data_sources": [
+    {
+      "id": "stats",
+      "type": "api",
+      "endpoint": "/api/modules/custom-ad_float/admin/stats?range=7d",
+      "method": "GET",
+      "auto_fetch": true,
+      "auth_required": true,
+      "initLocal": "stats",
+      "refetchOnMount": true,
+      "fallback": {
+        "data": {
+          "range": "7d",
+          "from": null,
+          "to": null,
+          "summary": {
+            "impressions": 0,
+            "clicks": 0,
+            "ctr": "0.00%",
+            "ctr_pct": 0
+          },
+          "by_item": [],
+          "by_page": [],
+          "by_item_page": []
+        }
+      }
+    }
+  ],
+  "init_actions": [
+    {
+      "handler": "setState",
+      "params": {
+        "target": "local",
+        "range": "7d",
+        "loading": false
+      }
+    }
+  ],
+  "slots": {
+    "content": [
+      {
+        "id": "caf_stats_page",
+        "type": "basic",
+        "name": "Div",
+        "props": {
+          "className": "admin-page-content w-full max-w-none"
+        },
+        "children": [
+          {
+            "type": "basic",
+            "name": "Div",
+            "id": "caf_stats_header",
+            "props": {
+              "className": "flex-between mb-6"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "Div",
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "H1",
+                    "props": {
+                      "className": "text-page-heading"
+                    },
+                    "text": "$t:custom-ad_float.admin.stats.title"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-sm text-gray-500 mt-1"
+                    },
+                    "text": "$t:custom-ad_float.admin.stats.description"
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "flex items-center gap-2"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "A",
+                    "props": {
+                      "href": "/admin/ad-float",
+                      "className": "px-3 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                    },
+                    "text": "$t:custom-ad_float.admin.stats.back"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "basic",
+            "name": "Div",
+            "props": {
+              "className": "mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex flex-wrap items-end gap-4"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "form-group"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                      "className": "form-label text-xs text-gray-500"
+                    },
+                    "text": "$t:custom-ad_float.admin.stats.range"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Select",
+                    "id": "caf_stats_range",
+                    "props": {
+                      "name": "range",
+                      "className": "input",
+                      "value": "{{_local.range || '7d'}}",
+                      "autoBinding": false
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "sequence",
+                        "actions": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "range": "{{$event.target.value}}",
+                              "loading": true
+                            }
+                          },
+                          {
+                            "handler": "apiCall",
+                            "auth_required": true,
+                            "target": "/api/modules/custom-ad_float/admin/stats?range={{$event.target.value}}",
+                            "params": {
+                              "method": "GET"
+                            },
+                            "onSuccess": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "loading": false,
+                                  "stats": "{{$response.data ?? $response}}"
+                                }
+                              }
+                            ],
+                            "onError": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "loading": false
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "error",
+                                  "message": "$t:custom-ad_float.admin.stats.fetch_failed"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Option",
+                        "props": {
+                          "value": "today"
+                        },
+                        "text": "$t:custom-ad_float.admin.stats.ranges.today"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Option",
+                        "props": {
+                          "value": "7d"
+                        },
+                        "text": "$t:custom-ad_float.admin.stats.ranges.7d"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Option",
+                        "props": {
+                          "value": "30d"
+                        },
+                        "text": "$t:custom-ad_float.admin.stats.ranges.30d"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Option",
+                        "props": {
+                          "value": "all"
+                        },
+                        "text": "$t:custom-ad_float.admin.stats.ranges.all"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "P",
+                "props": {
+                  "className": "text-xs text-gray-400"
+                },
+                "text": "$t:custom-ad_float.admin.stats.hint"
+              }
+            ]
+          },
+          {
+            "type": "basic",
+            "name": "Div",
+            "props": {
+              "className": "grid gap-4 mb-8",
+              "style": "grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-xs text-gray-500 mb-1"
+                    },
+                    "text": "$t:custom-ad_float.admin.stats.impressions"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-2xl font-semibold"
+                    },
+                    "text": "{{_local.stats?.summary?.impressions ?? stats?.data?.summary?.impressions ?? 0}}"
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-xs text-gray-500 mb-1"
+                    },
+                    "text": "$t:custom-ad_float.admin.stats.clicks"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-2xl font-semibold"
+                    },
+                    "text": "{{_local.stats?.summary?.clicks ?? stats?.data?.summary?.clicks ?? 0}}"
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-xs text-gray-500 mb-1"
+                    },
+                    "text": "$t:custom-ad_float.admin.stats.ctr"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-2xl font-semibold"
+                    },
+                    "text": "{{_local.stats?.summary?.ctr ?? stats?.data?.summary?.ctr ?? '0.00%'}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "basic",
+            "name": "Div",
+            "if": "{{!(_local.stats?.summary?.impressions ?? stats?.data?.summary?.impressions ?? 0) && !(_local.stats?.summary?.clicks ?? stats?.data?.summary?.clicks ?? 0)}}",
+            "props": {
+              "className": "mb-8 p-6 text-center text-gray-500 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "P",
+                "text": "$t:custom-ad_float.admin.stats.empty"
+              }
+            ]
+          },
+          {
+            "type": "basic",
+            "name": "Div",
+            "props": {
+              "className": "mb-8 p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "H2",
+                "props": {
+                  "className": "text-lg font-semibold mb-4"
+                },
+                "text": "$t:custom-ad_float.admin.stats.by_item"
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "if": "{{!(_local.stats?.by_item ?? stats?.data?.by_item ?? []).length}}",
+                "props": {
+                  "className": "text-sm text-gray-500"
+                },
+                "text": "$t:custom-ad_float.admin.stats.empty_table"
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "if": "{{(_local.stats?.by_item ?? stats?.data?.by_item ?? []).length > 0}}",
+                "props": {
+                  "className": "flex flex-col gap-3"
+                },
+                "iteration": {
+                  "source": "{{_local.stats?.by_item ?? stats?.data?.by_item ?? []}}",
+                  "item_var": "row",
+                  "index_var": "idx"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-4"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Img",
+                        "if": "{{!!row.image_url}}",
+                        "props": {
+                          "src": "{{row.image_url}}",
+                          "alt": "{{row.title || ''}}",
+                          "className": "w-14 h-14 object-cover rounded-md border"
+                        }
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                          "className": "flex-1 min-w-0"
+                        },
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "P",
+                            "props": {
+                              "className": "font-medium truncate"
+                            },
+                            "text": "{{row.title || '-'}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "P",
+                            "props": {
+                              "className": "text-xs text-gray-500"
+                            },
+                            "text": "노출 {{row.impressions}} · 클릭 {{row.clicks}} · CTR {{row.ctr}}"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                          "className": "text-right shrink-0 text-sm"
+                        },
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "P",
+                            "text": "{{row.impressions}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "P",
+                            "props": {
+                              "className": "text-gray-500"
+                            },
+                            "text": "{{row.clicks}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "P",
+                            "props": {
+                              "className": "font-medium"
+                            },
+                            "text": "{{row.ctr}}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "basic",
+            "name": "Div",
+            "props": {
+              "className": "mb-8 p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "H2",
+                "props": {
+                  "className": "text-lg font-semibold mb-4"
+                },
+                "text": "$t:custom-ad_float.admin.stats.by_page"
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "if": "{{!(_local.stats?.by_page ?? stats?.data?.by_page ?? []).length}}",
+                "props": {
+                  "className": "text-sm text-gray-500"
+                },
+                "text": "$t:custom-ad_float.admin.stats.empty_table"
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "if": "{{(_local.stats?.by_page ?? stats?.data?.by_page ?? []).length > 0}}",
+                "props": {
+                  "className": "overflow-x-auto"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "grid gap-2 text-xs text-gray-500 font-medium pb-2 border-b border-gray-200 dark:border-gray-700",
+                      "style": "grid-template-columns: 2fr 1fr 1fr 1fr"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.stats.page_path"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.stats.impressions"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.stats.clicks"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.stats.ctr"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "iteration": {
+                      "source": "{{_local.stats?.by_page ?? stats?.data?.by_page ?? []}}",
+                      "item_var": "row",
+                      "index_var": "pidx"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                          "className": "grid gap-2 py-2 text-sm border-b border-gray-100 dark:border-gray-800",
+                          "style": "grid-template-columns: 2fr 1fr 1fr 1fr"
+                        },
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "props": {
+                              "className": "font-mono truncate"
+                            },
+                            "text": "{{row.page_path}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "text": "{{row.impressions}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "text": "{{row.clicks}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "text": "{{row.ctr}}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "basic",
+            "name": "Div",
+            "props": {
+              "className": "mb-8 p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "H2",
+                "props": {
+                  "className": "text-lg font-semibold mb-4"
+                },
+                "text": "$t:custom-ad_float.admin.stats.by_item_page"
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "if": "{{!(_local.stats?.by_item_page ?? stats?.data?.by_item_page ?? []).length}}",
+                "props": {
+                  "className": "text-sm text-gray-500"
+                },
+                "text": "$t:custom-ad_float.admin.stats.empty_table"
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "if": "{{(_local.stats?.by_item_page ?? stats?.data?.by_item_page ?? []).length > 0}}",
+                "props": {
+                  "className": "overflow-x-auto"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "grid gap-2 text-xs text-gray-500 font-medium pb-2 border-b border-gray-200 dark:border-gray-700",
+                      "style": "grid-template-columns: 2fr 2fr 1fr 1fr 1fr"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.fields.title"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.stats.page_path"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.stats.impressions"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.stats.clicks"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.stats.ctr"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "iteration": {
+                      "source": "{{_local.stats?.by_item_page ?? stats?.data?.by_item_page ?? []}}",
+                      "item_var": "row",
+                      "index_var": "xidx"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                          "className": "grid gap-2 py-2 text-sm border-b border-gray-100 dark:border-gray-800 items-center",
+                          "style": "grid-template-columns: 2fr 2fr 1fr 1fr 1fr"
+                        },
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "props": {
+                              "className": "truncate"
+                            },
+                            "text": "{{row.title || '-'}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "props": {
+                              "className": "font-mono truncate"
+                            },
+                            "text": "{{row.page_path}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "text": "{{row.impressions}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "text": "{{row.clicks}}"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "text": "{{row.ctr}}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

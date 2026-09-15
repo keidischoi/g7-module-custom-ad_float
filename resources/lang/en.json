@@ -88,6 +88,30 @@
     "schedules_enabled_hint": "When on, only the matching reservation below is applied. If none match, ads are hidden.",
     "schedules_hint": "Add multiple windows. The first matching row from the top wins. All days on or empty means every day.",
     "item_ids_hint": "Leave empty to show all currently enabled ads.",
-    "row_settings_hint": "Override position, size, and carousel options for this window only."
+    "row_settings_hint": "Override position, size, and carousel options for this window only.",
+    "stats": {
+      "title": "Floating ad stats",
+      "description": "Impressions and clicks by ad, by page, and by ad × page.",
+      "view": "View stats",
+      "back": "Back to settings",
+      "range": "Range",
+      "hint": "Impressions are counted once per ad per page per session. Clicks are counted every time.",
+      "impressions": "Impressions",
+      "clicks": "Clicks",
+      "ctr": "CTR",
+      "page_path": "Page",
+      "by_item": "By ad",
+      "by_page": "By page",
+      "by_item_page": "Ad × page",
+      "empty": "No stats in this range yet. Counts appear after ads are shown.",
+      "empty_table": "No rows for this range.",
+      "fetch_failed": "Failed to load stats.",
+      "ranges": {
+        "today": "Today",
+        "7d": "Last 7 days",
+        "30d": "Last 30 days",
+        "all": "All"
+      }
+    }
   }
 }

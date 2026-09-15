@@ -4,7 +4,7 @@
 
 ## 기능
 
-- 관리자 `/admin/ad-float`: **기본 설정** → **광고 목록** → **날짜 및 시간 예약**
+- 관리자 `/admin/ad-float`: **기본 설정** → **광고 목록** → **날짜 및 시간 예약**. 「통계 보기」로 `/admin/ad-float/stats` (노출·클릭, 광고별 × 페이지별)
 - 광고 이미지: **파일 업로드** 또는 **웹주소 연결** (둘 중 하나)
 - 위치·캐러셀·모바일·닫기 쿠키 등 기본 표시 옵션
 - `position: fixed` 로 스크롤 따라다님
@@ -34,20 +34,23 @@ php artisan cache:clear
 
 - `custom_ad_float_settings`
 - `custom_ad_float_items`
+- `custom_ad_float_stats` (일별 노출/클릭 롤업)
 
-## 업그레이드 (0.1.11)
+## 업그레이드 (0.1.12)
 
 ```bash
 php artisan migrate
 php artisan cache:clear
 ```
 
-`image_source`, `schedules`, `schedules_enabled` 컬럼이 추가됩니다.
+`custom_ad_float_stats` 테이블이 추가됩니다. 프론트 `ad-float.js` 캐시 쿼리는 `?v=0.1.12` 입니다.
 
 ## 관리자
 
 - UI: `/admin/ad-float`
+- 통계: `/admin/ad-float/stats` (오늘 / 7일 / 30일 / 전체)
 - API: `/api/modules/custom-ad_float/admin/...`
+- 공개 트래킹: `POST /api/modules/custom-ad_float/track` `{ type: "impression"|"click", item_id, page_path }` (인증 없음, 분당 제한)
 
 ## 프론트 주입
 
@@ -62,4 +65,4 @@ php artisan cache:clear
 | identifier | `custom-ad_float` |
 | vendor | `custom` |
 | namespace | `Modules\\Custom\\AdFloat` |
-| version | `0.1.11` |
+| version | `0.1.12` |
