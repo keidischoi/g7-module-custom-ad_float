@@ -49,7 +49,8 @@ class AdminPayload
     {
         return [
             'position', 'direction', 'interval_ms', 'width_px', 'height_px',
-            'radius_px', 'offset_px', 'z_index', 'max_items', 'mobile_mode',
+            'radius_px', 'offset_px', 'vertical_align', 'vertical_offset_px',
+            'z_index', 'max_items', 'mobile_mode',
             'autoplay', 'show_arrows', 'show_dots', 'show_close',
             'pause_on_hover', 'open_new_tab',
         ];
@@ -68,6 +69,8 @@ class AdminPayload
             'height_px' => 180,
             'radius_px' => 10,
             'offset_px' => 24,
+            'vertical_align' => 'middle',
+            'vertical_offset_px' => 24,
             'z_index' => 9990,
             'max_items' => 20,
             'mobile_mode' => 'hide',
@@ -111,6 +114,8 @@ class AdminPayload
             'schedules.*.height_px' => ['nullable', 'integer', 'min:80', 'max:1200'],
             'schedules.*.radius_px' => ['nullable', 'integer', 'min:0', 'max:100'],
             'schedules.*.offset_px' => ['nullable', 'integer', 'min:0', 'max:500'],
+            'schedules.*.vertical_align' => ['nullable', 'in:top,middle,bottom'],
+            'schedules.*.vertical_offset_px' => ['nullable', 'integer', 'min:-500', 'max:500'],
             'schedules.*.z_index' => ['nullable', 'integer', 'min:100', 'max:2147483647'],
             'schedules.*.max_items' => ['nullable', 'integer', 'min:1', 'max:100'],
             'schedules.*.mobile_mode' => ['nullable', 'in:hide,show'],
@@ -282,8 +287,10 @@ class AdminPayload
             $value = $row[$key];
             if (in_array($key, ['autoplay', 'show_arrows', 'show_dots', 'show_close', 'pause_on_hover', 'open_new_tab'], true)) {
                 $out[$key] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-            } elseif (in_array($key, ['interval_ms', 'width_px', 'height_px', 'radius_px', 'offset_px', 'z_index', 'max_items'], true)) {
+            } elseif (in_array($key, ['interval_ms', 'width_px', 'height_px', 'radius_px', 'offset_px', 'vertical_offset_px', 'z_index', 'max_items'], true)) {
                 $out[$key] = (int) $value;
+            } elseif ($key === 'vertical_align') {
+                $out[$key] = self::normalizeVerticalAlign($value);
             } else {
                 $out[$key] = is_string($value) ? trim($value) : $value;
             }
@@ -451,6 +458,16 @@ class AdminPayload
         }
 
         return true;
+    }
+
+    public static function normalizeVerticalAlign(mixed $value): string
+    {
+        $align = is_string($value) ? strtolower(trim($value)) : '';
+        if (in_array($align, ['top', 'middle', 'bottom'], true)) {
+            return $align;
+        }
+
+        return 'middle';
     }
 
     public static function blankToNull(mixed $value): ?string

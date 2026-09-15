@@ -41,6 +41,8 @@ class AdFloatSettingController extends AdminBaseController
                 'height_px' => ['required', 'integer', 'min:80', 'max:1200'],
                 'radius_px' => ['required', 'integer', 'min:0', 'max:100'],
                 'offset_px' => ['required', 'integer', 'min:0', 'max:500'],
+                'vertical_align' => ['nullable', 'in:top,middle,bottom'],
+                'vertical_offset_px' => ['nullable', 'integer', 'min:-500', 'max:500'],
                 'z_index' => ['required', 'integer', 'min:100', 'max:2147483647'],
                 'max_items' => ['required', 'integer', 'min:1', 'max:100'],
                 'close_cookie_key' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z0-9_-]+$/'],

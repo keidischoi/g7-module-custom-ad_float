@@ -21,6 +21,8 @@ return new class extends Migration
                 $table->unsignedInteger('height_px')->default(180);
                 $table->unsignedInteger('radius_px')->default(10);
                 $table->unsignedInteger('offset_px')->default(24);
+                $table->string('vertical_align', 20)->default('middle');
+                $table->integer('vertical_offset_px')->default(24);
                 $table->unsignedInteger('z_index')->default(9990);
                 $table->unsignedInteger('max_items')->default(20);
                 $table->boolean('autoplay')->default(true);
@@ -67,6 +69,8 @@ return new class extends Migration
                 'height_px' => 180,
                 'radius_px' => 10,
                 'offset_px' => 24,
+                'vertical_align' => 'middle',
+                'vertical_offset_px' => 24,
                 'z_index' => 9990,
                 'max_items' => 20,
                 'autoplay' => true,

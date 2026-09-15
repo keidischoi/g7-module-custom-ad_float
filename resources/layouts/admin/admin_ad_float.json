@@ -31,6 +31,8 @@
           "height_px": 180,
           "radius_px": 10,
           "offset_px": 24,
+          "vertical_align": "middle",
+          "vertical_offset_px": 24,
           "z_index": 9990,
           "max_items": 20,
           "autoplay": true,
@@ -186,7 +188,9 @@
                             "width_px": "{{Number(_local.form?.width_px) || 180}}",
                             "height_px": "{{Number(_local.form?.height_px) || 180}}",
                             "radius_px": "{{Number(_local.form?.radius_px) || 10}}",
-                            "offset_px": "{{Number(_local.form?.offset_px) || 24}}",
+                            "offset_px": "{{Number(_local.form?.offset_px ?? 24)}}",
+                            "vertical_align": "{{_local.form?.vertical_align || 'middle'}}",
+                            "vertical_offset_px": "{{Number(_local.form?.vertical_offset_px ?? 24)}}",
                             "z_index": "{{Number(_local.form?.z_index) || 9990}}",
                             "max_items": "{{Number(_local.form?.max_items) || 20}}",
                             "close_cookie_key": "{{_local.form?.close_cookie_key || 'g7_custom_ad_float_closed'}}",
@@ -434,6 +438,127 @@
                             "text": "하단"
                           }
                         ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "id": "f_vertical_align",
+                    "props": {
+                      "className": "form-group w-full"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Label",
+                        "props": {
+                          "className": "form-label text-xs text-gray-500"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.vertical_align"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Select",
+                        "props": {
+                          "name": "vertical_align",
+                          "className": "input w-full",
+                          "value": "{{_local.form?.vertical_align ?? 'middle'}}",
+                          "autoBinding": false
+                        },
+                        "actions": [
+                          {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "form.vertical_align": "{{$event.target.value}}"
+                            }
+                          }
+                        ],
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "Option",
+                            "props": {
+                              "value": "top"
+                            },
+                            "text": "$t:custom-ad_float.admin.vertical.top"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Option",
+                            "props": {
+                              "value": "middle"
+                            },
+                            "text": "$t:custom-ad_float.admin.vertical.middle"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Option",
+                            "props": {
+                              "value": "bottom"
+                            },
+                            "text": "$t:custom-ad_float.admin.vertical.bottom"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-1"
+                        },
+                        "text": "$t:custom-ad_float.admin.vertical_align_hint"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "id": "f_vertical_offset",
+                    "props": {
+                      "className": "form-group w-full"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Label",
+                        "props": {
+                          "className": "form-label text-xs text-gray-500"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.vertical_offset_px"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Input",
+                        "props": {
+                          "type": "number",
+                          "name": "vertical_offset_px",
+                          "className": "input w-full",
+                          "value": "{{_local.form?.vertical_offset_px ?? 24}}",
+                          "autoBinding": false,
+                          "min": -500,
+                          "max": 500
+                        },
+                        "actions": [
+                          {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "form.vertical_offset_px": "{{Number($event.target.value)}}"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-1"
+                        },
+                        "text": "$t:custom-ad_float.admin.vertical_offset_px_hint"
                       }
                     ]
                   },
@@ -695,6 +820,14 @@
                             }
                           }
                         ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-1"
+                        },
+                        "text": "$t:custom-ad_float.admin.offset_px_hint"
                       }
                     ]
                   },
@@ -3328,6 +3461,107 @@
                                                 "props": {
                                                   "className": "form-label text-xs text-gray-500 mb-1"
                                                 },
+                                                "text": "$t:custom-ad_float.admin.fields.vertical_align"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Select",
+                                                "props": {
+                                                  "name": "sch_vertical_align_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.vertical_align ?? 'middle'}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.vertical_align": "{{$event.target.value}}"
+                                                    }
+                                                  }
+                                                ],
+                                                "children": [
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "top"
+                                                    },
+                                                    "text": "$t:custom-ad_float.admin.vertical.top"
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "middle"
+                                                    },
+                                                    "text": "$t:custom-ad_float.admin.vertical.middle"
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Option",
+                                                    "props": {
+                                                      "value": "bottom"
+                                                    },
+                                                    "text": "$t:custom-ad_float.admin.vertical.bottom"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
+                                                "text": "$t:custom-ad_float.admin.fields.vertical_offset_px"
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                  "type": "number",
+                                                  "name": "sch_vertical_offset_px_{{sidx}}",
+                                                  "className": "input w-full",
+                                                  "value": "{{sch.vertical_offset_px ?? ''}}",
+                                                  "autoBinding": false
+                                                },
+                                                "actions": [
+                                                  {
+                                                    "type": "change",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                      "target": "local",
+                                                      "form.schedules.{{sidx}}.vertical_offset_px": "{{Number($event.target.value)}}"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "props": {
+                                              "className": "form-group w-full min-w-0"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                  "className": "form-label text-xs text-gray-500 mb-1"
+                                                },
                                                 "text": "$t:custom-ad_float.admin.fields.z_index"
                                               },
                                               {
@@ -3724,7 +3958,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.schedules": "{{(_local.form?.schedules || []).concat([{id:'new',start_date:'',start_time:'',end_date:'',end_time:'',item_ids:[],d0:true,d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,_deleted:false,position:(_local.form?.position||'right'),direction:(_local.form?.direction||'horizontal'),interval_ms:(Number(_local.form?.interval_ms)||4000),width_px:(Number(_local.form?.width_px)||180),height_px:(Number(_local.form?.height_px)||180),radius_px:(Number(_local.form?.radius_px)||10),offset_px:(Number(_local.form?.offset_px)||24),z_index:(Number(_local.form?.z_index)||9990),max_items:(Number(_local.form?.max_items)||20),mobile_mode:(_local.form?.mobile_mode||'hide'),autoplay:!!_local.form?.autoplay,show_arrows:!!_local.form?.show_arrows,show_dots:!!_local.form?.show_dots,show_close:!!_local.form?.show_close,pause_on_hover:!!_local.form?.pause_on_hover,open_new_tab:!!_local.form?.open_new_tab}])}}"
+                              "form.schedules": "{{(_local.form?.schedules || []).concat([{id:'new',start_date:'',start_time:'',end_date:'',end_time:'',item_ids:[],d0:true,d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,_deleted:false,position:(_local.form?.position||'right'),direction:(_local.form?.direction||'horizontal'),interval_ms:(Number(_local.form?.interval_ms)||4000),width_px:(Number(_local.form?.width_px)||180),height_px:(Number(_local.form?.height_px)||180),radius_px:(Number(_local.form?.radius_px)||10),offset_px:(Number(_local.form?.offset_px)||24),vertical_align:(_local.form?.vertical_align||'middle'),vertical_offset_px:(Number(_local.form?.vertical_offset_px??24)),z_index:(Number(_local.form?.z_index)||9990),max_items:(Number(_local.form?.max_items)||20),mobile_mode:(_local.form?.mobile_mode||'hide'),autoplay:!!_local.form?.autoplay,show_arrows:!!_local.form?.show_arrows,show_dots:!!_local.form?.show_dots,show_close:!!_local.form?.show_close,pause_on_hover:!!_local.form?.pause_on_hover,open_new_tab:!!_local.form?.open_new_tab}])}}"
                             }
                           }
                         ]
@@ -3778,7 +4012,9 @@
                                 "width_px": "{{Number(_local.form?.width_px) || 180}}",
                                 "height_px": "{{Number(_local.form?.height_px) || 180}}",
                                 "radius_px": "{{Number(_local.form?.radius_px) || 10}}",
-                                "offset_px": "{{Number(_local.form?.offset_px) || 24}}",
+                                "offset_px": "{{Number(_local.form?.offset_px ?? 24)}}",
+                                "vertical_align": "{{_local.form?.vertical_align || 'middle'}}",
+                                "vertical_offset_px": "{{Number(_local.form?.vertical_offset_px ?? 24)}}",
                                 "z_index": "{{Number(_local.form?.z_index) || 9990}}",
                                 "max_items": "{{Number(_local.form?.max_items) || 20}}",
                                 "close_cookie_key": "{{_local.form?.close_cookie_key || 'g7_custom_ad_float_closed'}}",
