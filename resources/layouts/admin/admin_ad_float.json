@@ -133,6 +133,23 @@
               },
               {
                 "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "flex items-center gap-2"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "A",
+                    "id": "btn_view_stats",
+                    "props": {
+                      "href": "/admin/ad-float/stats",
+                      "className": "px-3 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                    },
+                    "text": "$t:custom-ad_float.admin.stats.view"
+                  },
+              {
+                "type": "basic",
                 "name": "Button",
                 "id": "btn_save_settings_top",
                 "props": {
@@ -226,6 +243,8 @@
                       }
                     ]
                   }
+                ]
+              }
                 ]
               }
             ]

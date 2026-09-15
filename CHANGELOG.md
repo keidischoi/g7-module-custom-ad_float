@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.12
+- Stats sub-page `/admin/ad-float/stats`: summary cards (impressions, clicks, CTR) plus tables by ad, by page, and ad × page. Date filter: today / 7d / 30d / all (default 7d). Empty state when no rows.
+- Main admin page link 「통계 보기」.
+- Public `POST /api/modules/custom-ad_float/track` (throttled, always 200): `{ type, item_id, page_path }`.
+- Admin `GET /api/modules/custom-ad_float/admin/stats?range=7d`.
+- Daily rollup table `custom_ad_float_stats` unique on `(item_id, page_path, stat_date)`; upsert increment. Registered in `getDynamicTables()`.
+- Front JS: impression when a slide is shown (sessionStorage `caf_imp_{itemId}_{path}`), click beacon then navigate. `page_path` from `location.pathname` with trailing slash normalized.
+
 ## 0.1.11
 - Home ads: inject `ad-float.js` on user chrome via `_user_base` `scripts`, `user_layout_root` HtmlContent, layout hooks (`filter_child_data` / `filter_merged` / `after_apply`), and SEO `extraBodyEnd` `<script src="...?v=0.1.11">`. No `main_content_area` dependency.
 - Admin is one flow: **기본 설정** → **광고 목록** → **날짜 및 시간 예약**.

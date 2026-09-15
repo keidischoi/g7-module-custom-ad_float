@@ -111,6 +111,7 @@ class Module extends AbstractModule
         return [
             'custom_ad_float_settings',
             'custom_ad_float_items',
+            'custom_ad_float_stats',
         ];
     }
 }

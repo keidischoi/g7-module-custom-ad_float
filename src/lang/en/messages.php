@@ -22,4 +22,10 @@ return [
         'file_required' => 'Please choose an image file.',
         'url_required' => 'Please enter an image URL.',
     ],
+    'stats' => [
+        'fetch_success' => 'Ad stats loaded.',
+        'fetch_failed' => 'Failed to load ad stats.',
+        'untitled' => '(Untitled)',
+        'deleted_item' => 'Deleted ad #:id',
+    ],
 ];
