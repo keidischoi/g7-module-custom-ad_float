@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.24
+- Popup modal polish: blurred dim backdrop, 18px rounded panel, soft shadow, max-width 920px / max-height 85vh, 180ms opacity+scale open/close.
+- Header shows the ad title and a circular × (does not overlap the iframe). Body has a loading shimmer until the iframe loads. Footer 「새 탭에서 열기」.
+- Backdrop click / Escape still close; body scroll stays locked. Mobile is a near-full-screen sheet with safe-area margins.
+
 ## 0.1.23
 - Admin 기본 설정 **링크 열기 방식**: 「현재 창」 (`same`) / 「새 창」 (`new_tab`) / 「팝업 모달」 (`modal`). New field `link_open_mode`; `open_new_tab true` → `new_tab`, false → `same`. `open_new_tab` stays derived for old JS.
 - Link open mode is **global** (like X 버튼). Reservations do not override it; the per-row toggle is a hint only.
