@@ -1195,127 +1195,169 @@
               {
                 "type": "basic",
                 "name": "Div",
-                "id": "tog_autoplay",
+                "id": "caf_carousel_options",
                 "props": {
-                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
+                  "className": "mt-2 mb-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40"
                 },
                 "children": [
                   {
                     "type": "basic",
                     "name": "Div",
-                    "children": [
-                      {
-                        "type": "basic",
-                        "name": "Span",
-                        "props": {
-                          "className": "text-sm font-medium"
-                        },
-                        "text": "$t:custom-ad_float.admin.fields.autoplay"
-                      }
-                    ]
+                    "props": {
+                      "className": "text-sm font-semibold"
+                    },
+                    "text": "$t:custom-ad_float.admin.carousel_options"
                   },
                   {
                     "type": "basic",
-                    "name": "Toggle",
+                    "name": "P",
                     "props": {
-                      "name": "autoplay",
-                      "autoBinding": false,
-                      "checked": "{{_local.form?.autoplay === true || _local.form?.autoplay === 1 || _local.form?.autoplay === '1' || _local.form?.autoplay === 'true'}}"
+                      "className": "text-xs text-gray-500 mb-1"
                     },
-                    "actions": [
-                      {
-                        "type": "change",
-                        "handler": "setState",
-                        "params": {
-                          "target": "local",
-                          "form.autoplay": "{{$event.target.checked === true}}"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "basic",
-                "name": "Div",
-                "id": "tog_show_arrows",
-                "props": {
-                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
-                },
-                "children": [
+                    "text": "$t:custom-ad_float.admin.carousel_options_hint"
+                  },
                   {
                     "type": "basic",
                     "name": "Div",
+                    "id": "tog_autoplay",
+                    "props": {
+                      "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
+                    },
                     "children": [
                       {
                         "type": "basic",
-                        "name": "Span",
+                        "name": "Div",
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "props": {
+                              "className": "text-sm font-medium"
+                            },
+                            "text": "$t:custom-ad_float.admin.fields.autoplay"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Toggle",
                         "props": {
-                          "className": "text-sm font-medium"
+                          "name": "autoplay",
+                          "autoBinding": false,
+                          "checked": "{{_local.form?.autoplay === true || _local.form?.autoplay === 1 || _local.form?.autoplay === '1' || _local.form?.autoplay === 'true'}}"
                         },
-                        "text": "$t:custom-ad_float.admin.fields.show_arrows"
+                        "actions": [
+                          {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "form.autoplay": "{{$event.target.checked === true}}"
+                            }
+                          }
+                        ]
                       }
                     ]
                   },
-                  {
-                    "type": "basic",
-                    "name": "Toggle",
-                    "props": {
-                      "name": "show_arrows",
-                      "autoBinding": false,
-                      "checked": "{{_local.form?.show_arrows === true || _local.form?.show_arrows === 1 || _local.form?.show_arrows === '1' || _local.form?.show_arrows === 'true'}}"
-                    },
-                    "actions": [
-                      {
-                        "type": "change",
-                        "handler": "setState",
-                        "params": {
-                          "target": "local",
-                          "form.show_arrows": "{{$event.target.checked === true}}"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "basic",
-                "name": "Div",
-                "id": "tog_show_dots",
-                "props": {
-                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
-                },
-                "children": [
                   {
                     "type": "basic",
                     "name": "Div",
+                    "id": "tog_show_arrows",
+                    "props": {
+                      "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
+                    },
                     "children": [
                       {
                         "type": "basic",
-                        "name": "Span",
+                        "name": "Div",
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "props": {
+                              "className": "text-sm font-medium"
+                            },
+                            "text": "$t:custom-ad_float.admin.fields.show_arrows"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "P",
+                            "props": {
+                              "className": "text-xs text-gray-500 mt-0.5"
+                            },
+                            "text": "$t:custom-ad_float.admin.show_arrows_hint"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Toggle",
                         "props": {
-                          "className": "text-sm font-medium"
+                          "name": "show_arrows",
+                          "autoBinding": false,
+                          "checked": "{{_local.form?.show_arrows === true || _local.form?.show_arrows === 1 || _local.form?.show_arrows === '1' || _local.form?.show_arrows === 'true'}}"
                         },
-                        "text": "$t:custom-ad_float.admin.fields.show_dots"
+                        "actions": [
+                          {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "form.show_arrows": "{{$event.target.checked === true}}"
+                            }
+                          }
+                        ]
                       }
                     ]
                   },
                   {
                     "type": "basic",
-                    "name": "Toggle",
+                    "name": "Div",
+                    "id": "tog_show_dots",
                     "props": {
-                      "name": "show_dots",
-                      "autoBinding": false,
-                      "checked": "{{_local.form?.show_dots === true || _local.form?.show_dots === 1 || _local.form?.show_dots === '1' || _local.form?.show_dots === 'true'}}"
+                      "className": "flex items-center justify-between gap-4 py-3"
                     },
-                    "actions": [
+                    "children": [
                       {
-                        "type": "change",
-                        "handler": "setState",
-                        "params": {
-                          "target": "local",
-                          "form.show_dots": "{{$event.target.checked === true}}"
-                        }
+                        "type": "basic",
+                        "name": "Div",
+                        "children": [
+                          {
+                            "type": "basic",
+                            "name": "Span",
+                            "props": {
+                              "className": "text-sm font-medium"
+                            },
+                            "text": "$t:custom-ad_float.admin.fields.show_dots"
+                          },
+                          {
+                            "type": "basic",
+                            "name": "P",
+                            "props": {
+                              "className": "text-xs text-gray-500 mt-0.5"
+                            },
+                            "text": "$t:custom-ad_float.admin.show_dots_hint"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Toggle",
+                        "props": {
+                          "name": "show_dots",
+                          "autoBinding": false,
+                          "checked": "{{_local.form?.show_dots === true || _local.form?.show_dots === 1 || _local.form?.show_dots === '1' || _local.form?.show_dots === 'true'}}"
+                        },
+                        "actions": [
+                          {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "form.show_dots": "{{$event.target.checked === true}}"
+                            }
+                          }
+                        ]
                       }
                     ]
                   }
@@ -4290,117 +4332,179 @@
                                         "type": "basic",
                                         "name": "Div",
                                         "props": {
-                                          "className": "grid grid-cols-1 md:grid-cols-2 gap-x-6 mt-2"
+                                          "className": "mt-3 p-3 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30"
                                         },
                                         "children": [
                                           {
                                             "type": "basic",
                                             "name": "Div",
                                             "props": {
-                                              "className": "flex items-center justify-between gap-2 py-1.5"
+                                              "className": "text-sm font-medium"
                                             },
-                                            "children": [
-                                              {
-                                                "type": "basic",
-                                                "name": "Span",
-                                                "props": {
-                                                  "className": "text-xs"
-                                                },
-                                                "text": "$t:custom-ad_float.admin.fields.autoplay"
-                                              },
-                                              {
-                                                "type": "basic",
-                                                "name": "Toggle",
-                                                "props": {
-                                                  "name": "sch_autoplay_{{sidx}}",
-                                                  "autoBinding": false,
-                                                  "checked": "{{sch.autoplay === true || sch.autoplay === 1 || sch.autoplay === '1' || sch.autoplay === 'true'}}"
-                                                },
-                                                "actions": [
-                                                  {
-                                                    "type": "change",
-                                                    "handler": "setState",
-                                                    "params": {
-                                                      "target": "local",
-                                                      "form.schedules.{{sidx}}.autoplay": "{{$event.target.checked === true}}"
-                                                    }
-                                                  }
-                                                ]
-                                              }
-                                            ]
+                                            "text": "$t:custom-ad_float.admin.carousel_options"
+                                          },
+                                          {
+                                            "type": "basic",
+                                            "name": "P",
+                                            "props": {
+                                              "className": "text-xs text-gray-500 mb-2"
+                                            },
+                                            "text": "$t:custom-ad_float.admin.carousel_options_hint"
                                           },
                                           {
                                             "type": "basic",
                                             "name": "Div",
                                             "props": {
-                                              "className": "flex items-center justify-between gap-2 py-1.5"
+                                              "className": "grid grid-cols-1 md:grid-cols-2 gap-x-6"
                                             },
                                             "children": [
                                               {
                                                 "type": "basic",
-                                                "name": "Span",
+                                                "name": "Div",
                                                 "props": {
-                                                  "className": "text-xs"
+                                                  "className": "flex items-center justify-between gap-2 py-1.5"
                                                 },
-                                                "text": "$t:custom-ad_float.admin.fields.show_arrows"
+                                                "children": [
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Span",
+                                                    "props": {
+                                                      "className": "text-sm"
+                                                    },
+                                                    "text": "$t:custom-ad_float.admin.fields.autoplay"
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Toggle",
+                                                    "props": {
+                                                      "name": "sch_autoplay_{{sidx}}",
+                                                      "autoBinding": false,
+                                                      "checked": "{{sch.autoplay === true || sch.autoplay === 1 || sch.autoplay === '1' || sch.autoplay === 'true'}}"
+                                                    },
+                                                    "actions": [
+                                                      {
+                                                        "type": "change",
+                                                        "handler": "setState",
+                                                        "params": {
+                                                          "target": "local",
+                                                          "form.schedules.{{sidx}}.autoplay": "{{$event.target.checked === true}}"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
                                               },
                                               {
                                                 "type": "basic",
-                                                "name": "Toggle",
+                                                "name": "Div",
                                                 "props": {
-                                                  "name": "sch_show_arrows_{{sidx}}",
-                                                  "autoBinding": false,
-                                                  "checked": "{{sch.show_arrows === true || sch.show_arrows === 1 || sch.show_arrows === '1' || sch.show_arrows === 'true'}}"
+                                                  "className": "flex items-center justify-between gap-2 py-1.5"
                                                 },
-                                                "actions": [
+                                                "children": [
                                                   {
-                                                    "type": "change",
-                                                    "handler": "setState",
-                                                    "params": {
-                                                      "target": "local",
-                                                      "form.schedules.{{sidx}}.show_arrows": "{{$event.target.checked === true}}"
-                                                    }
+                                                    "type": "basic",
+                                                    "name": "Div",
+                                                    "children": [
+                                                      {
+                                                        "type": "basic",
+                                                        "name": "Span",
+                                                        "props": {
+                                                          "className": "text-sm"
+                                                        },
+                                                        "text": "$t:custom-ad_float.admin.fields.show_arrows"
+                                                      },
+                                                      {
+                                                        "type": "basic",
+                                                        "name": "P",
+                                                        "props": {
+                                                          "className": "text-xs text-gray-500"
+                                                        },
+                                                        "text": "$t:custom-ad_float.admin.show_arrows_hint"
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Toggle",
+                                                    "props": {
+                                                      "name": "sch_show_arrows_{{sidx}}",
+                                                      "autoBinding": false,
+                                                      "checked": "{{sch.show_arrows === true || sch.show_arrows === 1 || sch.show_arrows === '1' || sch.show_arrows === 'true'}}"
+                                                    },
+                                                    "actions": [
+                                                      {
+                                                        "type": "change",
+                                                        "handler": "setState",
+                                                        "params": {
+                                                          "target": "local",
+                                                          "form.schedules.{{sidx}}.show_arrows": "{{$event.target.checked === true}}"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                  "className": "flex items-center justify-between gap-2 py-1.5"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Div",
+                                                    "children": [
+                                                      {
+                                                        "type": "basic",
+                                                        "name": "Span",
+                                                        "props": {
+                                                          "className": "text-sm"
+                                                        },
+                                                        "text": "$t:custom-ad_float.admin.fields.show_dots"
+                                                      },
+                                                      {
+                                                        "type": "basic",
+                                                        "name": "P",
+                                                        "props": {
+                                                          "className": "text-xs text-gray-500"
+                                                        },
+                                                        "text": "$t:custom-ad_float.admin.show_dots_hint"
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Toggle",
+                                                    "props": {
+                                                      "name": "sch_show_dots_{{sidx}}",
+                                                      "autoBinding": false,
+                                                      "checked": "{{sch.show_dots === true || sch.show_dots === 1 || sch.show_dots === '1' || sch.show_dots === 'true'}}"
+                                                    },
+                                                    "actions": [
+                                                      {
+                                                        "type": "change",
+                                                        "handler": "setState",
+                                                        "params": {
+                                                          "target": "local",
+                                                          "form.schedules.{{sidx}}.show_dots": "{{$event.target.checked === true}}"
+                                                        }
+                                                      }
+                                                    ]
                                                   }
                                                 ]
                                               }
                                             ]
-                                          },
-                                          {
-                                            "type": "basic",
-                                            "name": "Div",
-                                            "props": {
-                                              "className": "flex items-center justify-between gap-2 py-1.5"
-                                            },
-                                            "children": [
-                                              {
-                                                "type": "basic",
-                                                "name": "Span",
-                                                "props": {
-                                                  "className": "text-xs"
-                                                },
-                                                "text": "$t:custom-ad_float.admin.fields.show_dots"
-                                              },
-                                              {
-                                                "type": "basic",
-                                                "name": "Toggle",
-                                                "props": {
-                                                  "name": "sch_show_dots_{{sidx}}",
-                                                  "autoBinding": false,
-                                                  "checked": "{{sch.show_dots === true || sch.show_dots === 1 || sch.show_dots === '1' || sch.show_dots === 'true'}}"
-                                                },
-                                                "actions": [
-                                                  {
-                                                    "type": "change",
-                                                    "handler": "setState",
-                                                    "params": {
-                                                      "target": "local",
-                                                      "form.schedules.{{sidx}}.show_dots": "{{$event.target.checked === true}}"
-                                                    }
-                                                  }
-                                                ]
-                                              }
-                                            ]
-                                          },
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                          "className": "grid grid-cols-1 md:grid-cols-2 gap-x-6 mt-2"
+                                        },
+                                        "children": [
                                           {
                                             "type": "basic",
                                             "name": "Div",

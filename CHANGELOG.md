@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.17
+- Admin labels: `show_arrows` → 「슬라이딩 버튼」 (hint: 이전/다음 화살표 표시), `show_dots` → 「DOT 표시」 (hint: 캐러셀 인디케이터 점). Grouped with **자동재생** as Toggle controls in 기본 설정 and per-reservation rows.
+- Front JS still hides arrows/dots when the flag is false (also `0` / `"false"`), and when there is only one slide (`items.length > 1`).
+
 ## 0.1.16
 - Fix admin **결합** / **결합 해제**: G7 `setState` keys cannot use `{{}}`, so `itemSel.{{ad.id}}` never persisted and the POST body sent empty ids (`combine_min` / generic 「캐러셀 결합에 실패했습니다.」). Checkboxes now toggle `_local.itemIds` (numeric array; static key + `.concat`/`.filter`). POST `{ item_ids, ids, sels }`.
 - Client toast 「결합하려면 광고를 2개 이상 선택하세요」 when fewer than 2 are selected. onError prefers `error.errors[0]` then `error.message`.

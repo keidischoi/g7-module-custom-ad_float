@@ -438,6 +438,13 @@
     document.head.appendChild(style);
   }
 
+  function settingOn(value) {
+    if (value === false || value === 0 || value === '0' || value === 'false' || value === 'off') {
+      return false;
+    }
+    return !!value;
+  }
+
   function render(payload) {
     if (document.getElementById(ROOT_ID)) return;
 
@@ -499,7 +506,8 @@
     frame.appendChild(track);
 
     var prevBtn, nextBtn, dotsWrap;
-    if (items.length > 1 && config.show_arrows) {
+    // Single-slide carousels never show chrome. false / 0 / "0" / "false" hide arrows/dots.
+    if (items.length > 1 && settingOn(config.show_arrows)) {
       var nav = document.createElement('div');
       nav.className = 'g7-ad-nav';
       prevBtn = document.createElement('button');
@@ -517,7 +525,7 @@
       frame.appendChild(nav);
     }
 
-    if (items.length > 1 && config.show_dots) {
+    if (items.length > 1 && settingOn(config.show_dots)) {
       dotsWrap = document.createElement('div');
       dotsWrap.className = 'g7-ad-dots';
       items.forEach(function (_, index) {
