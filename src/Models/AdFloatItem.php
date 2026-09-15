@@ -13,6 +13,7 @@ class AdFloatItem extends Model
 
     protected $fillable = [
         'title', 'alt_text', 'image_path', 'image_source', 'target_url', 'sort_order', 'display_seconds', 'enabled',
+        'carousel_group',
     ];
 
     protected $casts = [
@@ -56,7 +57,7 @@ class AdFloatItem extends Model
 
     public function toAdminArray(): array
     {
-        return [
+        $row = [
             'id' => $this->id,
             'title' => $this->title,
             'alt_text' => $this->alt_text,
@@ -69,12 +70,27 @@ class AdFloatItem extends Model
             'display_seconds' => $this->display_seconds,
             'enabled' => (bool) $this->enabled,
         ];
+        if (static::hasCarouselGroupColumn()) {
+            $row['carousel_group'] = $this->carousel_group;
+            $row['carousel_badge'] = $this->carousel_badge ?? null;
+        }
+
+        return $row;
     }
 
     public static function hasImageSourceColumn(): bool
     {
         try {
             return Schema::hasColumn('custom_ad_float_items', 'image_source');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    public static function hasCarouselGroupColumn(): bool
+    {
+        try {
+            return Schema::hasColumn('custom_ad_float_items', 'carousel_group');
         } catch (\Throwable $e) {
             return false;
         }

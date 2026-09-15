@@ -212,7 +212,89 @@ class AdminPayload
             'image_source' => ['nullable', 'in:upload,url'],
             'image_url' => $imageUrlRule,
             'image' => $imageRule,
+            'images' => ['nullable', 'array', 'max:30'],
+            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'],
+            'image_urls' => ['nullable', 'array', 'max:30'],
+            'image_urls.*' => ['nullable', 'string', 'max:1000'],
+            'extra_urls' => ['nullable', 'array', 'max:30'],
+            'extra_urls.*.url' => ['nullable', 'string', 'max:1000'],
+            'combine' => ['nullable'],
+            'carousel_group' => ['nullable', 'string', 'max:36'],
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function itemBatchRules(): array
+    {
+        $rules = self::itemRules(self::SOURCE_URL, false);
+        $rules['image_url'] = ['nullable', 'string', 'max:1000'];
+        $rules['image'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'];
+
+        return $rules;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function collectImageUrls(array $data): array
+    {
+        $urls = [];
+        foreach (['image_url', 'image_urls', 'extra_urls'] as $key) {
+            if (! array_key_exists($key, $data)) {
+                continue;
+            }
+            $value = $data[$key];
+            if (is_string($value)) {
+                foreach (preg_split('/\r\n|\n|\r/', $value) ?: [] as $line) {
+                    $line = trim($line);
+                    if ($line !== '') {
+                        $urls[] = $line;
+                    }
+                }
+            } elseif (is_array($value)) {
+                foreach ($value as $row) {
+                    if (is_string($row) && trim($row) !== '') {
+                        $urls[] = trim($row);
+                    } elseif (is_array($row)) {
+                        $u = $row['url'] ?? $row['image_url'] ?? null;
+                        if (is_string($u) && trim($u) !== '') {
+                            $urls[] = trim($u);
+                        }
+                    }
+                }
+            }
+        }
+
+        return array_values(array_unique($urls));
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public static function selectedItemIds(mixed $ids, mixed $sels = null): array
+    {
+        $out = [];
+        if (is_array($ids)) {
+            foreach ($ids as $id) {
+                if (is_numeric($id) && (int) $id > 0) {
+                    $out[] = (int) $id;
+                }
+            }
+        }
+        if (is_array($sels)) {
+            foreach ($sels as $key => $on) {
+                $id = is_numeric($key) ? (int) $key : 0;
+                if ($id > 0 && ($on === true || $on === 1 || $on === '1' || $on === 'true')) {
+                    $out[] = $id;
+                }
+            }
+        }
+        $out = array_values(array_unique($out));
+        sort($out);
+
+        return $out;
     }
 
     /**

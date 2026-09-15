@@ -5,7 +5,8 @@
 ## 기능
 
 - 관리자 `/admin/ad-float`: **기본 설정** → **광고 목록** → **날짜 및 시간 예약**. 「통계 보기」로 `/admin/ad-float/stats` (노출·클릭, 광고별 × 페이지별)
-- 광고 이미지: **파일 업로드** 또는 **웹주소 연결** (둘 중 하나)
+- 광고 이미지: **파일 업로드**(여러 장) 또는 **웹주소 연결**(여러 행). 등록 시 「결합하여 캐러셀로 등록」 가능
+- 광고 목록에서 선택 후 **결합** / **결합 해제**. 같은 그룹은 「캐러셀 A」 배지
 - 위치·캐러셀·모바일·닫기 쿠키 등 기본 표시 옵션
 - 왼쪽/오른쪽: 본문(콘텐츠) 박스 좌우 가장자리 기준 여백, 세로 위치(위/가운데/아래) + px
 - `position: fixed` 로 스크롤 따라다님
@@ -38,6 +39,15 @@ php artisan cache:clear
 - `custom_ad_float_items`
 - `custom_ad_float_stats` (일별 노출/클릭 롤업)
 
+## 업그레이드 (0.1.14)
+
+```bash
+php artisan migrate
+php artisan cache:clear
+```
+
+`custom_ad_float_items.carousel_group` 이 추가됩니다. 프론트 `ad-float.js` 캐시 쿼리는 `?v=0.1.14` 입니다.
+
 ## 업그레이드 (0.1.13)
 
 ```bash
@@ -69,4 +79,4 @@ php artisan cache:clear
 | identifier | `custom-ad_float` |
 | vendor | `custom` |
 | namespace | `Modules\\Custom\\AdFloat` |
-| version | `0.1.13` |
+| version | `0.1.14` |
