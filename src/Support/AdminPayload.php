@@ -350,7 +350,20 @@ class AdminPayload
      */
     public static function dropNonFileUploadFields(Request $request): void
     {
-        foreach (['image', 'images', 'file', 'files', 'FileUploader'] as $key) {
+        $keys = [];
+        foreach (array_keys($request->all()) as $key) {
+            if (is_string($key) && self::isUploadFieldName($key)) {
+                $keys[] = $key;
+            }
+        }
+        if (isset($request->files)) {
+            foreach ($request->files->keys() as $key) {
+                if (is_string($key) && self::isUploadFieldName($key)) {
+                    $keys[] = $key;
+                }
+            }
+        }
+        foreach (array_unique($keys) as $key) {
             if (self::hasValidUpload($request, $key)) {
                 continue;
             }
@@ -392,7 +405,14 @@ class AdminPayload
     {
         $out = [];
         $seen = [];
-        $add = function ($file) use (&$out, &$seen) {
+        $add = function ($file) use (&$out, &$seen, &$add) {
+            if (is_array($file)) {
+                foreach ($file as $one) {
+                    $add($one);
+                }
+
+                return;
+            }
             if (! $file instanceof \Illuminate\Http\UploadedFile || ! $file->isValid()) {
                 return;
             }
@@ -407,19 +427,18 @@ class AdminPayload
         $all = method_exists($request, 'allFiles') ? $request->allFiles() : [];
         foreach ($all as $key => $file) {
             $name = is_string($key) ? $key : '';
-            if ($name !== '' && ! preg_match('/^(image|images|file|files|FileUploader)/i', $name)) {
+            if ($name !== '' && ! self::isUploadFieldName($name)) {
                 continue;
             }
-            if (is_array($file)) {
-                foreach ($file as $one) {
-                    $add($one);
-                }
-            } else {
-                $add($file);
-            }
+            $add($file);
         }
 
         return $out;
+    }
+
+    public static function isUploadFieldName(string $name): bool
+    {
+        return (bool) preg_match('/^(image|images|file|files|FileUploader)/i', $name);
     }
 
     private static function hasValidUpload(Request $request, string $key): bool

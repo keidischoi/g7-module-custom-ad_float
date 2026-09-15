@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.26
+- Restore G7 **FileUploader** (dashed 업로더 박스) for admin 「이미지 업로드」. 0.1.25 replaced it with a plain `<Input type="file">` after uploads failed; the box is back and files actually persist.
+- Why FileUploader broke in 0.1.21: layout actions used `"type": "onFilesChange"` (G7 binds that as `onOnFilesChange`, so the callback never ran) and `onFilesChange` stored files with `.map(function…)` / `$event[0].file`. G7 layout expressions reject `function` and do not run `.map`, so `create.image` stayed empty. Register then posted a non-file `image` → 「image 필드는 이미지여야 합니다」.
+- Fix (same pattern as ecommerce product images): `"event": "onFilesChange"` so `$args[0]` is `PendingFile[]`. Store real `File` objects with G7-safe expressions only (`$args[0][0].file`, `$args[0].length`, `images0`…`images9` — no `?.`, `??`, `.map(`, arrows). `accept` is `.jpg,.jpeg,.png,.gif,.webp` (FileUploader matches extensions, not `image/*`). `autoUpload: false` so files stay local until 「광고 등록」. Multipart POST sends top-level File fields (`image` / `images0`…); G7 only appends `File`/`Blob` at the top level of the body (arrays get JSON.stringified). Keep 0.1.25 `createSource` / `create.source` toggle so the upload panel appears.
+
 ## 0.1.25
 - Admin **이미지 업로드** toggle works in G7: create/edit source `if` / `className` no longer use `?.` or `??` (same class of bug as 예약 `??`). Click 「이미지 업로드」 sets `create.source` / `createSource` to `upload`, the button turns blue, and the upload box shows immediately.
 - Replaced unreliable G7 **FileUploader** (template `.map` on `onFilesChange` never stored files) with a dashed **업로드 박스** `<Input type="file" name="image" multiple accept="image/*">`. Change handler uses `$event.target.files` only (no `.map`, no `?.`). Register sends real files as `image` / `images` with `source=upload`. URL mode unchanged.
