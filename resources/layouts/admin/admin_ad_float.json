@@ -95,7 +95,18 @@
               "url": ""
             }
           ],
-          "combine": false
+          "combine": false,
+          "image_name": "",
+          "images0": null,
+          "images1": null,
+          "images2": null,
+          "images3": null,
+          "images4": null,
+          "images5": null,
+          "images6": null,
+          "images7": null,
+          "images8": null,
+          "images9": null
         },
         "itemIds": [],
         "resettingClosed": false,
@@ -1703,47 +1714,57 @@
                     "text": "$t:custom-ad_float.admin.image_file_hint"
                   },
                   {
-                    "id": "caf_create_images_box",
-                    "type": "basic",
-                    "name": "Div",
+                    "id": "caf_create_images_uploader",
+                    "type": "composite",
+                    "name": "FileUploader",
                     "props": {
-                      "className": "mt-1 w-full rounded-lg border border-dashed border-gray-500 px-3 py-4"
+                      "collection": "ad_float",
+                      "maxFiles": 10,
+                      "maxSize": 10,
+                      "accept": ".jpg,.jpeg,.png,.gif,.webp",
+                      "autoUpload": false,
+                      "className": "mt-1"
                     },
-                    "children": [
+                    "actions": [
                       {
-                        "id": "caf_create_images_input",
-                        "type": "basic",
-                        "name": "Input",
-                        "props": {
-                          "type": "file",
-                          "name": "image",
-                          "multiple": true,
-                          "accept": "image/*",
-                          "className": "block w-full text-sm cursor-pointer"
-                        },
-                        "actions": [
-                          {
-                            "type": "change",
-                            "handler": "setState",
-                            "params": {
-                              "target": "local",
-                              "create.image": "{{$event.target.files[0]}}",
-                              "create.images": "{{$event.target.files}}",
-                              "create.image_count": "{{$event.target.files.length}}"
-                            }
-                          }
-                        ]
+                        "event": "onFilesChange",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "create.image": "{{$args[0][0].file || null}}",
+                          "create.images": "{{$args[0][0].file || null}}",
+                          "create.image_count": "{{($args[0] && $args[0].length) || 0}}",
+                          "create.image_name": "{{$args[0][0].original_filename || ''}}",
+                          "create.images0": "{{$args[0][0].file || null}}",
+                          "create.images1": "{{$args[0][1].file || null}}",
+                          "create.images2": "{{$args[0][2].file || null}}",
+                          "create.images3": "{{$args[0][3].file || null}}",
+                          "create.images4": "{{$args[0][4].file || null}}",
+                          "create.images5": "{{$args[0][5].file || null}}",
+                          "create.images6": "{{$args[0][6].file || null}}",
+                          "create.images7": "{{$args[0][7].file || null}}",
+                          "create.images8": "{{$args[0][8].file || null}}",
+                          "create.images9": "{{$args[0][9].file || null}}"
+                        }
+                      },
+                      {
+                        "event": "onUploadError",
+                        "handler": "toast",
+                        "params": {
+                          "type": "error",
+                          "message": "{{$args[0]}}"
+                        }
                       }
                     ]
                   },
                   {
                     "type": "basic",
                     "name": "P",
-                    "if": "{{!!(_local.create.image && _local.create.image.name)}}",
+                    "if": "{{!!(_local.create.image_name || (_local.create.image && _local.create.image.name))}}",
                     "props": {
                       "className": "text-xs text-gray-500 mt-1"
                     },
-                    "text": "{{_local.create.image.name}}"
+                    "text": "{{_local.create.image_name || _local.create.image.name}}"
                   },
                   {
                     "type": "basic",
@@ -2225,7 +2246,18 @@
                                 "url": ""
                               }
                             ],
-                            "combine": false
+                            "combine": false,
+                            "image_name": "",
+                            "images0": null,
+                            "images1": null,
+                            "images2": null,
+                            "images3": null,
+                            "images4": null,
+                            "images5": null,
+                            "images6": null,
+                            "images7": null,
+                            "images8": null,
+                            "images9": null
                           },
                           "createSource": "url"
                         }
@@ -2298,7 +2330,18 @@
                                         "url": ""
                                       }
                                     ],
-                                    "combine": false
+                                    "combine": false,
+                                    "image_name": "",
+                                    "images0": null,
+                                    "images1": null,
+                                    "images2": null,
+                                    "images3": null,
+                                    "images4": null,
+                                    "images5": null,
+                                    "images6": null,
+                                    "images7": null,
+                                    "images8": null,
+                                    "images9": null
                                   },
                                   "createSource": "url"
                                 }
@@ -2378,7 +2421,17 @@
                                 "display_seconds": "{{_local.create.display_seconds ? _local.create.display_seconds : undefined}}",
                                 "enabled": 1,
                                 "images": "{{_local.create.images}}",
-                                "combine": "{{_local.create.combine ? 1 : 0}}"
+                                "combine": "{{_local.create.combine ? 1 : 0}}",
+                                "images0": "{{_local.create.images0}}",
+                                "images1": "{{_local.create.images1}}",
+                                "images2": "{{_local.create.images2}}",
+                                "images3": "{{_local.create.images3}}",
+                                "images4": "{{_local.create.images4}}",
+                                "images5": "{{_local.create.images5}}",
+                                "images6": "{{_local.create.images6}}",
+                                "images7": "{{_local.create.images7}}",
+                                "images8": "{{_local.create.images8}}",
+                                "images9": "{{_local.create.images9}}"
                               },
                               "contentType": "multipart/form-data"
                             },
@@ -2406,7 +2459,18 @@
                                         "url": ""
                                       }
                                     ],
-                                    "combine": false
+                                    "combine": false,
+                                    "image_name": "",
+                                    "images0": null,
+                                    "images1": null,
+                                    "images2": null,
+                                    "images3": null,
+                                    "images4": null,
+                                    "images5": null,
+                                    "images6": null,
+                                    "images7": null,
+                                    "images8": null,
+                                    "images9": null
                                   },
                                   "createSource": "url"
                                 }
@@ -2509,7 +2573,18 @@
                                         "url": ""
                                       }
                                     ],
-                                    "combine": false
+                                    "combine": false,
+                                    "image_name": "",
+                                    "images0": null,
+                                    "images1": null,
+                                    "images2": null,
+                                    "images3": null,
+                                    "images4": null,
+                                    "images5": null,
+                                    "images6": null,
+                                    "images7": null,
+                                    "images8": null,
+                                    "images9": null
                                   },
                                   "createSource": "url"
                                 }
@@ -2614,7 +2689,18 @@
                                         "url": ""
                                       }
                                     ],
-                                    "combine": false
+                                    "combine": false,
+                                    "image_name": "",
+                                    "images0": null,
+                                    "images1": null,
+                                    "images2": null,
+                                    "images3": null,
+                                    "images4": null,
+                                    "images5": null,
+                                    "images6": null,
+                                    "images7": null,
+                                    "images8": null,
+                                    "images9": null
                                   },
                                   "createSource": "url"
                                 }
@@ -3089,7 +3175,18 @@
                                           "createSource": "{{ad.source || ad.image_source || 'url'}}",
                                           "create.image": null,
                                           "create.images": null,
-                                          "create.image_count": 0
+                                          "create.image_count": 0,
+                                          "create.image_name": "",
+                                          "create.images0": null,
+                                          "create.images1": null,
+                                          "create.images2": null,
+                                          "create.images3": null,
+                                          "create.images4": null,
+                                          "create.images5": null,
+                                          "create.images6": null,
+                                          "create.images7": null,
+                                          "create.images8": null,
+                                          "create.images9": null
                                         }
                                       },
                                       {

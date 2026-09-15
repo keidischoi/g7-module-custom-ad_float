@@ -40,6 +40,11 @@ namespace {
     expect('schedule _deleted is validated', array_key_exists('schedules.*._deleted', $schedRules), true);
     expect('remove_schedule_id is validated', array_key_exists('remove_schedule_id', $schedRules), true);
 
+    expect('images0 is an upload field name', AdminPayload::isUploadFieldName('images0'), true);
+    expect('images9 is an upload field name', AdminPayload::isUploadFieldName('images9'), true);
+    expect('FileUploader is an upload field name', AdminPayload::isUploadFieldName('FileUploader'), true);
+    expect('title is not an upload field name', AdminPayload::isUploadFieldName('title'), false);
+
     echo "\n{$passed} passed, {$failed} failed\n";
     exit($failed === 0 ? 0 : 1);
 }
