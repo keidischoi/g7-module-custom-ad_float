@@ -105,7 +105,7 @@
     "delete_success": "삭제했습니다.",
     "edit_loaded": "선택한 광고를 수정 폼에 불러왔습니다.",
     "image_url_hint": "공개 이미지 웹주소를 입력하세요. (예: https://... 또는 /storage/...)",
-    "image_file_hint": "jpg, png, gif, webp 파일을 하나 또는 여러 개 선택하세요. (파일당 최대 10MB)",
+    "image_file_hint": "아래 업로드 박스에 jpg, png, gif, webp를 끌어다 놓거나 선택하세요. (최대 10개, 파일당 10MB)",
     "source_hint": "이미지 파일 업로드와 웹주소 연결 중 하나를 선택하세요.",
     "reset_closed_success": "방문자가 닫았던 기록이 무효화되어 다시 표시됩니다.",
     "reset_closed_hint": "브라우저마다 쿠키/로컬스토리지에 저장되며, 이 버튼은 쿠키 키를 바꿔 전체 다시 노출시킵니다.",
@@ -129,6 +129,7 @@
     "show_arrows_hint": "이전/다음 화살표 표시",
     "show_dots_hint": "캐러셀 인디케이터 점",
     "show_close_hint": "광고 닫기(×) 표시",
+    "show_close_global_hint": "X 버튼은 기본 설정 기준입니다. 예약이 덮어쓰지 않습니다.",
     "stats": {
       "title": "플로팅 광고 통계",
       "description": "광고 노출·클릭을 광고별, 페이지별, 광고×페이지로 봅니다.",

@@ -3,6 +3,10 @@
 ## 0.1.21
 - Admin dark theme: 「캐러셀 옵션」 boxes no longer use `bg-gray-50` (G7 often does not apply Tailwind `dark:` fills, so the block stayed near-white and labels vanished). Main settings and per-reservation boxes are transparent with the same border as sibling toggle rows (X 버튼). Headings stay `text-sm font-semibold` / inherit.
 - Same-screen filled cards that relied on `bg-white dark:bg-gray-800` (ad list rows, stats summary/by-item cards) drop the light fill so they match dark admin. Secondary admin buttons drop `bg-white` / `bg-gray-100` fills and keep a border only.
+- Admin 「예약 추가」 no longer concatenates a huge template (with `??` and `id:'new'`). New rows are a short object with `id: 's' + Date.now()` and `position` only, so the page does not freeze and each card is unique.
+- **X 버튼은 기본 설정 기준. 예약이 덮어쓰지 않음.** `overlayVisual` pins `show_close` from base settings. Reservation cards hide the X toggle.
+- 광고 목록: tighter row gap (`gap-1.5`), card padding (`p-3`), and 광고 등록 / 새로고침 header spacing.
+- Admin create/edit uses G7 **FileUploader** (업로드 박스) instead of a raw file input. Store/update drop empty `image`/`images` strings before validate (`image` is nullable); missing files return 「이미지 파일을 선택해 주세요.」 Validation toasts show the full errors list.
 
 ## 0.1.20
 - Admin sidebar: **플로팅 광고** is a parent with children **광고 설정** (`/admin/ad-float`) and **통계** (`/admin/ad-float/stats`), same `children` pattern as `custom-digital_product`.

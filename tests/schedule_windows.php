@@ -110,6 +110,32 @@ namespace {
     ], $base);
     expect('missing position inherits base', $inherit[0]['id'] ?? null, 'right');
 
+    $baseCloseOff = array_merge($base, ['show_close' => false]);
+    $scheduleCloseOn = [
+        'enabled' => true,
+        'position' => 'left',
+        'item_ids' => [1],
+        'weekdays' => [],
+        'show_close' => true,
+    ];
+    $pinnedOff = AdminPayload::windowsFromMatchingSchedules([$scheduleCloseOn], $baseCloseOff);
+    expect('schedule show_close true does not override base OFF', $pinnedOff[0]['settings']['show_close'] ?? null, false);
+
+    $baseCloseOn = array_merge($base, ['show_close' => true]);
+    $scheduleCloseOff = [
+        'enabled' => true,
+        'position' => 'right',
+        'item_ids' => [2],
+        'weekdays' => [],
+        'show_close' => false,
+    ];
+    $pinnedOn = AdminPayload::windowsFromMatchingSchedules([$scheduleCloseOff], $baseCloseOn);
+    expect('schedule show_close false does not override base ON', $pinnedOn[0]['settings']['show_close'] ?? null, true);
+
+    $direct = AdminPayload::overlayVisual(['show_close' => false, 'position' => 'right'], ['show_close' => true, 'width_px' => 90]);
+    expect('overlayVisual pins base show_close', $direct['show_close'] ?? null, false);
+    expect('overlayVisual still applies other schedule visuals', $direct['width_px'] ?? null, 90);
+
     echo "\n{$passed} passed, {$failed} failed\n";
     exit($failed === 0 ? 0 : 1);
 }
