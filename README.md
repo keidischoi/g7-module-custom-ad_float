@@ -43,10 +43,18 @@ php artisan cache:clear
 
 ## 닫기(X) 상태
 
-방문자가 플로팅 광고 **X**를 누르면 `close_cookie_key`(기본 `g7_custom_ad_float_closed`)로 **쿠키 + localStorage**에 저장되어, 그 브라우저에서는 다시 보이지 않습니다. 예약으로 여러 위치에 띄운 창은 키 뒤에 `_{위치}`가 붙어서, 한쪽만 닫아도 다른 위치는 남습니다. (예약 사용 OFF의 기본 창은 예전처럼 접미사 없는 키입니다.)
+방문자가 플로팅 광고 **X**를 누르면 `close_cookie_key`(기본 `g7_custom_ad_float_closed`)로 **쿠키 + localStorage**에 저장되어, 그 브라우저에서는 다시 보이지 않습니다. 「X 버튼」 토글을 끄면 × 자체가 나오지 않습니다. 예약으로 여러 위치에 띄운 창은 키 뒤에 `_{위치}`가 붙어서, 한쪽만 닫아도 다른 위치는 남습니다. (예약 사용 OFF의 기본 창은 예전처럼 접미사 없는 키입니다.)
 
 - **전체 다시 노출:** `/admin/ad-float` 기본 설정에서 **닫힘 상태 초기화** / **다시 보이게 하기**. 서버가 쿠키 키를 새 값으로 바꿔 예전 기록을 무효화합니다. (`POST /api/modules/custom-ad_float/admin/settings/reset-closed`)
 - **한 브라우저만 테스트:** 개발자 도구에서 해당 키의 쿠키와 localStorage를 지우면 됩니다. 방문자마다 수동으로 지울 필요는 없습니다.
+
+## 업그레이드 (0.1.19)
+
+```bash
+php artisan cache:clear
+```
+
+마이그레이션은 없습니다. 관리자에서 「X 버튼」을 끄면 플로팅 광고에 ×가 없어집니다. 프론트 `ad-float.js` 캐시 쿼리는 `?v=0.1.19` 입니다.
 
 ## 업그레이드 (0.1.18)
 
@@ -121,4 +129,4 @@ php artisan cache:clear
 | identifier | `custom-ad_float` |
 | vendor | `custom` |
 | namespace | `Modules\\Custom\\AdFloat` |
-| version | `0.1.18` |
+| version | `0.1.19` |

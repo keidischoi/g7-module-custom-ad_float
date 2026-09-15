@@ -93,6 +93,7 @@ class AdFloatService
      */
     private function windowFromItems(string $id, array $settings, Collection $items): array
     {
+        $settings = AdminPayload::coerceSettingFlags($settings);
         $settings['enabled'] = true;
         $items = $this->orderItemsForCarousel($items)
             ->take(max(1, (int) ($settings['max_items'] ?? 20)));
@@ -133,7 +134,8 @@ class AdFloatService
             'show_close', 'pause_on_hover', 'open_new_tab', 'schedules_enabled',
         ] as $boolKey) {
             if (array_key_exists($boolKey, $data)) {
-                $data[$boolKey] = filter_var($data[$boolKey], FILTER_VALIDATE_BOOLEAN);
+                $default = ! in_array($boolKey, ['enabled', 'home_only', 'schedules_enabled'], true);
+                $data[$boolKey] = AdminPayload::toBool($data[$boolKey], $default);
             }
         }
         foreach (['start_at', 'end_at'] as $dateKey) {

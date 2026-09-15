@@ -42,7 +42,7 @@
       "autoplay": "Autoplay",
       "show_arrows": "Sliding buttons",
       "show_dots": "DOT indicators",
-      "show_close": "Close button",
+      "show_close": "Close / X button",
       "pause_on_hover": "Pause on hover",
       "open_new_tab": "Open links in new tab",
       "title": "Title",
@@ -124,6 +124,7 @@
     "carousel_options_hint": "Applies when two or more slides are shown. A single ad hides the buttons and dots.",
     "show_arrows_hint": "Previous/next arrows",
     "show_dots_hint": "Carousel indicator dots",
+    "show_close_hint": "Show the ad close (×) control",
     "stats": {
       "title": "Floating ad stats",
       "description": "Impressions and clicks by ad, by page, and by ad × page.",

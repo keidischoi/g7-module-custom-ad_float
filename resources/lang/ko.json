@@ -42,7 +42,7 @@
       "autoplay": "자동재생",
       "show_arrows": "슬라이딩 버튼",
       "show_dots": "DOT 표시",
-      "show_close": "닫기 버튼",
+      "show_close": "X 버튼",
       "pause_on_hover": "마우스 오버 시 정지",
       "open_new_tab": "링크 새 창",
       "title": "광고명",
@@ -124,6 +124,7 @@
     "carousel_options_hint": "여러 장이 이어질 때만 적용됩니다. 광고가 1장이면 버튼과 DOT는 숨깁니다.",
     "show_arrows_hint": "이전/다음 화살표 표시",
     "show_dots_hint": "캐러셀 인디케이터 점",
+    "show_close_hint": "광고 닫기(×) 표시",
     "stats": {
       "title": "플로팅 광고 통계",
       "description": "광고 노출·클릭을 광고별, 페이지별, 광고×페이지로 봅니다.",

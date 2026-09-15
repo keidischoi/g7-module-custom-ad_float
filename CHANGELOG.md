@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.19
+- Front JS honors **X 버튼** (`show_close`) OFF: G7 often saves `0` / `"0"` / `"false"`, and `0 !== false` still created the ×. `settingOn()` now treats those as off and **defaults ON** when the flag is missing (same helper for arrows, dots, autoplay, pause-on-hover, new-tab, enabled, home_only).
+- Each payload window keeps `show_close` after reservation overlay; PHP `AdminPayload::toBool()` avoids Laravel `(bool) "0" === true`.
+- Admin label `show_close` → 「X 버튼」 (hint: 광고 닫기(×) 표시). EN: Close / X button.
+
 ## 0.1.18
 - When **예약 사용 ON**, apply **every** matching reservation (not only the first). Each distinct `position` mounts its own float root (`g7-custom-ad-float-{left|right|top|bottom}`).
 - Matching rows that share a position merge into **one** carousel: first row’s visuals, union of `item_ids` (empty = all enabled ads).
