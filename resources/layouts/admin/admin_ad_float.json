@@ -1867,9 +1867,11 @@
                   },
                   {
                     "type": "basic",
-                    "name": "Toggle",
+                    "name": "Input",
                     "props": {
+                      "type": "checkbox",
                       "name": "combine_on_create",
+                      "className": "h-4 w-4 cursor-pointer",
                       "autoBinding": false,
                       "checked": "{{_local.create?.combine === true || _local.create?.combine === 1 || _local.create?.combine === '1' || _local.create?.combine === 'true'}}"
                     },
@@ -2077,7 +2079,6 @@
                                 "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}",
                                 "enabled": 1,
                                 "images": "{{_local.create?.images}}",
-                                "image_count": 0,
                                 "extra_urls": "{{_local.create?.extra_urls ?? []}}",
                                 "combine": "{{_local.create?.combine ? 1 : 0}}"
                               },
@@ -2571,9 +2572,11 @@
                         "children": [
                           {
                             "type": "basic",
-                            "name": "Toggle",
+                            "name": "Input",
                             "props": {
+                              "type": "checkbox",
                               "name": "item_sel_{{ad.id}}",
+                              "className": "h-4 w-4 cursor-pointer",
                               "autoBinding": false,
                               "checked": "{{_local.itemSel?.[String(ad.id)] === true || _local.itemSel?.[ad.id] === true}}"
                             },
