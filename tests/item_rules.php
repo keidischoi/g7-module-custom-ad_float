@@ -35,6 +35,11 @@ namespace {
     $updateUpload = AdminPayload::itemRules(AdminPayload::SOURCE_UPLOAD, false);
     expect('upload update image nullable', $updateUpload['image'][0] ?? null, 'nullable');
 
+    $schedRules = AdminPayload::scheduleNestedRules();
+    expect('schedule id is validated', array_key_exists('schedules.*.id', $schedRules), true);
+    expect('schedule _deleted is validated', array_key_exists('schedules.*._deleted', $schedRules), true);
+    expect('remove_schedule_id is validated', array_key_exists('remove_schedule_id', $schedRules), true);
+
     echo "\n{$passed} passed, {$failed} failed\n";
     exit($failed === 0 ? 0 : 1);
 }

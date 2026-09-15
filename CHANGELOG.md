@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.25
+- Admin **이미지 업로드** toggle works in G7: create/edit source `if` / `className` no longer use `?.` or `??` (same class of bug as 예약 `??`). Click 「이미지 업로드」 sets `create.source` / `createSource` to `upload`, the button turns blue, and the upload box shows immediately.
+- Replaced unreliable G7 **FileUploader** (template `.map` on `onFilesChange` never stored files) with a dashed **업로드 박스** `<Input type="file" name="image" multiple accept="image/*">`. Change handler uses `$event.target.files` only (no `.map`, no `?.`). Register sends real files as `image` / `images` with `source=upload`. URL mode unchanged.
+- **예약창 삭제** now persists: the − button PUTs settings with `remove_schedule_id` (and still flags `_deleted` locally). Backend drops that id from stored `schedules` even if G7 omits `_deleted`. Validation keeps `schedules.*.id` / `_deleted`. Refresh after delete: that reservation is gone; others stay.
+
 ## 0.1.24
 - Popup modal polish: blurred dim backdrop, 18px rounded panel, soft shadow, max-width 920px / max-height 85vh, 180ms opacity+scale open/close.
 - Header shows the ad title and a circular × (does not overlap the iframe). Body has a loading shimmer until the iframe loads. Footer 「새 탭에서 열기」.

@@ -197,7 +197,92 @@ class AdminPayload
             'schedules.*.pause_on_hover' => ['nullable'],
             'schedules.*.open_new_tab' => ['nullable'],
             'schedules.*.link_open_mode' => ['nullable', 'in:same,new_tab,modal'],
+            'schedules.*.id' => ['nullable', 'string', 'max:64'],
+            'schedules.*._deleted' => ['nullable'],
+            'schedules.*.deleted' => ['nullable'],
+            'remove_schedule_id' => ['nullable', 'string', 'max:64'],
+            'remove_schedule_ids' => ['nullable'],
         ];
+    }
+
+    /**
+     * Ids posted when the admin deletes a reservation card (G7 may not send `_deleted`).
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<int, string>
+     */
+    public static function collectRemoveScheduleIds(array $data): array
+    {
+        $ids = [];
+        foreach (['remove_schedule_id', 'remove_schedule_ids'] as $key) {
+            if (! array_key_exists($key, $data)) {
+                continue;
+            }
+            $raw = $data[$key];
+            if (is_string($raw)) {
+                $trimmed = trim($raw);
+                if ($trimmed === '') {
+                    continue;
+                }
+                $decoded = json_decode($trimmed, true);
+                $raw = is_array($decoded) ? $decoded : preg_split('/\s*,\s*/', $trimmed);
+            }
+            if (! is_array($raw)) {
+                $raw = [$raw];
+            }
+            foreach ($raw as $id) {
+                if (! is_scalar($id)) {
+                    continue;
+                }
+                $id = trim((string) $id);
+                if ($id !== '') {
+                    $ids[] = $id;
+                }
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $schedules
+     * @param  array<int, string>  $removeIds
+     * @return array<int, array<string, mixed>>
+     */
+    public static function withoutRemovedSchedules(array $schedules, array $removeIds): array
+    {
+        if ($removeIds === []) {
+            return array_values($schedules);
+        }
+        $remove = array_fill_keys($removeIds, true);
+        $out = [];
+        foreach ($schedules as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $id = isset($row['id']) ? trim((string) $row['id']) : '';
+            if ($id !== '' && isset($remove[$id])) {
+                continue;
+            }
+            $out[] = $row;
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     */
+    public static function scheduleRowDeleted(array $row): bool
+    {
+        if (array_key_exists('_deleted', $row)) {
+            return self::toBool($row['_deleted'], false);
+        }
+        if (array_key_exists('deleted', $row)) {
+            return self::toBool($row['deleted'], false);
+        }
+
+        return false;
     }
 
     public static function nullifyScheduleBlanks(Request $request): void
@@ -642,7 +727,7 @@ class AdminPayload
             if (! is_array($row)) {
                 continue;
             }
-            if (! empty($row['_deleted']) || ! empty($row['deleted'])) {
+            if (self::scheduleRowDeleted($row)) {
                 continue;
             }
             $start = self::combineDateTime($row['start_date'] ?? null, $row['start_time'] ?? null, $row['start_at'] ?? null);
