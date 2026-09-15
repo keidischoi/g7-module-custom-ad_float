@@ -111,6 +111,7 @@ class AdFloatSetting extends Model
         $itemIds = AdminPayload::normalizeItemIds($row);
         $form = array_merge($visual, [
             'id' => $row['id'] ?? ('s'.$index),
+            'enabled' => AdminPayload::scheduleRowEnabled($row),
             'start_at' => $start ?? '',
             'end_at' => $end ?? '',
             'start_date' => $splitStart['date'] ?? '',

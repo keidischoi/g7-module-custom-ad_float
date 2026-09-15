@@ -107,6 +107,7 @@ class AdminPayload
             'schedules.*.d6' => ['nullable'],
             'schedules.*.item_ids' => ['nullable', 'array'],
             'schedules.*.item_ids.*' => ['integer', 'min:1'],
+            'schedules.*.enabled' => ['nullable'],
             'schedules.*.position' => ['nullable', 'in:left,right,top,bottom'],
             'schedules.*.direction' => ['nullable', 'in:horizontal,vertical'],
             'schedules.*.interval_ms' => ['nullable', 'integer', 'min:1000', 'max:60000'],
@@ -255,6 +256,7 @@ class AdminPayload
             $splitStart = self::splitDateTime($start);
             $splitEnd = self::splitDateTime($end);
             $out[] = array_merge($visual, [
+                'enabled' => self::scheduleRowEnabled($row),
                 'start_at' => $start,
                 'end_at' => $end,
                 'start_date' => $splitStart['date'],
@@ -430,12 +432,34 @@ class AdminPayload
     }
 
     /**
-     * Empty weekdays = all days (Sun–Sat).
+     * Missing `enabled` on legacy rows counts as on.
+     */
+    public static function scheduleRowEnabled(array $row): bool
+    {
+        if (! array_key_exists('enabled', $row) || self::isBlank($row['enabled'])) {
+            return true;
+        }
+        $value = $row['enabled'];
+        if ($value === false || $value === 0 || $value === '0') {
+            return false;
+        }
+        if ($value === true || $value === 1 || $value === '1') {
+            return true;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Empty weekdays = all days (Sun–Sat). Disabled rows never match.
      *
      * @param  array{start_at:?string,end_at:?string,weekdays:array<int,int>}  $row
      */
     public static function scheduleMatchesNow(array $row, \DateTimeInterface $now): bool
     {
+        if (! self::scheduleRowEnabled($row)) {
+            return false;
+        }
         $ts = $now->getTimestamp();
         if (! empty($row['start_at'])) {
             $start = strtotime((string) $row['start_at']);

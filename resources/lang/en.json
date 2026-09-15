@@ -36,6 +36,7 @@
       "end_time": "End time",
       "weekdays": "Weekdays",
       "schedules_enabled": "Use reservations",
+      "schedule_enabled": "On",
       "item_ids": "Ads to show",
       "row_settings": "Display settings for this reservation",
       "autoplay": "Autoplay",
@@ -96,7 +97,7 @@
       "bottom": "Bottom"
     },
     "schedules_enabled_hint": "When on, only the matching reservation below is applied. If none match, ads are hidden.",
-    "schedules_hint": "Add multiple windows. The first matching row from the top wins. All days on or empty means every day.",
+    "schedules_hint": "Add multiple windows. The first matching On row from the top wins. Turn a row off to skip it. All days on or empty means every day.",
     "item_ids_hint": "Leave empty to show all currently enabled ads.",
     "row_settings_hint": "Override position, size, and carousel options for this window only.",
     "stats": {
