@@ -4,6 +4,7 @@
 - Front JS honors **X 버튼** (`show_close`) OFF: G7 often saves `0` / `"0"` / `"false"`, and `0 !== false` still created the ×. `settingOn()` now treats those as off and **defaults ON** when the flag is missing (same helper for arrows, dots, autoplay, pause-on-hover, new-tab, enabled, home_only).
 - Each payload window keeps `show_close` after reservation overlay; PHP `AdminPayload::toBool()` avoids Laravel `(bool) "0" === true`.
 - Admin label `show_close` → 「X 버튼」 (hint: 광고 닫기(×) 표시). EN: Close / X button.
+- Float frame background is **transparent** (was `#fff`), so unused top/bottom of the box no longer show as white bars. Slide/link/img fill the frame (`object-fit: cover`, no baseline gap); vertical (상하) track slides are clamped to 100% height.
 
 ## 0.1.18
 - When **예약 사용 ON**, apply **every** matching reservation (not only the first). Each distinct `position` mounts its own float root (`g7-custom-ad-float-{left|right|top|bottom}`).
