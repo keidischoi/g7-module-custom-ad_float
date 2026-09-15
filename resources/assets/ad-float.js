@@ -198,7 +198,7 @@
   function considerBox(el) {
     if (!isUsableBox(el)) return null;
     if (isFullBleed(el)) {
-      return pickCenteredChild(el);
+      return pickCenteredChild(el) || el;
     }
     return el;
   }
