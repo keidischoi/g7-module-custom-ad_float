@@ -33,6 +33,7 @@ return new class extends Migration
                 $table->string('mobile_mode', 20)->default('hide');
                 $table->timestamp('start_at')->nullable();
                 $table->timestamp('end_at')->nullable();
+                $table->json('schedules')->nullable();
                 $table->timestamps();
             });
         }
@@ -43,6 +44,7 @@ return new class extends Migration
                 $table->string('title', 120)->nullable();
                 $table->string('alt_text', 255)->nullable();
                 $table->string('image_path', 1000);
+                $table->string('image_source', 20)->default('url');
                 $table->string('target_url', 1000)->nullable();
                 $table->unsignedInteger('sort_order')->default(0);
                 $table->unsignedInteger('display_seconds')->nullable();

@@ -6,6 +6,8 @@
 - Normalize blank/`null` JSON payloads from the G7 layout engine before validate.
 - Create item API returns HTTP 200 (G7 admin `apiCall` success path).
 - Idempotent settings/items migrations; register dynamic tables for uninstall.
+- Ad create/edit: choose **이미지 업로드** (file) or **웹주소로 연결** (URL). Mutual choice; persist `image_source`; validate file vs URL accordingly.
+- Settings: multiple addable display reservations (start/end) with weekday checkboxes (Sun–Sat). Ads show when now is inside a window **and** today matches (empty weekdays = every day). No rows = always visible.
 
 ## 0.1.9
 - Rename module from `local-popup_ad` to `custom-ad_float` (vendor `custom`, namespace `Modules\\Custom\\AdFloat`).

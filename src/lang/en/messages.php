@@ -18,6 +18,8 @@ return [
         'delete_success' => 'Ad item deleted.',
         'delete_failed' => 'Failed to delete ad item.',
         'not_found' => 'Ad item not found.',
-        'image_required' => 'Image file or image_url is required.',
+        'image_required' => 'An image file or image URL is required.',
+        'file_required' => 'Please choose an image file.',
+        'url_required' => 'Please enter an image URL.',
     ],
 ];

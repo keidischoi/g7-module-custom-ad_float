@@ -34,10 +34,15 @@ class AdFloatItemController extends AdminBaseController
     {
         try {
             AdminPayload::nullifyEmpty($request, AdminPayload::itemNullableKeys());
-            $data = $request->validate(AdminPayload::itemRules());
+            $source = AdminPayload::resolveSource($request);
+            $data = $request->validate(AdminPayload::itemRules($source, true));
+            $data['image_source'] = $source;
 
-            if (! $request->hasFile('image') && empty($data['image_url'])) {
-                return $this->error('custom-ad_float::messages.items.image_required', 422);
+            if ($source === AdminPayload::SOURCE_UPLOAD && ! $request->hasFile('image')) {
+                return $this->error('custom-ad_float::messages.items.file_required', 422);
+            }
+            if ($source === AdminPayload::SOURCE_URL && empty($data['image_url'])) {
+                return $this->error('custom-ad_float::messages.items.url_required', 422);
             }
 
             $item = $this->service->createItem($data, $request->file('image'));
@@ -57,7 +62,16 @@ class AdFloatItemController extends AdminBaseController
         try {
             $item = AdFloatItem::query()->findOrFail($id);
             AdminPayload::nullifyEmpty($request, AdminPayload::itemNullableKeys());
-            $data = $request->validate(AdminPayload::itemRules());
+            $source = AdminPayload::resolveSource($request, $item->resolvedSource());
+            $data = $request->validate(AdminPayload::itemRules($source, false));
+            $data['image_source'] = $source;
+
+            if ($source === AdminPayload::SOURCE_UPLOAD && ! $request->hasFile('image') && $item->resolvedSource() !== AdminPayload::SOURCE_UPLOAD) {
+                return $this->error('custom-ad_float::messages.items.file_required', 422);
+            }
+            if ($source === AdminPayload::SOURCE_URL && empty($data['image_url']) && $item->resolvedSource() !== AdminPayload::SOURCE_URL) {
+                return $this->error('custom-ad_float::messages.items.url_required', 422);
+            }
 
             $item = $this->service->updateItem($item, $data, $request->file('image'));
 

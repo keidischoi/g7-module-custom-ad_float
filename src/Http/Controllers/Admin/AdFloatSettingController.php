@@ -30,6 +30,7 @@ class AdFloatSettingController extends AdminBaseController
     {
         try {
             AdminPayload::nullifyEmpty($request, ['start_at', 'end_at', 'close_cookie_key']);
+            AdminPayload::nullifyScheduleBlanks($request);
             $data = $request->validate([
                 'enabled' => ['nullable'],
                 'home_only' => ['nullable'],
@@ -52,6 +53,19 @@ class AdFloatSettingController extends AdminBaseController
                 'mobile_mode' => ['required', 'in:hide,show'],
                 'start_at' => ['nullable', 'date'],
                 'end_at' => ['nullable', 'date'],
+                'schedules' => ['nullable', 'array'],
+                'schedules.*.start_at' => ['nullable', 'date'],
+                'schedules.*.end_at' => ['nullable', 'date'],
+                'schedules.*.weekdays' => ['nullable', 'array'],
+                'schedules.*.weekdays.*' => ['integer', 'min:0', 'max:6'],
+                'schedules.*.d0' => ['nullable'],
+                'schedules.*.d1' => ['nullable'],
+                'schedules.*.d2' => ['nullable'],
+                'schedules.*.d3' => ['nullable'],
+                'schedules.*.d4' => ['nullable'],
+                'schedules.*.d5' => ['nullable'],
+                'schedules.*.d6' => ['nullable'],
+                'schedules.*._deleted' => ['nullable'],
             ]);
 
             $row = $this->service->updateSettings($data);

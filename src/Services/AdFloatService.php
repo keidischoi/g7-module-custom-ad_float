@@ -14,8 +14,7 @@ class AdFloatService
     {
         $settings = AdFloatSetting::current();
 
-        $now = now();
-        if (($settings->start_at && $now->lt($settings->start_at)) || ($settings->end_at && $now->gt($settings->end_at))) {
+        if (! $settings->isWithinSchedule(now())) {
             return ['settings' => ['enabled' => false], 'items' => []];
         }
 
@@ -77,6 +76,18 @@ class AdFloatService
                 $data[$dateKey] = null;
             }
         }
+        if (array_key_exists('schedules', $data)) {
+            $schedules = AdminPayload::normalizeSchedules($data['schedules']);
+            if (AdFloatSetting::hasSchedulesColumn()) {
+                $data['schedules'] = $schedules;
+            } else {
+                unset($data['schedules']);
+            }
+            $starts = array_values(array_filter(array_column($schedules, 'start_at')));
+            $ends = array_values(array_filter(array_column($schedules, 'end_at')));
+            $data['start_at'] = $starts[0] ?? null;
+            $data['end_at'] = $ends !== [] ? $ends[count($ends) - 1] : null;
+        }
         $settings->update($data);
 
         return $settings->fresh();
@@ -89,35 +100,24 @@ class AdFloatService
 
     public function createItem(array $data, ?UploadedFile $image = null): AdFloatItem
     {
-        $data = $this->applyImage($data, $image);
+        $source = $this->sourceFromData($data, $image);
+        $data = $this->applyImage($data, $image, $source, requireImage: true);
         if (empty($data['image_path'])) {
             throw new \InvalidArgumentException(__('custom-ad_float::messages.items.image_required'));
         }
-        unset($data['image'], $data['image_url']);
-        $data['enabled'] = array_key_exists('enabled', $data)
-            ? filter_var($data['enabled'], FILTER_VALIDATE_BOOLEAN)
-            : true;
-        $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
-        if (array_key_exists('display_seconds', $data) && ($data['display_seconds'] === '' || $data['display_seconds'] === null)) {
-            $data['display_seconds'] = null;
-        }
+        $data = $this->sanitizeItemFields($data, $source, true);
 
         return AdFloatItem::create($data);
     }
 
     public function updateItem(AdFloatItem $item, array $data, ?UploadedFile $image = null): AdFloatItem
     {
-        if ($image) {
+        $source = $this->sourceFromData($data, $image, $item->resolvedSource());
+        if ($image || ($source === AdminPayload::SOURCE_URL && ! empty($data['image_url']))) {
             $this->deleteStoredImage($item);
         }
-        $data = $this->applyImage($data, $image, requireImage: false);
-        unset($data['image'], $data['image_url']);
-        if (array_key_exists('enabled', $data)) {
-            $data['enabled'] = filter_var($data['enabled'], FILTER_VALIDATE_BOOLEAN);
-        }
-        if (array_key_exists('display_seconds', $data) && ($data['display_seconds'] === '' || $data['display_seconds'] === null)) {
-            $data['display_seconds'] = null;
-        }
+        $data = $this->applyImage($data, $image, $source, requireImage: false);
+        $data = $this->sanitizeItemFields($data, $source, false);
         $item->update($data);
 
         return $item->fresh();
@@ -140,18 +140,68 @@ class AdFloatService
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
-    private function applyImage(array $data, ?UploadedFile $image, bool $requireImage = true): array
+    private function sanitizeItemFields(array $data, string $source, bool $isCreate): array
     {
+        unset($data['image'], $data['image_url'], $data['source']);
+        if (AdFloatItem::hasImageSourceColumn()) {
+            $data['image_source'] = $source;
+        } else {
+            unset($data['image_source']);
+        }
+        if (array_key_exists('enabled', $data)) {
+            $data['enabled'] = filter_var($data['enabled'], FILTER_VALIDATE_BOOLEAN);
+        } elseif ($isCreate) {
+            $data['enabled'] = true;
+        } else {
+            unset($data['enabled']);
+        }
+        if (array_key_exists('sort_order', $data) || $isCreate) {
+            $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
+        } else {
+            unset($data['sort_order']);
+        }
+        if (array_key_exists('display_seconds', $data) && AdminPayload::isBlank($data['display_seconds'])) {
+            $data['display_seconds'] = null;
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function sourceFromData(array $data, ?UploadedFile $image, ?string $fallback = null): string
+    {
+        $source = $data['source'] ?? $data['image_source'] ?? null;
+        if (is_string($source) && in_array($source, [AdminPayload::SOURCE_UPLOAD, AdminPayload::SOURCE_URL], true)) {
+            return $source;
+        }
         if ($image) {
+            return AdminPayload::SOURCE_UPLOAD;
+        }
+        if (! empty($data['image_url'])) {
+            return AdminPayload::SOURCE_URL;
+        }
+
+        return $fallback ?: AdminPayload::SOURCE_URL;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function applyImage(array $data, ?UploadedFile $image, string $source, bool $requireImage = true): array
+    {
+        if ($source === AdminPayload::SOURCE_UPLOAD && $image) {
             try {
                 $data['image_path'] = $image->store('custom-ad-float', 'public');
             } catch (\Throwable $e) {
                 throw new \RuntimeException('Failed to store uploaded image: '.$e->getMessage(), 0, $e);
             }
-        } elseif (! empty($data['image_url']) && is_string($data['image_url'])) {
+        } elseif ($source === AdminPayload::SOURCE_URL && ! empty($data['image_url']) && is_string($data['image_url'])) {
             $data['image_path'] = trim($data['image_url']);
         } elseif ($requireImage) {
-            $data['image_path'] = '';
+            $data['image_path'] = $data['image_path'] ?? '';
         }
 
         return $data;
@@ -160,7 +210,7 @@ class AdFloatService
     private function deleteStoredImage(AdFloatItem $item): void
     {
         $path = (string) $item->image_path;
-        if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '//')) {
+        if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '//') || str_starts_with($path, '/')) {
             return;
         }
         try {

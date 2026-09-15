@@ -42,7 +42,8 @@
           "mobile_mode": "hide",
           "close_cookie_key": "g7_custom_ad_float_closed",
           "start_at": "",
-          "end_at": ""
+          "end_at": "",
+          "schedules": []
         }
       }
     },
@@ -72,13 +73,17 @@
         "errors": null,
         "saving": false,
         "creating": false,
+        "editingId": null,
         "create": {
           "title": "",
           "alt_text": "",
           "target_url": "",
           "image_url": "",
           "sort_order": 0,
-          "display_seconds": ""
+          "display_seconds": "",
+          "source": "url",
+          "original_source": "",
+          "image": null
         }
       }
     }
@@ -770,46 +775,46 @@
                         ]
                       }
                     ]
-                  },
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"
+                },
+                "children": [
                   {
-                    "id": "f_start",
                     "type": "basic",
                     "name": "Div",
                     "props": {
-                      "className": "form-group w-full"
+                      "className": "flex items-center justify-between mb-2"
                     },
                     "children": [
                       {
                         "type": "basic",
-                        "name": "Label",
+                        "name": "H3",
                         "props": {
-                          "className": "form-label"
+                          "className": "text-base font-semibold"
                         },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.start_at"
-                          }
-                        ]
+                        "text": "$t:custom-ad_float.admin.sections.schedules"
                       },
                       {
                         "type": "basic",
-                        "name": "Input",
+                        "name": "Button",
                         "props": {
-                          "type": "datetime-local",
-                          "name": "start_at",
-                          "className": "input w-full",
-                          "value": "{{_local.form?.start_at ?? ''}}",
-                          "autoBinding": false
+                          "type": "button",
+                          "className": "px-3 py-1.5 text-sm border rounded-lg"
                         },
+                        "text": "$t:custom-ad_float.admin.actions.add_schedule",
                         "actions": [
                           {
-                            "type": "change",
+                            "type": "click",
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.start_at": "{{$event.target.value}}"
+                              "form.schedules": "{{(_local.form?.schedules || []).concat([{id: 'new', start_at: '', end_at: '', d0: true, d1: true, d2: true, d3: true, d4: true, d5: true, d6: true, _deleted: false}])}}"
                             }
                           }
                         ]
@@ -817,45 +822,415 @@
                     ]
                   },
                   {
-                    "id": "f_end",
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-xs text-gray-500 mb-3"
+                    },
+                    "text": "$t:custom-ad_float.admin.schedules_hint"
+                  },
+                  {
+                    "id": "caf_sch_{{sidx}}",
                     "type": "basic",
                     "name": "Div",
+                    "iteration": {
+                      "source": "{{_local.form?.schedules ?? []}}",
+                      "item_var": "sch",
+                      "index_var": "sidx"
+                    },
                     "props": {
-                      "className": "form-group w-full"
+                      "className": ""
                     },
                     "children": [
                       {
                         "type": "basic",
-                        "name": "Label",
+                        "name": "Div",
+                        "if": "{{!(sch._deleted === true || sch._deleted === 1 || sch._deleted === '1' || sch._deleted === 'true')}}",
                         "props": {
-                          "className": "form-label"
+                          "className": "mb-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
                         },
                         "children": [
                           {
                             "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.end_at"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "basic",
-                        "name": "Input",
-                        "props": {
-                          "type": "datetime-local",
-                          "name": "end_at",
-                          "className": "input w-full",
-                          "value": "{{_local.form?.end_at ?? ''}}",
-                          "autoBinding": false
-                        },
-                        "actions": [
+                            "name": "Div",
+                            "props": {
+                              "className": "grid grid-cols-1 md:grid-cols-2 gap-3"
+                            },
+                            "children": [
+                              {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                  "className": "form-group w-full"
+                                },
+                                "children": [
+                                  {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "props": {
+                                      "className": "form-label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "$t:custom-ad_float.admin.fields.start_at"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Input",
+                                    "props": {
+                                      "type": "datetime-local",
+                                      "name": "sch_start_{{sidx}}",
+                                      "className": "input w-full",
+                                      "value": "{{sch.start_at ?? ''}}",
+                                      "autoBinding": false
+                                    },
+                                    "actions": [
+                                      {
+                                        "type": "change",
+                                        "handler": "setState",
+                                        "params": {
+                                          "target": "local",
+                                          "form.schedules.{{sidx}}.start_at": "{{$event.target.value}}"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                  "className": "form-group w-full"
+                                },
+                                "children": [
+                                  {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "props": {
+                                      "className": "form-label"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "$t:custom-ad_float.admin.fields.end_at"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Input",
+                                    "props": {
+                                      "type": "datetime-local",
+                                      "name": "sch_end_{{sidx}}",
+                                      "className": "input w-full",
+                                      "value": "{{sch.end_at ?? ''}}",
+                                      "autoBinding": false
+                                    },
+                                    "actions": [
+                                      {
+                                        "type": "change",
+                                        "handler": "setState",
+                                        "params": {
+                                          "target": "local",
+                                          "form.schedules.{{sidx}}.end_at": "{{$event.target.value}}"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
                           {
-                            "type": "change",
-                            "handler": "setState",
-                            "params": {
-                              "target": "local",
-                              "form.end_at": "{{$event.target.value}}"
-                            }
+                            "type": "basic",
+                            "name": "Div",
+                            "props": {
+                              "className": "mt-3"
+                            },
+                            "children": [
+                              {
+                                "type": "basic",
+                                "name": "Label",
+                                "props": {
+                                  "className": "form-label"
+                                },
+                                "text": "$t:custom-ad_float.admin.fields.weekdays"
+                              },
+                              {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                  "className": "flex flex-wrap gap-3 mt-1"
+                                },
+                                "children": [
+                                  {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "props": {
+                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Checkbox",
+                                        "props": {
+                                          "name": "sch_{{sidx}}_d0",
+                                          "autoBinding": false,
+                                          "checked": "{{sch.d0 === true || sch.d0 === 1 || sch.d0 === '1' || sch.d0 === 'true'}}"
+                                        },
+                                        "actions": [
+                                          {
+                                            "type": "change",
+                                            "handler": "setState",
+                                            "params": {
+                                              "target": "local",
+                                              "form.schedules.{{sidx}}.d0": "{{$event.target.checked === true}}"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "$t:custom-ad_float.admin.weekdays.d0"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "props": {
+                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Checkbox",
+                                        "props": {
+                                          "name": "sch_{{sidx}}_d1",
+                                          "autoBinding": false,
+                                          "checked": "{{sch.d1 === true || sch.d1 === 1 || sch.d1 === '1' || sch.d1 === 'true'}}"
+                                        },
+                                        "actions": [
+                                          {
+                                            "type": "change",
+                                            "handler": "setState",
+                                            "params": {
+                                              "target": "local",
+                                              "form.schedules.{{sidx}}.d1": "{{$event.target.checked === true}}"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "$t:custom-ad_float.admin.weekdays.d1"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "props": {
+                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Checkbox",
+                                        "props": {
+                                          "name": "sch_{{sidx}}_d2",
+                                          "autoBinding": false,
+                                          "checked": "{{sch.d2 === true || sch.d2 === 1 || sch.d2 === '1' || sch.d2 === 'true'}}"
+                                        },
+                                        "actions": [
+                                          {
+                                            "type": "change",
+                                            "handler": "setState",
+                                            "params": {
+                                              "target": "local",
+                                              "form.schedules.{{sidx}}.d2": "{{$event.target.checked === true}}"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "$t:custom-ad_float.admin.weekdays.d2"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "props": {
+                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Checkbox",
+                                        "props": {
+                                          "name": "sch_{{sidx}}_d3",
+                                          "autoBinding": false,
+                                          "checked": "{{sch.d3 === true || sch.d3 === 1 || sch.d3 === '1' || sch.d3 === 'true'}}"
+                                        },
+                                        "actions": [
+                                          {
+                                            "type": "change",
+                                            "handler": "setState",
+                                            "params": {
+                                              "target": "local",
+                                              "form.schedules.{{sidx}}.d3": "{{$event.target.checked === true}}"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "$t:custom-ad_float.admin.weekdays.d3"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "props": {
+                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Checkbox",
+                                        "props": {
+                                          "name": "sch_{{sidx}}_d4",
+                                          "autoBinding": false,
+                                          "checked": "{{sch.d4 === true || sch.d4 === 1 || sch.d4 === '1' || sch.d4 === 'true'}}"
+                                        },
+                                        "actions": [
+                                          {
+                                            "type": "change",
+                                            "handler": "setState",
+                                            "params": {
+                                              "target": "local",
+                                              "form.schedules.{{sidx}}.d4": "{{$event.target.checked === true}}"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "$t:custom-ad_float.admin.weekdays.d4"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "props": {
+                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Checkbox",
+                                        "props": {
+                                          "name": "sch_{{sidx}}_d5",
+                                          "autoBinding": false,
+                                          "checked": "{{sch.d5 === true || sch.d5 === 1 || sch.d5 === '1' || sch.d5 === 'true'}}"
+                                        },
+                                        "actions": [
+                                          {
+                                            "type": "change",
+                                            "handler": "setState",
+                                            "params": {
+                                              "target": "local",
+                                              "form.schedules.{{sidx}}.d5": "{{$event.target.checked === true}}"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "$t:custom-ad_float.admin.weekdays.d5"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "props": {
+                                      "className": "flex items-center gap-1 cursor-pointer text-sm"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "basic",
+                                        "name": "Checkbox",
+                                        "props": {
+                                          "name": "sch_{{sidx}}_d6",
+                                          "autoBinding": false,
+                                          "checked": "{{sch.d6 === true || sch.d6 === 1 || sch.d6 === '1' || sch.d6 === 'true'}}"
+                                        },
+                                        "actions": [
+                                          {
+                                            "type": "change",
+                                            "handler": "setState",
+                                            "params": {
+                                              "target": "local",
+                                              "form.schedules.{{sidx}}.d6": "{{$event.target.checked === true}}"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "$t:custom-ad_float.admin.weekdays.d6"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Div",
+                            "props": {
+                              "className": "flex justify-end mt-2"
+                            },
+                            "children": [
+                              {
+                                "type": "basic",
+                                "name": "Button",
+                                "props": {
+                                  "type": "button",
+                                  "className": "px-3 py-1 text-sm rounded-md bg-red-50 text-red-700"
+                                },
+                                "text": "$t:custom-ad_float.admin.actions.remove_schedule",
+                                "actions": [
+                                  {
+                                    "type": "click",
+                                    "handler": "setState",
+                                    "params": {
+                                      "target": "local",
+                                      "form.schedules.{{sidx}}._deleted": true
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
                           }
                         ]
                       }
@@ -1250,8 +1625,7 @@
                                 "pause_on_hover": "{{_local.form?.pause_on_hover ? 1 : 0}}",
                                 "open_new_tab": "{{_local.form?.open_new_tab ? 1 : 0}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
-                                "start_at": "{{_local.form?.start_at ? _local.form.start_at : undefined}}",
-                                "end_at": "{{_local.form?.end_at ? _local.form.end_at : undefined}}"
+                                "schedules": "{{_local.form?.schedules ?? []}}"
                               }
                             },
                             "onSuccess": [
@@ -1312,6 +1686,7 @@
               {
                 "type": "basic",
                 "name": "H2",
+                "if": "{{!_local.editingId}}",
                 "props": {
                   "className": "text-lg font-semibold mb-2"
                 },
@@ -1319,11 +1694,213 @@
               },
               {
                 "type": "basic",
+                "name": "H2",
+                "if": "{{!!_local.editingId}}",
+                "props": {
+                  "className": "text-lg font-semibold mb-2"
+                },
+                "text": "$t:custom-ad_float.admin.sections.edit"
+              },
+              {
+                "type": "basic",
                 "name": "P",
                 "props": {
-                  "className": "text-xs text-gray-500 mb-4"
+                  "className": "text-xs text-gray-500 mb-3"
                 },
-                "text": "$t:custom-ad_float.admin.image_url_hint"
+                "text": "$t:custom-ad_float.admin.source_hint"
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "form-group w-full mb-4"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                      "className": "form-label"
+                    },
+                    "text": "$t:custom-ad_float.admin.fields.image_source"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "flex flex-wrap gap-2 mt-1"
+                    },
+                    "children": [
+                      {
+                        "id": "btn_src_upload",
+                        "type": "basic",
+                        "name": "Button",
+                        "props": {
+                          "type": "button",
+                          "className": "{{(_local.create?.source || 'url') === 'upload' ? 'px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white' : 'px-3 py-1.5 text-sm rounded-md border'}}"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.source_upload",
+                        "actions": [
+                          {
+                            "type": "click",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "create.source": "upload"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "id": "btn_src_url",
+                        "type": "basic",
+                        "name": "Button",
+                        "props": {
+                          "type": "button",
+                          "className": "{{(_local.create?.source || 'url') === 'url' ? 'px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white' : 'px-3 py-1.5 text-sm rounded-md border'}}"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.source_url",
+                        "actions": [
+                          {
+                            "type": "click",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "create.source": "url"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "n_image_file",
+                "type": "basic",
+                "name": "Div",
+                "if": "{{(_local.create?.source || 'url') === 'upload'}}",
+                "props": {
+                  "className": "form-group w-full mb-4"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                      "className": "form-label"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.fields.image_file"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-xs text-gray-500 mb-1"
+                    },
+                    "text": "$t:custom-ad_float.admin.image_file_hint"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Input",
+                    "props": {
+                      "type": "file",
+                      "name": "image",
+                      "accept": "image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp",
+                      "className": "input w-full",
+                      "autoBinding": false
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "create.image": "{{$event.target?.files?.[0] ?? $event}}"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "if": "{{!!(_local.create?.image?.name)}}",
+                    "props": {
+                      "className": "text-xs text-gray-500 mt-1"
+                    },
+                    "text": "{{_local.create?.image?.name}}"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Img",
+                    "if": "{{!!_local.editingId && !!_local.create?.image_url && !_local.create?.image}}",
+                    "props": {
+                      "src": "{{_local.create?.image_url}}",
+                      "alt": "",
+                      "className": "mt-2 w-24 h-24 object-cover rounded-md border"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "n_image",
+                "type": "basic",
+                "name": "Div",
+                "if": "{{(_local.create?.source || 'url') !== 'upload'}}",
+                "props": {
+                  "className": "form-group w-full mb-4"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                      "className": "form-label"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "text": "$t:custom-ad_float.admin.fields.image_url"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "P",
+                    "props": {
+                      "className": "text-xs text-gray-500 mb-1"
+                    },
+                    "text": "$t:custom-ad_float.admin.image_url_hint"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Input",
+                    "props": {
+                      "type": "text",
+                      "name": "image_url",
+                      "className": "input w-full",
+                      "value": "{{_local.create?.image_url ?? ''}}",
+                      "autoBinding": false
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "create.image_url": "{{$event.target.value}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
               },
               {
                 "type": "basic",
@@ -1332,51 +1909,6 @@
                   "className": "grid grid-cols-1 md:grid-cols-2 gap-4"
                 },
                 "children": [
-                  {
-                    "id": "n_image",
-                    "type": "basic",
-                    "name": "Div",
-                    "props": {
-                      "className": "form-group w-full"
-                    },
-                    "children": [
-                      {
-                        "type": "basic",
-                        "name": "Label",
-                        "props": {
-                          "className": "form-label"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "text": "$t:custom-ad_float.admin.fields.image_url"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "basic",
-                        "name": "Input",
-                        "props": {
-                          "type": "text",
-                          "name": "image_url",
-                          "className": "input w-full",
-                          "value": "{{_local.create?.image_url ?? ''}}",
-                          "autoBinding": false
-                        },
-                        "actions": [
-                          {
-                            "type": "change",
-                            "handler": "setState",
-                            "params": {
-                              "target": "local",
-                              "create.image_url": "{{$event.target.value}}"
-                            }
-                          }
-                        ]
-                      }
-                    ]
-                  },
                   {
                     "id": "n_title",
                     "type": "basic",
@@ -1608,13 +2140,46 @@
                 "type": "basic",
                 "name": "Div",
                 "props": {
-                  "className": "flex justify-end mt-4"
+                  "className": "flex flex-wrap justify-end gap-2 mt-4"
                 },
                 "children": [
                   {
-                    "id": "btn_create_item",
+                    "id": "btn_cancel_edit",
                     "type": "basic",
                     "name": "Button",
+                    "if": "{{!!_local.editingId}}",
+                    "props": {
+                      "type": "button",
+                      "className": "px-3 py-1.5 text-sm border rounded-lg"
+                    },
+                    "text": "$t:custom-ad_float.admin.actions.cancel_edit",
+                    "actions": [
+                      {
+                        "type": "click",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "editingId": null,
+                          "create": {
+                            "title": "",
+                            "alt_text": "",
+                            "target_url": "",
+                            "image_url": "",
+                            "sort_order": 0,
+                            "display_seconds": "",
+                            "source": "url",
+                            "original_source": "",
+                            "image": null
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "btn_create_item_url",
+                    "type": "basic",
+                    "name": "Button",
+                    "if": "{{!_local.editingId && (_local.create?.source || 'url') === 'url'}}",
                     "props": {
                       "type": "button",
                       "disabled": "{{_local.creating || !(_local.create?.image_url)}}",
@@ -1640,6 +2205,7 @@
                             "params": {
                               "method": "POST",
                               "body": {
+                                "source": "url",
                                 "title": "{{_local.create?.title || ''}}",
                                 "alt_text": "{{_local.create?.alt_text || ''}}",
                                 "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
@@ -1655,13 +2221,17 @@
                                 "params": {
                                   "target": "local",
                                   "creating": false,
+                                  "editingId": null,
                                   "create": {
                                     "title": "",
                                     "alt_text": "",
                                     "target_url": "",
                                     "image_url": "",
                                     "sort_order": 0,
-                                    "display_seconds": ""
+                                    "display_seconds": "",
+                                    "source": "url",
+                                    "original_source": "",
+                                    "image": null
                                   }
                                 }
                               },
@@ -1670,6 +2240,291 @@
                                 "params": {
                                   "type": "success",
                                   "message": "$t:custom-ad_float.admin.create_success"
+                                }
+                              },
+                              {
+                                "handler": "refetchDataSource",
+                                "params": {
+                                  "dataSourceId": "items"
+                                }
+                              }
+                            ],
+                            "onError": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "creating": false
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "error",
+                                  "message": "{{error.message}}"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "btn_create_item_upload",
+                    "type": "basic",
+                    "name": "Button",
+                    "if": "{{!_local.editingId && _local.create?.source === 'upload'}}",
+                    "props": {
+                      "type": "button",
+                      "disabled": "{{_local.creating || !_local.create?.image}}",
+                      "className": "btn btn-primary disabled:opacity-50"
+                    },
+                    "text": "$t:custom-ad_float.admin.actions.create",
+                    "actions": [
+                      {
+                        "type": "click",
+                        "handler": "sequence",
+                        "actions": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "creating": true
+                            }
+                          },
+                          {
+                            "handler": "apiCall",
+                            "auth_required": true,
+                            "target": "/api/modules/custom-ad_float/admin/items",
+                            "params": {
+                              "method": "POST",
+                              "body": {
+                                "source": "upload",
+                                "image": "{{_local.create.image}}",
+                                "title": "{{_local.create?.title || ''}}",
+                                "alt_text": "{{_local.create?.alt_text || ''}}",
+                                "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
+                                "sort_order": "{{_local.create?.sort_order || 0}}",
+                                "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}",
+                                "enabled": 1
+                              },
+                              "contentType": "multipart/form-data"
+                            },
+                            "onSuccess": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "creating": false,
+                                  "editingId": null,
+                                  "create": {
+                                    "title": "",
+                                    "alt_text": "",
+                                    "target_url": "",
+                                    "image_url": "",
+                                    "sort_order": 0,
+                                    "display_seconds": "",
+                                    "source": "url",
+                                    "original_source": "",
+                                    "image": null
+                                  }
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "success",
+                                  "message": "$t:custom-ad_float.admin.create_success"
+                                }
+                              },
+                              {
+                                "handler": "refetchDataSource",
+                                "params": {
+                                  "dataSourceId": "items"
+                                }
+                              }
+                            ],
+                            "onError": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "creating": false
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "error",
+                                  "message": "{{error.message}}"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "btn_update_item_url",
+                    "type": "basic",
+                    "name": "Button",
+                    "if": "{{!!_local.editingId && (_local.create?.source || 'url') === 'url'}}",
+                    "props": {
+                      "type": "button",
+                      "disabled": "{{_local.creating || !(_local.create?.image_url)}}",
+                      "className": "btn btn-primary disabled:opacity-50"
+                    },
+                    "text": "$t:custom-ad_float.admin.actions.update",
+                    "actions": [
+                      {
+                        "type": "click",
+                        "handler": "sequence",
+                        "actions": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "creating": true
+                            }
+                          },
+                          {
+                            "handler": "apiCall",
+                            "auth_required": true,
+                            "target": "/api/modules/custom-ad_float/admin/items/{{_local.editingId}}",
+                            "params": {
+                              "method": "POST",
+                              "body": {
+                                "source": "url",
+                                "title": "{{_local.create?.title || ''}}",
+                                "alt_text": "{{_local.create?.alt_text || ''}}",
+                                "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
+                                "image_url": "{{_local.create?.image_url || ''}}",
+                                "sort_order": "{{_local.create?.sort_order || 0}}",
+                                "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}"
+                              }
+                            },
+                            "onSuccess": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "creating": false,
+                                  "editingId": null,
+                                  "create": {
+                                    "title": "",
+                                    "alt_text": "",
+                                    "target_url": "",
+                                    "image_url": "",
+                                    "sort_order": 0,
+                                    "display_seconds": "",
+                                    "source": "url",
+                                    "original_source": "",
+                                    "image": null
+                                  }
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "success",
+                                  "message": "$t:custom-ad_float.admin.update_success"
+                                }
+                              },
+                              {
+                                "handler": "refetchDataSource",
+                                "params": {
+                                  "dataSourceId": "items"
+                                }
+                              }
+                            ],
+                            "onError": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "creating": false
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "error",
+                                  "message": "{{error.message}}"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "btn_update_item_upload",
+                    "type": "basic",
+                    "name": "Button",
+                    "if": "{{!!_local.editingId && _local.create?.source === 'upload'}}",
+                    "props": {
+                      "type": "button",
+                      "disabled": "{{_local.creating || (!_local.create?.image && _local.create?.original_source !== 'upload')}}",
+                      "className": "btn btn-primary disabled:opacity-50"
+                    },
+                    "text": "$t:custom-ad_float.admin.actions.update",
+                    "actions": [
+                      {
+                        "type": "click",
+                        "handler": "sequence",
+                        "actions": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "creating": true
+                            }
+                          },
+                          {
+                            "handler": "apiCall",
+                            "auth_required": true,
+                            "target": "/api/modules/custom-ad_float/admin/items/{{_local.editingId}}",
+                            "params": {
+                              "method": "POST",
+                              "body": {
+                                "source": "upload",
+                                "image": "{{_local.create?.image ? _local.create.image : undefined}}",
+                                "title": "{{_local.create?.title || ''}}",
+                                "alt_text": "{{_local.create?.alt_text || ''}}",
+                                "target_url": "{{_local.create?.target_url ? _local.create.target_url : undefined}}",
+                                "sort_order": "{{_local.create?.sort_order || 0}}",
+                                "display_seconds": "{{_local.create?.display_seconds ? _local.create.display_seconds : undefined}}"
+                              },
+                              "contentType": "multipart/form-data"
+                            },
+                            "onSuccess": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "local",
+                                  "creating": false,
+                                  "editingId": null,
+                                  "create": {
+                                    "title": "",
+                                    "alt_text": "",
+                                    "target_url": "",
+                                    "image_url": "",
+                                    "sort_order": 0,
+                                    "display_seconds": "",
+                                    "source": "url",
+                                    "original_source": "",
+                                    "image": null
+                                  }
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "success",
+                                  "message": "$t:custom-ad_float.admin.update_success"
                                 }
                               },
                               {
@@ -1819,6 +2674,14 @@
                           },
                           {
                             "type": "basic",
+                            "name": "P",
+                            "props": {
+                              "className": "text-xs text-gray-400 truncate"
+                            },
+                            "text": "{{(ad.source || ad.image_source) === 'upload' ? '이미지 업로드' : '웹주소로 연결'}}"
+                          },
+                          {
+                            "type": "basic",
                             "name": "Span",
                             "if": "{{ad.enabled}}",
                             "props": {
@@ -1882,6 +2745,46 @@
                                     "params": {
                                       "type": "error",
                                       "message": "{{error.message}}"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Button",
+                            "props": {
+                              "type": "button",
+                              "className": "px-3 py-1.5 text-sm rounded-md bg-gray-100 dark:bg-gray-700"
+                            },
+                            "text": "$t:custom-ad_float.admin.actions.edit",
+                            "actions": [
+                              {
+                                "type": "click",
+                                "handler": "sequence",
+                                "actions": [
+                                  {
+                                    "handler": "setState",
+                                    "params": {
+                                      "target": "local",
+                                      "editingId": "{{ad.id}}",
+                                      "create.title": "{{ad.title || ''}}",
+                                      "create.alt_text": "{{ad.alt_text || ''}}",
+                                      "create.target_url": "{{ad.target_url || ''}}",
+                                      "create.image_url": "{{ad.image_url || ''}}",
+                                      "create.sort_order": "{{ad.sort_order || 0}}",
+                                      "create.display_seconds": "{{ad.display_seconds || ''}}",
+                                      "create.source": "{{ad.source || ad.image_source || 'url'}}",
+                                      "create.original_source": "{{ad.source || ad.image_source || 'url'}}",
+                                      "create.image": null
+                                    }
+                                  },
+                                  {
+                                    "handler": "toast",
+                                    "params": {
+                                      "type": "success",
+                                      "message": "$t:custom-ad_float.admin.edit_loaded"
                                     }
                                   }
                                 ]
