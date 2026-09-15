@@ -162,7 +162,7 @@ class AdFloatSetting extends Model
             return false;
         }
 
-        return (bool) $this->schedules_enabled;
+        return $this->rawFlag('schedules_enabled', false);
     }
 
     /**
@@ -198,9 +198,9 @@ class AdFloatSetting extends Model
      */
     public function toPublicSettingsArray(): array
     {
-        return [
-            'enabled' => (bool) $this->enabled,
-            'home_only' => (bool) $this->home_only,
+        return AdminPayload::coerceSettingFlags([
+            'enabled' => $this->rawFlag('enabled', true),
+            'home_only' => $this->rawFlag('home_only', true),
             'position' => $this->position,
             'direction' => $this->direction,
             'interval_ms' => (int) $this->interval_ms,
@@ -211,18 +211,18 @@ class AdFloatSetting extends Model
             'vertical_align' => AdminPayload::normalizeVerticalAlign($this->vertical_align ?? null),
             'vertical_offset_px' => (int) ($this->vertical_offset_px ?? 24),
             'z_index' => (int) $this->z_index,
-            'autoplay' => (bool) $this->autoplay,
-            'show_arrows' => (bool) $this->show_arrows,
-            'show_dots' => (bool) $this->show_dots,
-            'pause_on_hover' => (bool) $this->pause_on_hover,
-            'open_new_tab' => (bool) $this->open_new_tab,
+            'autoplay' => $this->rawFlag('autoplay', true),
+            'show_arrows' => $this->rawFlag('show_arrows', true),
+            'show_dots' => $this->rawFlag('show_dots', true),
+            'pause_on_hover' => $this->rawFlag('pause_on_hover', true),
+            'open_new_tab' => $this->rawFlag('open_new_tab', true),
             'mobile_mode' => $this->mobile_mode,
             'max_items' => (int) $this->max_items,
-            'show_close' => (bool) $this->show_close,
+            'show_close' => $this->rawFlag('show_close', true),
             'close_cookie_key' => $this->close_cookie_key ?: self::DEFAULT_CLOSE_COOKIE_KEY,
             'start_at' => optional($this->start_at)->toIso8601String(),
             'end_at' => optional($this->end_at)->toIso8601String(),
-        ];
+        ]);
     }
 
     public function isWithinSchedule(?\DateTimeInterface $now = null): bool
@@ -232,9 +232,9 @@ class AdFloatSetting extends Model
 
     public function toAdminArray(): array
     {
-        return [
-            'enabled' => (bool) $this->enabled,
-            'home_only' => (bool) $this->home_only,
+        return AdminPayload::coerceSettingFlags([
+            'enabled' => $this->rawFlag('enabled', true),
+            'home_only' => $this->rawFlag('home_only', true),
             'position' => $this->position,
             'direction' => $this->direction,
             'interval_ms' => (int) $this->interval_ms,
@@ -246,19 +246,32 @@ class AdFloatSetting extends Model
             'vertical_offset_px' => (int) ($this->vertical_offset_px ?? 24),
             'z_index' => (int) $this->z_index,
             'max_items' => (int) $this->max_items,
-            'autoplay' => (bool) $this->autoplay,
-            'show_arrows' => (bool) $this->show_arrows,
-            'show_dots' => (bool) $this->show_dots,
-            'show_close' => (bool) $this->show_close,
-            'pause_on_hover' => (bool) $this->pause_on_hover,
-            'open_new_tab' => (bool) $this->open_new_tab,
+            'autoplay' => $this->rawFlag('autoplay', true),
+            'show_arrows' => $this->rawFlag('show_arrows', true),
+            'show_dots' => $this->rawFlag('show_dots', true),
+            'show_close' => $this->rawFlag('show_close', true),
+            'pause_on_hover' => $this->rawFlag('pause_on_hover', true),
+            'open_new_tab' => $this->rawFlag('open_new_tab', true),
             'mobile_mode' => $this->mobile_mode,
             'close_cookie_key' => $this->close_cookie_key,
             'start_at' => optional($this->start_at)->format('Y-m-d\TH:i'),
             'end_at' => optional($this->end_at)->format('Y-m-d\TH:i'),
             'schedules_enabled' => $this->schedulesEnabled(),
             'schedules' => $this->schedulesForAdmin(),
-        ];
+        ]);
+    }
+
+    /**
+     * Read the raw DB/attribute value so string "0" is not cast with `(bool)` (truthy in PHP).
+     */
+    private function rawFlag(string $key, bool $default = true): bool
+    {
+        $attrs = $this->getAttributes();
+        if (array_key_exists($key, $attrs)) {
+            return AdminPayload::toBool($attrs[$key], $default);
+        }
+
+        return AdminPayload::toBool($this->{$key} ?? null, $default);
     }
 
     public static function hasSchedulesColumn(): bool

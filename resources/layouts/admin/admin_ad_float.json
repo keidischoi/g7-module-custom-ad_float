@@ -204,12 +204,12 @@
                                 "z_index": "{{Number(_local.form?.z_index) || 9990}}",
                                 "max_items": "{{Number(_local.form?.max_items) || 20}}",
                                 "close_cookie_key": "{{_local.form?.close_cookie_key || 'g7_custom_ad_float_closed'}}",
-                                "autoplay": "{{_local.form?.autoplay ? 1 : 0}}",
-                                "show_arrows": "{{_local.form?.show_arrows ? 1 : 0}}",
-                                "show_dots": "{{_local.form?.show_dots ? 1 : 0}}",
-                                "show_close": "{{_local.form?.show_close ? 1 : 0}}",
-                                "pause_on_hover": "{{_local.form?.pause_on_hover ? 1 : 0}}",
-                                "open_new_tab": "{{_local.form?.open_new_tab ? 1 : 0}}",
+                                "autoplay": "{{_local.form?.autoplay === true || _local.form?.autoplay === 1 || _local.form?.autoplay === '1' || _local.form?.autoplay === 'true' ? 1 : 0}}",
+                                "show_arrows": "{{_local.form?.show_arrows === true || _local.form?.show_arrows === 1 || _local.form?.show_arrows === '1' || _local.form?.show_arrows === 'true' ? 1 : 0}}",
+                                "show_dots": "{{_local.form?.show_dots === true || _local.form?.show_dots === 1 || _local.form?.show_dots === '1' || _local.form?.show_dots === 'true' ? 1 : 0}}",
+                                "show_close": "{{_local.form?.show_close === true || _local.form?.show_close === 1 || _local.form?.show_close === '1' || _local.form?.show_close === 'true' ? 1 : 0}}",
+                                "pause_on_hover": "{{_local.form?.pause_on_hover === true || _local.form?.pause_on_hover === 1 || _local.form?.pause_on_hover === '1' || _local.form?.pause_on_hover === 'true' ? 1 : 0}}",
+                                "open_new_tab": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true' ? 1 : 0}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
                                 "schedules_enabled": "{{_local.form?.schedules_enabled ? 1 : 0}}",
                                 "schedules": "{{_local.form?.schedules ?? []}}"
@@ -1382,6 +1382,14 @@
                           "className": "text-sm font-medium"
                         },
                         "text": "$t:custom-ad_float.admin.fields.show_close"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-0.5"
+                        },
+                        "text": "$t:custom-ad_float.admin.show_close_hint"
                       }
                     ]
                   },
@@ -4522,11 +4530,25 @@
                                             "children": [
                                               {
                                                 "type": "basic",
-                                                "name": "Span",
-                                                "props": {
-                                                  "className": "text-xs"
-                                                },
-                                                "text": "$t:custom-ad_float.admin.fields.show_close"
+                                                "name": "Div",
+                                                "children": [
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "Span",
+                                                    "props": {
+                                                      "className": "text-xs"
+                                                    },
+                                                    "text": "$t:custom-ad_float.admin.fields.show_close"
+                                                  },
+                                                  {
+                                                    "type": "basic",
+                                                    "name": "P",
+                                                    "props": {
+                                                      "className": "text-xs text-gray-500"
+                                                    },
+                                                    "text": "$t:custom-ad_float.admin.show_close_hint"
+                                                  }
+                                                ]
                                               },
                                               {
                                                 "type": "basic",
@@ -4721,7 +4743,7 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.schedules": "{{(_local.form?.schedules || []).concat([{id:'new',enabled:true,start_date:'',start_time:'',end_date:'',end_time:'',item_ids:[],d0:true,d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,_deleted:false,position:(_local.form?.position||'right'),direction:(_local.form?.direction||'horizontal'),interval_ms:(Number(_local.form?.interval_ms)||4000),width_px:(Number(_local.form?.width_px)||180),height_px:(Number(_local.form?.height_px)||180),radius_px:(Number(_local.form?.radius_px)||10),offset_px:(Number(_local.form?.offset_px)||24),vertical_align:(_local.form?.vertical_align||'middle'),vertical_offset_px:(Number(_local.form?.vertical_offset_px??24)),z_index:(Number(_local.form?.z_index)||9990),max_items:(Number(_local.form?.max_items)||20),mobile_mode:(_local.form?.mobile_mode||'hide'),autoplay:!!_local.form?.autoplay,show_arrows:!!_local.form?.show_arrows,show_dots:!!_local.form?.show_dots,show_close:!!_local.form?.show_close,pause_on_hover:!!_local.form?.pause_on_hover,open_new_tab:!!_local.form?.open_new_tab}])}}"
+                              "form.schedules": "{{(_local.form?.schedules || []).concat([{id:'new',enabled:true,start_date:'',start_time:'',end_date:'',end_time:'',item_ids:[],d0:true,d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,_deleted:false,position:(_local.form?.position||'right'),direction:(_local.form?.direction||'horizontal'),interval_ms:(Number(_local.form?.interval_ms)||4000),width_px:(Number(_local.form?.width_px)||180),height_px:(Number(_local.form?.height_px)||180),radius_px:(Number(_local.form?.radius_px)||10),offset_px:(Number(_local.form?.offset_px)||24),vertical_align:(_local.form?.vertical_align||'middle'),vertical_offset_px:(Number(_local.form?.vertical_offset_px??24)),z_index:(Number(_local.form?.z_index)||9990),max_items:(Number(_local.form?.max_items)||20),mobile_mode:(_local.form?.mobile_mode||'hide'),autoplay:(_local.form?.autoplay===true||_local.form?.autoplay===1||_local.form?.autoplay==='1'||_local.form?.autoplay==='true'),show_arrows:(_local.form?.show_arrows===true||_local.form?.show_arrows===1||_local.form?.show_arrows==='1'||_local.form?.show_arrows==='true'),show_dots:(_local.form?.show_dots===true||_local.form?.show_dots===1||_local.form?.show_dots==='1'||_local.form?.show_dots==='true'),show_close:(_local.form?.show_close===true||_local.form?.show_close===1||_local.form?.show_close==='1'||_local.form?.show_close==='true'),pause_on_hover:(_local.form?.pause_on_hover===true||_local.form?.pause_on_hover===1||_local.form?.pause_on_hover==='1'||_local.form?.pause_on_hover==='true'),open_new_tab:(_local.form?.open_new_tab===true||_local.form?.open_new_tab===1||_local.form?.open_new_tab==='1'||_local.form?.open_new_tab==='true')}])}}"
                             }
                           }
                         ]
@@ -4781,12 +4803,12 @@
                                 "z_index": "{{Number(_local.form?.z_index) || 9990}}",
                                 "max_items": "{{Number(_local.form?.max_items) || 20}}",
                                 "close_cookie_key": "{{_local.form?.close_cookie_key || 'g7_custom_ad_float_closed'}}",
-                                "autoplay": "{{_local.form?.autoplay ? 1 : 0}}",
-                                "show_arrows": "{{_local.form?.show_arrows ? 1 : 0}}",
-                                "show_dots": "{{_local.form?.show_dots ? 1 : 0}}",
-                                "show_close": "{{_local.form?.show_close ? 1 : 0}}",
-                                "pause_on_hover": "{{_local.form?.pause_on_hover ? 1 : 0}}",
-                                "open_new_tab": "{{_local.form?.open_new_tab ? 1 : 0}}",
+                                "autoplay": "{{_local.form?.autoplay === true || _local.form?.autoplay === 1 || _local.form?.autoplay === '1' || _local.form?.autoplay === 'true' ? 1 : 0}}",
+                                "show_arrows": "{{_local.form?.show_arrows === true || _local.form?.show_arrows === 1 || _local.form?.show_arrows === '1' || _local.form?.show_arrows === 'true' ? 1 : 0}}",
+                                "show_dots": "{{_local.form?.show_dots === true || _local.form?.show_dots === 1 || _local.form?.show_dots === '1' || _local.form?.show_dots === 'true' ? 1 : 0}}",
+                                "show_close": "{{_local.form?.show_close === true || _local.form?.show_close === 1 || _local.form?.show_close === '1' || _local.form?.show_close === 'true' ? 1 : 0}}",
+                                "pause_on_hover": "{{_local.form?.pause_on_hover === true || _local.form?.pause_on_hover === 1 || _local.form?.pause_on_hover === '1' || _local.form?.pause_on_hover === 'true' ? 1 : 0}}",
+                                "open_new_tab": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true' ? 1 : 0}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
                                 "schedules_enabled": "{{_local.form?.schedules_enabled ? 1 : 0}}",
                                 "schedules": "{{_local.form?.schedules ?? []}}"

@@ -441,10 +441,22 @@
     document.head.appendChild(style);
   }
 
-  function settingOn(value) {
-    if (value === false || value === 0 || value === '0' || value === 'false' || value === 'off') {
-      return false;
+  /**
+   * G7 often stores toggles as 0/1 or "0"/"false". Missing/blank defaults ON
+   * for visual chrome (close, arrows, dots, autoplay). Pass false as the
+   * second arg for flags that should stay off when omitted (enabled).
+   */
+  function settingOn(value, defaultOn) {
+    if (defaultOn === undefined) defaultOn = true;
+    if (value === undefined || value === null) return !!defaultOn;
+    if (typeof value === 'string') {
+      var s = value.replace(/^\s+|\s+$/g, '').toLowerCase();
+      if (s === '' || s === 'null' || s === 'undefined') return !!defaultOn;
+      if (s === 'false' || s === '0' || s === 'off' || s === 'no') return false;
+      if (s === 'true' || s === '1' || s === 'on' || s === 'yes') return true;
     }
+    if (value === false || value === 0) return false;
+    if (value === true || value === 1) return true;
     return !!value;
   }
 
@@ -481,8 +493,8 @@
   function render(payload) {
     if (alreadyMounted()) return;
     var global = (payload && payload.settings) || {};
-    if (global.enabled === false) return;
-    if (global.home_only && !isHomePath()) return;
+    if (!settingOn(global.enabled, false)) return;
+    if (settingOn(global.home_only, true) && !isHomePath()) return;
 
     var windows = windowsFromPayload(payload);
     if (!windows.length) return;
@@ -496,7 +508,7 @@
     var config = win.settings || global || {};
     var items = Array.isArray(win.items) ? win.items : [];
     if (!items.length) return;
-    if (config.enabled === false) return;
+    if (!settingOn(config.enabled, true)) return;
 
     var id = windowId(win.id, index);
     var closeKey = closeCookieKey(config, id);
@@ -535,7 +547,7 @@
       if (item.id) link.setAttribute('data-item-id', String(item.id));
       if (item.target_url) {
         link.href = item.target_url;
-        if (config.open_new_tab) {
+        if (settingOn(config.open_new_tab)) {
           link.target = '_blank';
           link.rel = 'noopener noreferrer';
         }
@@ -583,7 +595,7 @@
       frame.appendChild(dotsWrap);
     }
 
-    if (config.show_close !== false) {
+    if (settingOn(config.show_close)) {
       var close = document.createElement('button');
       close.type = 'button';
       close.className = 'g7-ad-close';
@@ -638,7 +650,7 @@
     }
 
     function start() {
-      if (!config.autoplay || items.length < 2) return;
+      if (!settingOn(config.autoplay) || items.length < 2) return;
       stop();
       var seconds = Number(items[slideIndex] && items[slideIndex].display_seconds) || (Number(config.interval_ms || 4000) / 1000);
       timer = window.setTimeout(function () {
@@ -658,7 +670,7 @@
         start();
       });
     }
-    if (config.pause_on_hover) {
+    if (settingOn(config.pause_on_hover)) {
       frame.addEventListener('mouseenter', stop);
       frame.addEventListener('mouseleave', start);
     }

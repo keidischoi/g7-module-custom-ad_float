@@ -57,6 +57,69 @@ class AdminPayload
     }
 
     /**
+     * Visual flags that default ON when missing. G7 often sends 0/1/"0"/"false".
+     *
+     * @return array<int, string>
+     */
+    public static function visualBoolKeys(): array
+    {
+        return ['autoplay', 'show_arrows', 'show_dots', 'show_close', 'pause_on_hover', 'open_new_tab'];
+    }
+
+    /**
+     * Treat G7/admin/DB boolean-ish values consistently.
+     * Missing/blank → $default (true for visual chrome). Off: false, 0, "0", "false".
+     */
+    public static function toBool(mixed $value, bool $default = true): bool
+    {
+        if ($value === null) {
+            return $default;
+        }
+        if (is_string($value)) {
+            $trimmed = strtolower(trim($value));
+            if ($trimmed === '' || $trimmed === 'null' || $trimmed === 'undefined') {
+                return $default;
+            }
+            if (in_array($trimmed, ['0', 'false', 'off', 'no'], true)) {
+                return false;
+            }
+            if (in_array($trimmed, ['1', 'true', 'on', 'yes'], true)) {
+                return true;
+            }
+        }
+        if ($value === false || $value === 0 || $value === 0.0) {
+            return false;
+        }
+        if ($value === true || $value === 1 || $value === 1.0) {
+            return true;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Coerce known flag keys in a public/admin settings array to real bools.
+     *
+     * @param  array<string, mixed>  $settings
+     * @return array<string, mixed>
+     */
+    public static function coerceSettingFlags(array $settings): array
+    {
+        $defaults = array_merge([
+            'enabled' => true,
+            'home_only' => true,
+        ], self::visualDefaults());
+        foreach (array_merge(['enabled', 'home_only'], self::visualBoolKeys()) as $key) {
+            if (! array_key_exists($key, $settings)) {
+                continue;
+            }
+            $settings[$key] = self::toBool($settings[$key], (bool) ($defaults[$key] ?? true));
+        }
+
+        return $settings;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public static function visualDefaults(): array
@@ -524,8 +587,8 @@ class AdminPayload
                 continue;
             }
             $value = $row[$key];
-            if (in_array($key, ['autoplay', 'show_arrows', 'show_dots', 'show_close', 'pause_on_hover', 'open_new_tab'], true)) {
-                $out[$key] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+            if (in_array($key, self::visualBoolKeys(), true)) {
+                $out[$key] = self::toBool($value, (bool) $defaults[$key]);
             } elseif (in_array($key, ['interval_ms', 'width_px', 'height_px', 'radius_px', 'offset_px', 'vertical_offset_px', 'z_index', 'max_items'], true)) {
                 $out[$key] = (int) $value;
             } elseif ($key === 'vertical_align') {
@@ -545,7 +608,7 @@ class AdminPayload
      */
     public static function overlayVisual(array $base, array $row): array
     {
-        return array_merge($base, self::extractVisual($row, false));
+        return self::coerceSettingFlags(array_merge($base, self::extractVisual($row, false)));
     }
 
     /**
@@ -740,15 +803,8 @@ class AdminPayload
         if (! array_key_exists('enabled', $row) || self::isBlank($row['enabled'])) {
             return true;
         }
-        $value = $row['enabled'];
-        if ($value === false || $value === 0 || $value === '0') {
-            return false;
-        }
-        if ($value === true || $value === 1 || $value === '1') {
-            return true;
-        }
 
-        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        return self::toBool($row['enabled'], true);
     }
 
     /**
