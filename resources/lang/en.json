@@ -1,14 +1,16 @@
 {
   "admin": {
     "title": "Floating Ads",
-    "description": "Show fixed carousel ads on the main theme.",
+    "description": "Manage defaults, ad images, and date/time reservations in one screen.",
     "save": "Save settings",
     "save_success": "Settings saved.",
     "save_failed": "Failed to save settings.",
     "sections": {
-      "settings": "Settings",
-      "items": "Ad images",
-      "create": "Add ad"
+      "settings": "Basic settings",
+      "items": "Ad catalog",
+      "create": "Add ad",
+      "edit": "Edit ad",
+      "schedules": "Date and time reservations"
     },
     "fields": {
       "enabled": "Enabled",
@@ -26,6 +28,14 @@
       "close_cookie_key": "Close cookie key",
       "start_at": "Start at",
       "end_at": "End at",
+      "start_date": "Start date",
+      "start_time": "Start time",
+      "end_date": "End date",
+      "end_time": "End time",
+      "weekdays": "Weekdays",
+      "schedules_enabled": "Use reservations",
+      "item_ids": "Ads to show",
+      "row_settings": "Display settings for this reservation",
       "autoplay": "Autoplay",
       "show_arrows": "Arrows",
       "show_dots": "Dots",
@@ -36,21 +46,48 @@
       "alt_text": "Alt text",
       "target_url": "Click URL",
       "image_url": "Image URL",
+      "image_file": "Image file",
+      "image_source": "Image source",
+      "source_upload": "Upload image",
+      "source_url": "Link from URL",
       "sort_order": "Sort order",
       "display_seconds": "Display seconds"
     },
+    "weekdays": {
+      "d0": "Sun",
+      "d1": "Mon",
+      "d2": "Tue",
+      "d3": "Wed",
+      "d4": "Thu",
+      "d5": "Fri",
+      "d6": "Sat"
+    },
     "actions": {
       "create": "Create ad",
+      "update": "Save changes",
+      "cancel_edit": "Cancel edit",
+      "edit": "Edit",
       "toggle_on": "Enable",
       "toggle_off": "Disable",
       "delete": "Delete",
-      "refresh": "Refresh"
+      "refresh": "Refresh",
+      "add_schedule": "+ Add reservation",
+      "remove_schedule": "−"
     },
     "empty": "No ads yet.",
     "create_success": "Ad created.",
     "create_failed": "Failed to create ad.",
+    "update_success": "Ad updated.",
     "toggle_success": "Status updated.",
     "delete_success": "Deleted.",
-    "image_url_hint": "Enter a public image URL (https://... or /storage/...)."
+    "edit_loaded": "Loaded the selected ad into the form.",
+    "image_url_hint": "Enter a public image URL (https://... or /storage/...).",
+    "image_file_hint": "Choose a jpg, png, gif, or webp file (max 10MB).",
+    "source_hint": "Choose either file upload or an image URL. Only one applies.",
+    "settings_hint": "These values apply when reservations are off, and as defaults for new reservation rows.",
+    "schedules_enabled_hint": "When on, only the matching reservation below is applied. If none match, ads are hidden.",
+    "schedules_hint": "Add multiple windows. The first matching row from the top wins. All days on or empty means every day.",
+    "item_ids_hint": "Leave empty to show all currently enabled ads.",
+    "row_settings_hint": "Override position, size, and carousel options for this window only."
   }
 }

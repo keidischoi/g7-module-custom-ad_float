@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Base\AdminBaseController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Custom\AdFloat\Services\AdFloatService;
+use Modules\Custom\AdFloat\Support\AdminPayload;
 
 class AdFloatSettingController extends AdminBaseController
 {
@@ -28,7 +29,9 @@ class AdFloatSettingController extends AdminBaseController
     public function update(Request $request): JsonResponse
     {
         try {
-            $data = $request->validate([
+            AdminPayload::nullifyEmpty($request, ['start_at', 'end_at', 'close_cookie_key']);
+            AdminPayload::nullifyScheduleBlanks($request);
+            $data = $request->validate(array_merge([
                 'enabled' => ['nullable'],
                 'home_only' => ['nullable'],
                 'position' => ['required', 'in:left,right,top,bottom'],
@@ -50,7 +53,8 @@ class AdFloatSettingController extends AdminBaseController
                 'mobile_mode' => ['required', 'in:hide,show'],
                 'start_at' => ['nullable', 'date'],
                 'end_at' => ['nullable', 'date'],
-            ]);
+                'schedules_enabled' => ['nullable'],
+            ], AdminPayload::scheduleNestedRules()));
 
             $row = $this->service->updateSettings($data);
 

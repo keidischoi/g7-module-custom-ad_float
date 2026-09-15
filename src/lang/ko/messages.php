@@ -18,6 +18,8 @@ return [
         'delete_success' => '광고를 삭제했습니다.',
         'delete_failed' => '광고 삭제에 실패했습니다.',
         'not_found' => '광고를 찾을 수 없습니다.',
-        'image_required' => '이미지 파일 또는 image_url이 필요합니다.',
+        'image_required' => '이미지 파일 또는 이미지 웹주소가 필요합니다.',
+        'file_required' => '이미지 파일을 선택해 주세요.',
+        'url_required' => '이미지 웹주소를 입력해 주세요.',
     ],
 ];

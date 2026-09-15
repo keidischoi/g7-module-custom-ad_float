@@ -26,7 +26,7 @@ class Module extends AbstractModule
             'categories' => [
                 [
                     'identifier' => 'ads',
-                    'resource_route_key' => 'ad-float',
+                    'resource_route_key' => null,
                     'owner_key' => null,
                     'name' => [
                         'ko' => '플로팅 광고 관리',
@@ -103,6 +103,14 @@ class Module extends AbstractModule
     {
         return [
             InjectAdFloatListener::class,
+        ];
+    }
+
+    public function getDynamicTables(): array
+    {
+        return [
+            'custom_ad_float_settings',
+            'custom_ad_float_items',
         ];
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Custom\AdFloat\Models\AdFloatItem;
 use Modules\Custom\AdFloat\Services\AdFloatService;
+use Modules\Custom\AdFloat\Support\AdminPayload;
 
 class AdFloatItemController extends AdminBaseController
 {
@@ -32,26 +33,25 @@ class AdFloatItemController extends AdminBaseController
     public function store(Request $request): JsonResponse
     {
         try {
-            $data = $request->validate([
-                'title' => ['nullable', 'string', 'max:120'],
-                'alt_text' => ['nullable', 'string', 'max:255'],
-                'target_url' => ['nullable', 'url', 'max:1000'],
-                'sort_order' => ['nullable', 'integer', 'min:0', 'max:999999'],
-                'display_seconds' => ['nullable', 'integer', 'min:1', 'max:60'],
-                'enabled' => ['nullable'],
-                'image_url' => ['nullable', 'string', 'max:1000'],
-                'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'],
-            ]);
+            AdminPayload::nullifyEmpty($request, AdminPayload::itemNullableKeys());
+            $source = AdminPayload::resolveSource($request);
+            $data = $request->validate(AdminPayload::itemRules($source, true));
+            $data['image_source'] = $source;
 
-            if (! $request->hasFile('image') && empty($data['image_url'])) {
-                return $this->error('custom-ad_float::messages.items.image_required', 422);
+            if ($source === AdminPayload::SOURCE_UPLOAD && ! $request->hasFile('image')) {
+                return $this->error('custom-ad_float::messages.items.file_required', 422);
+            }
+            if ($source === AdminPayload::SOURCE_URL && empty($data['image_url'])) {
+                return $this->error('custom-ad_float::messages.items.url_required', 422);
             }
 
             $item = $this->service->createItem($data, $request->file('image'));
 
-            return $this->success('custom-ad_float::messages.items.create_success', $item->toAdminArray(), 201);
+            return $this->success('custom-ad_float::messages.items.create_success', $item->toAdminArray());
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
+        } catch (\InvalidArgumentException $e) {
+            return $this->error('custom-ad_float::messages.items.create_failed', 422, $e->getMessage());
         } catch (\Exception $e) {
             return $this->error('custom-ad_float::messages.items.create_failed', 500, $e->getMessage());
         }
@@ -61,16 +61,17 @@ class AdFloatItemController extends AdminBaseController
     {
         try {
             $item = AdFloatItem::query()->findOrFail($id);
-            $data = $request->validate([
-                'title' => ['nullable', 'string', 'max:120'],
-                'alt_text' => ['nullable', 'string', 'max:255'],
-                'target_url' => ['nullable', 'url', 'max:1000'],
-                'sort_order' => ['nullable', 'integer', 'min:0', 'max:999999'],
-                'display_seconds' => ['nullable', 'integer', 'min:1', 'max:60'],
-                'enabled' => ['nullable'],
-                'image_url' => ['nullable', 'string', 'max:1000'],
-                'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'],
-            ]);
+            AdminPayload::nullifyEmpty($request, AdminPayload::itemNullableKeys());
+            $source = AdminPayload::resolveSource($request, $item->resolvedSource());
+            $data = $request->validate(AdminPayload::itemRules($source, false));
+            $data['image_source'] = $source;
+
+            if ($source === AdminPayload::SOURCE_UPLOAD && ! $request->hasFile('image') && $item->resolvedSource() !== AdminPayload::SOURCE_UPLOAD) {
+                return $this->error('custom-ad_float::messages.items.file_required', 422);
+            }
+            if ($source === AdminPayload::SOURCE_URL && empty($data['image_url']) && $item->resolvedSource() !== AdminPayload::SOURCE_URL) {
+                return $this->error('custom-ad_float::messages.items.url_required', 422);
+            }
 
             $item = $this->service->updateItem($item, $data, $request->file('image'));
 
@@ -79,6 +80,8 @@ class AdFloatItemController extends AdminBaseController
             return $this->notFound('custom-ad_float::messages.items.not_found');
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
+        } catch (\InvalidArgumentException $e) {
+            return $this->error('custom-ad_float::messages.items.update_failed', 422, $e->getMessage());
         } catch (\Exception $e) {
             return $this->error('custom-ad_float::messages.items.update_failed', 500, $e->getMessage());
         }

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.11
+- Home ads: inject `ad-float.js` on user chrome via `_user_base` `scripts`, `user_layout_root` HtmlContent, layout hooks (`filter_child_data` / `filter_merged` / `after_apply`), and SEO `extraBodyEnd` `<script src="...?v=0.1.11">`. No `main_content_area` dependency.
+- Admin is one flow: **기본 설정** → **광고 목록** → **날짜 및 시간 예약**.
+- Booleans use Toggle switches (including **예약 사용**).
+- **예약 사용 OFF** (default): public payload uses 기본 설정 and all enabled ads.
+- **예약 사용 ON**: first matching row (window + weekdays) applies that row’s visual settings and `item_ids`; no match hides ads.
+- Each reservation copies 기본 설정 visual fields, date/time, weekdays, and selectable ads.
+
+## 0.1.10
+- Fix admin ad create/save: empty optional fields (`target_url`, `display_seconds`, schedule dates) no longer fail validation.
+- Accept relative click URLs (no longer require a strict `url` scheme).
+- Normalize blank/`null` JSON payloads from the G7 layout engine before validate.
+- Create item API returns HTTP 200 (G7 admin `apiCall` success path).
+- Idempotent settings/items migrations; register dynamic tables for uninstall.
+- Ad create/edit: choose **이미지 업로드** (file) or **웹주소로 연결** (URL). Mutual choice; persist `image_source`; validate file vs URL accordingly.
+- Settings: multiple addable display reservations (start/end) with weekday checkboxes (Sun–Sat). Ads show when now is inside a window **and** today matches (empty weekdays = every day). No rows = always visible.
+
 ## 0.1.9
 - Rename module from `local-popup_ad` to `custom-ad_float` (vendor `custom`, namespace `Modules\\Custom\\AdFloat`).
 - Tables renamed to `custom_ad_float_settings` / `custom_ad_float_items`.
