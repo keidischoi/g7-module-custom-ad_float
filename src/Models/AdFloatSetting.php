@@ -12,7 +12,7 @@ class AdFloatSetting extends Model
 
     protected $fillable = [
         'enabled', 'home_only', 'position', 'direction', 'interval_ms', 'width_px', 'height_px',
-        'radius_px', 'offset_px', 'z_index', 'autoplay', 'show_arrows', 'show_dots', 'show_close',
+        'radius_px', 'offset_px', 'vertical_align', 'vertical_offset_px', 'z_index', 'autoplay', 'show_arrows', 'show_dots', 'show_close',
         'pause_on_hover', 'open_new_tab', 'mobile_mode', 'max_items', 'close_cookie_key',
         'start_at', 'end_at', 'schedules', 'schedules_enabled',
     ];
@@ -40,6 +40,12 @@ class AdFloatSetting extends Model
         }
         if (static::hasSchedulesEnabledColumn()) {
             $defaults['schedules_enabled'] = false;
+        }
+        if (static::hasVerticalAlignColumn()) {
+            $defaults['vertical_align'] = 'middle';
+        }
+        if (static::hasVerticalOffsetColumn()) {
+            $defaults['vertical_offset_px'] = 24;
         }
 
         return static::query()->firstOrCreate(['id' => 1], $defaults);
@@ -105,6 +111,7 @@ class AdFloatSetting extends Model
         $itemIds = AdminPayload::normalizeItemIds($row);
         $form = array_merge($visual, [
             'id' => $row['id'] ?? ('s'.$index),
+            'enabled' => AdminPayload::scheduleRowEnabled($row),
             'start_at' => $start ?? '',
             'end_at' => $end ?? '',
             'start_date' => $splitStart['date'] ?? '',
@@ -190,6 +197,8 @@ class AdFloatSetting extends Model
             'height_px' => (int) $this->height_px,
             'radius_px' => (int) $this->radius_px,
             'offset_px' => (int) $this->offset_px,
+            'vertical_align' => AdminPayload::normalizeVerticalAlign($this->vertical_align ?? null),
+            'vertical_offset_px' => (int) ($this->vertical_offset_px ?? 24),
             'z_index' => (int) $this->z_index,
             'autoplay' => (bool) $this->autoplay,
             'show_arrows' => (bool) $this->show_arrows,
@@ -222,6 +231,8 @@ class AdFloatSetting extends Model
             'height_px' => (int) $this->height_px,
             'radius_px' => (int) $this->radius_px,
             'offset_px' => (int) $this->offset_px,
+            'vertical_align' => AdminPayload::normalizeVerticalAlign($this->vertical_align ?? null),
+            'vertical_offset_px' => (int) ($this->vertical_offset_px ?? 24),
             'z_index' => (int) $this->z_index,
             'max_items' => (int) $this->max_items,
             'autoplay' => (bool) $this->autoplay,
@@ -252,6 +263,24 @@ class AdFloatSetting extends Model
     {
         try {
             return Schema::hasColumn('custom_ad_float_settings', 'schedules_enabled');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    public static function hasVerticalAlignColumn(): bool
+    {
+        try {
+            return Schema::hasColumn('custom_ad_float_settings', 'vertical_align');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    public static function hasVerticalOffsetColumn(): bool
+    {
+        try {
+            return Schema::hasColumn('custom_ad_float_settings', 'vertical_offset_px');
         } catch (\Throwable $e) {
             return false;
         }

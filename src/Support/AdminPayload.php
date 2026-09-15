@@ -49,7 +49,8 @@ class AdminPayload
     {
         return [
             'position', 'direction', 'interval_ms', 'width_px', 'height_px',
-            'radius_px', 'offset_px', 'z_index', 'max_items', 'mobile_mode',
+            'radius_px', 'offset_px', 'vertical_align', 'vertical_offset_px',
+            'z_index', 'max_items', 'mobile_mode',
             'autoplay', 'show_arrows', 'show_dots', 'show_close',
             'pause_on_hover', 'open_new_tab',
         ];
@@ -68,6 +69,8 @@ class AdminPayload
             'height_px' => 180,
             'radius_px' => 10,
             'offset_px' => 24,
+            'vertical_align' => 'middle',
+            'vertical_offset_px' => 24,
             'z_index' => 9990,
             'max_items' => 20,
             'mobile_mode' => 'hide',
@@ -104,13 +107,16 @@ class AdminPayload
             'schedules.*.d6' => ['nullable'],
             'schedules.*.item_ids' => ['nullable', 'array'],
             'schedules.*.item_ids.*' => ['integer', 'min:1'],
+            'schedules.*.enabled' => ['nullable'],
             'schedules.*.position' => ['nullable', 'in:left,right,top,bottom'],
             'schedules.*.direction' => ['nullable', 'in:horizontal,vertical'],
             'schedules.*.interval_ms' => ['nullable', 'integer', 'min:1000', 'max:60000'],
             'schedules.*.width_px' => ['nullable', 'integer', 'min:80', 'max:1200'],
             'schedules.*.height_px' => ['nullable', 'integer', 'min:80', 'max:1200'],
             'schedules.*.radius_px' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'schedules.*.offset_px' => ['nullable', 'integer', 'min:0', 'max:500'],
+            'schedules.*.offset_px' => ['nullable', 'integer', 'min:-500', 'max:500'],
+            'schedules.*.vertical_align' => ['nullable', 'in:top,middle,bottom'],
+            'schedules.*.vertical_offset_px' => ['nullable', 'integer', 'min:-500', 'max:500'],
             'schedules.*.z_index' => ['nullable', 'integer', 'min:100', 'max:2147483647'],
             'schedules.*.max_items' => ['nullable', 'integer', 'min:1', 'max:100'],
             'schedules.*.mobile_mode' => ['nullable', 'in:hide,show'],
@@ -250,6 +256,7 @@ class AdminPayload
             $splitStart = self::splitDateTime($start);
             $splitEnd = self::splitDateTime($end);
             $out[] = array_merge($visual, [
+                'enabled' => self::scheduleRowEnabled($row),
                 'start_at' => $start,
                 'end_at' => $end,
                 'start_date' => $splitStart['date'],
@@ -282,8 +289,10 @@ class AdminPayload
             $value = $row[$key];
             if (in_array($key, ['autoplay', 'show_arrows', 'show_dots', 'show_close', 'pause_on_hover', 'open_new_tab'], true)) {
                 $out[$key] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-            } elseif (in_array($key, ['interval_ms', 'width_px', 'height_px', 'radius_px', 'offset_px', 'z_index', 'max_items'], true)) {
+            } elseif (in_array($key, ['interval_ms', 'width_px', 'height_px', 'radius_px', 'offset_px', 'vertical_offset_px', 'z_index', 'max_items'], true)) {
                 $out[$key] = (int) $value;
+            } elseif ($key === 'vertical_align') {
+                $out[$key] = self::normalizeVerticalAlign($value);
             } else {
                 $out[$key] = is_string($value) ? trim($value) : $value;
             }
@@ -423,12 +432,34 @@ class AdminPayload
     }
 
     /**
-     * Empty weekdays = all days (Sun–Sat).
+     * Missing `enabled` on legacy rows counts as on.
+     */
+    public static function scheduleRowEnabled(array $row): bool
+    {
+        if (! array_key_exists('enabled', $row) || self::isBlank($row['enabled'])) {
+            return true;
+        }
+        $value = $row['enabled'];
+        if ($value === false || $value === 0 || $value === '0') {
+            return false;
+        }
+        if ($value === true || $value === 1 || $value === '1') {
+            return true;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Empty weekdays = all days (Sun–Sat). Disabled rows never match.
      *
      * @param  array{start_at:?string,end_at:?string,weekdays:array<int,int>}  $row
      */
     public static function scheduleMatchesNow(array $row, \DateTimeInterface $now): bool
     {
+        if (! self::scheduleRowEnabled($row)) {
+            return false;
+        }
         $ts = $now->getTimestamp();
         if (! empty($row['start_at'])) {
             $start = strtotime((string) $row['start_at']);
@@ -451,6 +482,16 @@ class AdminPayload
         }
 
         return true;
+    }
+
+    public static function normalizeVerticalAlign(mixed $value): string
+    {
+        $align = is_string($value) ? strtolower(trim($value)) : '';
+        if (in_array($align, ['top', 'middle', 'bottom'], true)) {
+            return $align;
+        }
+
+        return 'middle';
     }
 
     public static function blankToNull(mixed $value): ?string

@@ -64,6 +64,16 @@ class AdFloatService
         if (array_key_exists('schedules_enabled', $data) && ! AdFloatSetting::hasSchedulesEnabledColumn()) {
             unset($data['schedules_enabled']);
         }
+        if (array_key_exists('vertical_align', $data)) {
+            if (! AdFloatSetting::hasVerticalAlignColumn()) {
+                unset($data['vertical_align']);
+            } else {
+                $data['vertical_align'] = AdminPayload::normalizeVerticalAlign($data['vertical_align']);
+            }
+        }
+        if (array_key_exists('vertical_offset_px', $data) && ! AdFloatSetting::hasVerticalOffsetColumn()) {
+            unset($data['vertical_offset_px']);
+        }
         if (array_key_exists('schedules', $data)) {
             $schedules = AdminPayload::normalizeSchedules($data['schedules']);
             if (AdFloatSetting::hasSchedulesColumn()) {

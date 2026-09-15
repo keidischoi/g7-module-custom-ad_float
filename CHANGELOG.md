@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.13
+- Left/right ads align to the **main content column** via `getBoundingClientRect()` (not `left/right: var(--g7-ad-offset)` viewport walls). Finder prefers `#main_content` / `max-w-7xl` / centered max-width under `user_layout_root` and **never** treats a full-bleed wrapper as the box (that clamp looked like viewport walls). Recompute on resize/orientation/scroll (rAF). `left`/`right` are set with `!important` so leftover CSS cannot pin to the viewport.
+- `offset_px` / `vertical_offset_px` accept **negatives** (−500…500). Horizontal: positive = outside into the side margin, negative = inward over the content. Vertical: opposite-direction nudge. JS no longer `Math.max(0)` the offsets; final position is only nudged back if the ad would fully leave the viewport.
+- New settings `vertical_align` (`top` | `middle` | `bottom`, default `middle`) and `vertical_offset_px` (default 24) for left/right ads. Top = `top: px`; middle = center plus optional px nudge (positive = down); bottom = `bottom: px`.
+- Placement updates on resize/scroll (rAF) and ResizeObserver; ads are clamped on-screen if the content box is flush or wider than the viewport.
+- Each reservation row has a **사용** checkbox (`enabled`, default true). Global **예약 사용** is still the master switch; when it is on, disabled rows are skipped as if they were not in the list.
+
 ## 0.1.12
 - Stats sub-page `/admin/ad-float/stats`: summary cards (impressions, clicks, CTR) plus tables by ad, by page, and ad × page. Date filter: today / 7d / 30d / all (default 7d). Empty state when no rows.
 - Main admin page link 「통계 보기」.
