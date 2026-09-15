@@ -97,7 +97,8 @@
           "combine": false
         },
         "itemIds": [],
-        "resettingClosed": false
+        "resettingClosed": false,
+        "schSeq": 0
       }
     }
   ],
@@ -201,7 +202,7 @@
                                 "pause_on_hover": "{{_local.form?.pause_on_hover === true || _local.form?.pause_on_hover === 1 || _local.form?.pause_on_hover === '1' || _local.form?.pause_on_hover === 'true' ? 1 : 0}}",
                                 "open_new_tab": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true' ? 1 : 0}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
-                                "schedules_enabled": "{{_local.form?.schedules_enabled ? 1 : 0}}",
+                                "schedules_enabled": "{{_local.form.schedules_enabled ? 1 : 0}}",
                                 "schedules": "{{_local.form.schedules || []}}"
                               }
                             },
@@ -1807,7 +1808,7 @@
                           "type": "text",
                           "name": "extra_url_{{uidx}}",
                           "className": "input w-full",
-                      "value": "{{urow.url || ''}}",
+                          "value": "{{urow.url || ''}}",
                           "placeholder": "$t:custom-ad_float.admin.fields.image_url",
                           "autoBinding": false
                         },
@@ -2817,228 +2818,67 @@
                   "className": "flex flex-col gap-1"
                 },
                 "children": [
-              {
-                "id": "caf_items_{{idx}}",
-                "type": "basic",
-                "name": "Div",
-                "iteration": {
-                  "source": "{{items?.data?.data ?? []}}",
-                  "item_var": "ad",
-                  "index_var": "idx"
-                },
-                "children": [
                   {
-                    "id": "caf_item_{{idx}}",
+                    "id": "caf_items_{{idx}}",
                     "type": "basic",
                     "name": "Div",
-                    "props": {
-                      "className": "p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-3"
+                    "iteration": {
+                      "source": "{{items?.data?.data ?? []}}",
+                      "item_var": "ad",
+                      "index_var": "idx"
                     },
                     "children": [
                       {
-                        "id": "caf_item_sel",
+                        "id": "caf_item_{{idx}}",
                         "type": "basic",
                         "name": "Div",
                         "props": {
-                          "className": "shrink-0"
+                          "className": "p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-3"
                         },
                         "children": [
                           {
+                            "id": "caf_item_sel",
                             "type": "basic",
-                            "name": "Input",
+                            "name": "Div",
                             "props": {
-                              "type": "checkbox",
-                              "name": "item_sel_{{ad.id}}",
-                              "className": "h-4 w-4 cursor-pointer",
-                              "autoBinding": false,
-                              "checked": "{{(_local.itemIds ?? []).filter(id => Number(id) === Number(ad.id)).length > 0}}"
+                              "className": "shrink-0"
                             },
-                            "actions": [
+                            "children": [
                               {
-                                "type": "change",
-                                "handler": "conditions",
-                                "conditions": [
-                                  {
-                                    "if": "{{$event.target.checked === true}}",
-                                    "then": {
-                                      "handler": "setState",
-                                      "params": {
-                                        "target": "local",
-                                        "itemIds": "{{(_local.itemIds || []).concat((_local.itemIds || []).filter(id => Number(id) === Number(ad.id)).length ? [] : [Number(ad.id)])}}"
-                                      }
-                                    }
-                                  },
-                                  {
-                                    "then": {
-                                      "handler": "setState",
-                                      "params": {
-                                        "target": "local",
-                                        "itemIds": "{{(_local.itemIds || []).filter(id => Number(id) !== Number(ad.id))}}"
-                                      }
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "basic",
-                        "name": "Img",
-                        "if": "{{!!ad.image_url}}",
-                        "props": {
-                          "src": "{{ad.image_url}}",
-                          "alt": "{{ad.alt_text || ad.title || ''}}",
-                          "className": "w-24 h-24 object-cover rounded-md border"
-                        }
-                      },
-                      {
-                        "type": "basic",
-                        "name": "Div",
-                        "props": {
-                          "className": "flex-1 min-w-0"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "H3",
-                            "props": {
-                              "className": "font-semibold truncate"
-                            },
-                            "text": "{{ad.title || '(제목 없음)'}}"
-                          },
-                          {
-                            "type": "basic",
-                            "name": "P",
-                            "props": {
-                              "className": "text-sm text-gray-500 truncate"
-                            },
-                            "text": "{{ad.target_url || '링크 없음'}} · 정렬 {{ad.sort_order}}"
-                          },
-                          {
-                            "type": "basic",
-                            "name": "P",
-                            "props": {
-                              "className": "text-xs text-gray-400 truncate"
-                            },
-                            "text": "{{(ad.source || ad.image_source) === 'upload' ? '이미지 업로드' : '웹주소로 연결'}}"
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "if": "{{!!ad.carousel_badge}}",
-                            "props": {
-                              "className": "inline-flex mt-1 mr-1 px-2 py-0.5 rounded text-xs bg-indigo-100 text-indigo-800"
-                            },
-                            "text": "$t:custom-ad_float.admin.carousel_badge {{ad.carousel_badge}}"
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "if": "{{ad.enabled}}",
-                            "props": {
-                              "className": "inline-flex mt-1 px-2 py-0.5 rounded text-xs bg-green-500 text-black"
-                            },
-                            "text": "활성"
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Span",
-                            "if": "{{!ad.enabled}}",
-                            "props": {
-                              "className": "inline-flex mt-1 px-2 py-0.5 rounded text-xs bg-red-500 text-white"
-                            },
-                            "text": "비활성"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "basic",
-                        "name": "Div",
-                        "props": {
-                          "className": "flex gap-2 shrink-0"
-                        },
-                        "children": [
-                          {
-                            "type": "basic",
-                            "name": "Button",
-                            "props": {
-                              "type": "button",
-                              "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600"
-                            },
-                            "text": "{{ad.enabled ? '중지' : '사용'}}",
-                            "actions": [
-                              {
-                                "type": "click",
-                                "handler": "apiCall",
-                                "auth_required": true,
-                                "target": "/api/modules/custom-ad_float/admin/items/{{ad.id}}/toggle",
-                                "params": {
-                                  "method": "PATCH"
+                                "type": "basic",
+                                "name": "Input",
+                                "props": {
+                                  "type": "checkbox",
+                                  "name": "item_sel_{{ad.id}}",
+                                  "className": "h-4 w-4 cursor-pointer",
+                                  "autoBinding": false,
+                                  "checked": "{{(_local.itemIds ?? []).filter(id => Number(id) === Number(ad.id)).length > 0}}"
                                 },
-                                "onSuccess": [
-                                  {
-                                    "handler": "toast",
-                                    "params": {
-                                      "type": "success",
-                                      "message": "$t:custom-ad_float.admin.toggle_success"
-                                    }
-                                  },
-                                  {
-                                    "handler": "refetchDataSource",
-                                    "params": {
-                                      "dataSourceId": "items"
-                                    }
-                                  }
-                                ],
-                                "onError": [
-                                  {
-                                    "handler": "toast",
-                                    "params": {
-                                      "type": "error",
-                                      "message": "{{error.message}}"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "type": "basic",
-                            "name": "Button",
-                            "props": {
-                              "type": "button",
-                              "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600"
-                            },
-                            "text": "$t:custom-ad_float.admin.actions.edit",
-                            "actions": [
-                              {
-                                "type": "click",
-                                "handler": "sequence",
                                 "actions": [
                                   {
-                                    "handler": "setState",
-                                    "params": {
-                                      "target": "local",
-                                      "editingId": "{{ad.id}}",
-                                      "create.title": "{{ad.title || ''}}",
-                                      "create.alt_text": "{{ad.alt_text || ''}}",
-                                      "create.target_url": "{{ad.target_url || ''}}",
-                                      "create.image_url": "{{ad.image_url || ''}}",
-                                      "create.sort_order": "{{ad.sort_order || 0}}",
-                                      "create.display_seconds": "{{ad.display_seconds || ''}}",
-                                      "create.source": "{{ad.source || ad.image_source || 'url'}}",
-                                      "create.original_source": "{{ad.source || ad.image_source || 'url'}}",
-                                      "create.image": null
-                                    }
-                                  },
-                                  {
-                                    "handler": "toast",
-                                    "params": {
-                                      "type": "success",
-                                      "message": "$t:custom-ad_float.admin.edit_loaded"
-                                    }
+                                    "type": "change",
+                                    "handler": "conditions",
+                                    "conditions": [
+                                      {
+                                        "if": "{{$event.target.checked === true}}",
+                                        "then": {
+                                          "handler": "setState",
+                                          "params": {
+                                            "target": "local",
+                                            "itemIds": "{{(_local.itemIds || []).concat((_local.itemIds || []).filter(id => Number(id) === Number(ad.id)).length ? [] : [Number(ad.id)])}}"
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "then": {
+                                          "handler": "setState",
+                                          "params": {
+                                            "target": "local",
+                                            "itemIds": "{{(_local.itemIds || []).filter(id => Number(id) !== Number(ad.id))}}"
+                                          }
+                                        }
+                                      }
+                                    ]
                                   }
                                 ]
                               }
@@ -3046,43 +2886,206 @@
                           },
                           {
                             "type": "basic",
-                            "name": "Button",
+                            "name": "Img",
+                            "if": "{{!!ad.image_url}}",
                             "props": {
-                              "type": "button",
-                              "className": "px-3 py-1.5 text-sm rounded-md bg-red-50 text-red-700"
+                              "src": "{{ad.image_url}}",
+                              "alt": "{{ad.alt_text || ad.title || ''}}",
+                              "className": "w-24 h-24 object-cover rounded-md border"
+                            }
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Div",
+                            "props": {
+                              "className": "flex-1 min-w-0"
                             },
-                            "text": "$t:custom-ad_float.admin.actions.delete",
-                            "actions": [
+                            "children": [
                               {
-                                "type": "click",
-                                "handler": "apiCall",
-                                "auth_required": true,
-                                "target": "/api/modules/custom-ad_float/admin/items/{{ad.id}}",
-                                "params": {
-                                  "method": "DELETE"
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                  "className": "font-semibold truncate"
                                 },
-                                "onSuccess": [
+                                "text": "{{ad.title || '(제목 없음)'}}"
+                              },
+                              {
+                                "type": "basic",
+                                "name": "P",
+                                "props": {
+                                  "className": "text-sm text-gray-500 truncate"
+                                },
+                                "text": "{{ad.target_url || '링크 없음'}} · 정렬 {{ad.sort_order}}"
+                              },
+                              {
+                                "type": "basic",
+                                "name": "P",
+                                "props": {
+                                  "className": "text-xs text-gray-400 truncate"
+                                },
+                                "text": "{{(ad.source || ad.image_source) === 'upload' ? '이미지 업로드' : '웹주소로 연결'}}"
+                              },
+                              {
+                                "type": "basic",
+                                "name": "Span",
+                                "if": "{{!!ad.carousel_badge}}",
+                                "props": {
+                                  "className": "inline-flex mt-1 mr-1 px-2 py-0.5 rounded text-xs bg-indigo-100 text-indigo-800"
+                                },
+                                "text": "$t:custom-ad_float.admin.carousel_badge {{ad.carousel_badge}}"
+                              },
+                              {
+                                "type": "basic",
+                                "name": "Span",
+                                "if": "{{ad.enabled}}",
+                                "props": {
+                                  "className": "inline-flex mt-1 px-2 py-0.5 rounded text-xs bg-green-500 text-black"
+                                },
+                                "text": "활성"
+                              },
+                              {
+                                "type": "basic",
+                                "name": "Span",
+                                "if": "{{!ad.enabled}}",
+                                "props": {
+                                  "className": "inline-flex mt-1 px-2 py-0.5 rounded text-xs bg-red-500 text-white"
+                                },
+                                "text": "비활성"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "basic",
+                            "name": "Div",
+                            "props": {
+                              "className": "flex gap-2 shrink-0"
+                            },
+                            "children": [
+                              {
+                                "type": "basic",
+                                "name": "Button",
+                                "props": {
+                                  "type": "button",
+                                  "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600"
+                                },
+                                "text": "{{ad.enabled ? '중지' : '사용'}}",
+                                "actions": [
                                   {
-                                    "handler": "toast",
+                                    "type": "click",
+                                    "handler": "apiCall",
+                                    "auth_required": true,
+                                    "target": "/api/modules/custom-ad_float/admin/items/{{ad.id}}/toggle",
                                     "params": {
-                                      "type": "success",
-                                      "message": "$t:custom-ad_float.admin.delete_success"
-                                    }
-                                  },
-                                  {
-                                    "handler": "refetchDataSource",
-                                    "params": {
-                                      "dataSourceId": "items"
-                                    }
+                                      "method": "PATCH"
+                                    },
+                                    "onSuccess": [
+                                      {
+                                        "handler": "toast",
+                                        "params": {
+                                          "type": "success",
+                                          "message": "$t:custom-ad_float.admin.toggle_success"
+                                        }
+                                      },
+                                      {
+                                        "handler": "refetchDataSource",
+                                        "params": {
+                                          "dataSourceId": "items"
+                                        }
+                                      }
+                                    ],
+                                    "onError": [
+                                      {
+                                        "handler": "toast",
+                                        "params": {
+                                          "type": "error",
+                                          "message": "{{error.message}}"
+                                        }
+                                      }
+                                    ]
                                   }
-                                ],
-                                "onError": [
+                                ]
+                              },
+                              {
+                                "type": "basic",
+                                "name": "Button",
+                                "props": {
+                                  "type": "button",
+                                  "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600"
+                                },
+                                "text": "$t:custom-ad_float.admin.actions.edit",
+                                "actions": [
                                   {
-                                    "handler": "toast",
+                                    "type": "click",
+                                    "handler": "sequence",
+                                    "actions": [
+                                      {
+                                        "handler": "setState",
+                                        "params": {
+                                          "target": "local",
+                                          "editingId": "{{ad.id}}",
+                                          "create.title": "{{ad.title || ''}}",
+                                          "create.alt_text": "{{ad.alt_text || ''}}",
+                                          "create.target_url": "{{ad.target_url || ''}}",
+                                          "create.image_url": "{{ad.image_url || ''}}",
+                                          "create.sort_order": "{{ad.sort_order || 0}}",
+                                          "create.display_seconds": "{{ad.display_seconds || ''}}",
+                                          "create.source": "{{ad.source || ad.image_source || 'url'}}",
+                                          "create.original_source": "{{ad.source || ad.image_source || 'url'}}",
+                                          "create.image": null
+                                        }
+                                      },
+                                      {
+                                        "handler": "toast",
+                                        "params": {
+                                          "type": "success",
+                                          "message": "$t:custom-ad_float.admin.edit_loaded"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "basic",
+                                "name": "Button",
+                                "props": {
+                                  "type": "button",
+                                  "className": "px-3 py-1.5 text-sm rounded-md bg-red-50 text-red-700"
+                                },
+                                "text": "$t:custom-ad_float.admin.actions.delete",
+                                "actions": [
+                                  {
+                                    "type": "click",
+                                    "handler": "apiCall",
+                                    "auth_required": true,
+                                    "target": "/api/modules/custom-ad_float/admin/items/{{ad.id}}",
                                     "params": {
-                                      "type": "error",
-                                      "message": "{{error.message}}"
-                                    }
+                                      "method": "DELETE"
+                                    },
+                                    "onSuccess": [
+                                      {
+                                        "handler": "toast",
+                                        "params": {
+                                          "type": "success",
+                                          "message": "$t:custom-ad_float.admin.delete_success"
+                                        }
+                                      },
+                                      {
+                                        "handler": "refetchDataSource",
+                                        "params": {
+                                          "dataSourceId": "items"
+                                        }
+                                      }
+                                    ],
+                                    "onError": [
+                                      {
+                                        "handler": "toast",
+                                        "params": {
+                                          "type": "error",
+                                          "message": "{{error.message}}"
+                                        }
+                                      }
+                                    ]
                                   }
                                 ]
                               }
@@ -3092,8 +3095,6 @@
                       }
                     ]
                   }
-                ]
-              }
                 ]
               }
             ]
@@ -3155,7 +3156,7 @@
                         "props": {
                           "name": "schedules_enabled",
                           "autoBinding": false,
-                          "checked": "{{_local.form?.schedules_enabled === true || _local.form?.schedules_enabled === 1 || _local.form?.schedules_enabled === '1' || _local.form?.schedules_enabled === 'true'}}"
+                          "checked": "{{_local.form.schedules_enabled === true || _local.form.schedules_enabled === 1 || _local.form.schedules_enabled === '1' || _local.form.schedules_enabled === 'true'}}"
                         },
                         "actions": [
                           {
@@ -3200,7 +3201,7 @@
                     "name": "Div",
                     "id": "caf_sch_{{sidx}}",
                     "iteration": {
-                      "source": "{{_local.form?.schedules ?? []}}",
+                      "source": "{{_local.form.schedules || []}}",
                       "item_var": "sch",
                       "index_var": "sidx"
                     },
@@ -3263,7 +3264,7 @@
                                               "type": "date",
                                               "name": "sch_start_date_{{sidx}}",
                                               "className": "input w-full",
-                                              "value": "{{sch.start_date ?? ''}}",
+                                              "value": "{{(sch.start_date || '')}}",
                                               "autoBinding": false
                                             },
                                             "actions": [
@@ -3272,7 +3273,7 @@
                                                 "handler": "setState",
                                                 "params": {
                                                   "target": "local",
-                                                  "form.schedules.{{sidx}}.start_date": "{{$event.target.value}}"
+                                                  "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {start_date: ($event.target.value)}) : row))}}"
                                                 }
                                               }
                                             ]
@@ -3301,7 +3302,7 @@
                                               "type": "time",
                                               "name": "sch_start_time_{{sidx}}",
                                               "className": "input w-full",
-                                              "value": "{{sch.start_time ?? ''}}",
+                                              "value": "{{(sch.start_time || '')}}",
                                               "autoBinding": false
                                             },
                                             "actions": [
@@ -3310,7 +3311,7 @@
                                                 "handler": "setState",
                                                 "params": {
                                                   "target": "local",
-                                                  "form.schedules.{{sidx}}.start_time": "{{$event.target.value}}"
+                                                  "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {start_time: ($event.target.value)}) : row))}}"
                                                 }
                                               }
                                             ]
@@ -3339,7 +3340,7 @@
                                               "type": "date",
                                               "name": "sch_end_date_{{sidx}}",
                                               "className": "input w-full",
-                                              "value": "{{sch.end_date ?? ''}}",
+                                              "value": "{{(sch.end_date || '')}}",
                                               "autoBinding": false
                                             },
                                             "actions": [
@@ -3348,7 +3349,7 @@
                                                 "handler": "setState",
                                                 "params": {
                                                   "target": "local",
-                                                  "form.schedules.{{sidx}}.end_date": "{{$event.target.value}}"
+                                                  "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {end_date: ($event.target.value)}) : row))}}"
                                                 }
                                               }
                                             ]
@@ -3377,7 +3378,7 @@
                                               "type": "time",
                                               "name": "sch_end_time_{{sidx}}",
                                               "className": "input w-full",
-                                              "value": "{{sch.end_time ?? ''}}",
+                                              "value": "{{(sch.end_time || '')}}",
                                               "autoBinding": false
                                             },
                                             "actions": [
@@ -3386,7 +3387,7 @@
                                                 "handler": "setState",
                                                 "params": {
                                                   "target": "local",
-                                                  "form.schedules.{{sidx}}.end_time": "{{$event.target.value}}"
+                                                  "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {end_time: ($event.target.value)}) : row))}}"
                                                 }
                                               }
                                             ]
@@ -3446,7 +3447,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.d0": "{{$event.target.checked === true}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {d0: ($event.target.checked === true)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -3482,7 +3483,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.d1": "{{$event.target.checked === true}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {d1: ($event.target.checked === true)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -3518,7 +3519,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.d2": "{{$event.target.checked === true}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {d2: ($event.target.checked === true)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -3554,7 +3555,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.d3": "{{$event.target.checked === true}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {d3: ($event.target.checked === true)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -3590,7 +3591,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.d4": "{{$event.target.checked === true}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {d4: ($event.target.checked === true)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -3626,7 +3627,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.d5": "{{$event.target.checked === true}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {d5: ($event.target.checked === true)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -3662,7 +3663,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.d6": "{{$event.target.checked === true}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {d6: ($event.target.checked === true)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -3709,7 +3710,7 @@
                                             "text": "$t:custom-ad_float.admin.empty"
                                           }
                                         ],
-                                        "if": "{{!(items?.data?.data ?? []).length}}"
+                                        "if": "{{!(((items || {}).data || {}).data || []).length}}"
                                       },
                                       {
                                         "type": "basic",
@@ -3718,7 +3719,7 @@
                                           "className": "flex flex-col gap-2"
                                         },
                                         "iteration": {
-                                          "source": "{{items?.data?.data ?? []}}",
+                                          "source": "{{(((items || {}).data || {}).data || [])}}",
                                           "item_var": "ad",
                                           "index_var": "aidx"
                                         },
@@ -3762,7 +3763,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.sel_{{ad.id}}": "{{$event.target.checked === true}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {['sel_' + ad.id]: ($event.target.checked === true)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -3824,7 +3825,7 @@
                                                 "props": {
                                                   "name": "sch_position_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.position ?? ''}}",
+                                                  "value": "{{(sch.position || '')}}",
                                                   "autoBinding": false
                                                 },
                                                 "actions": [
@@ -3833,7 +3834,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.position": "{{$event.target.value}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {position: ($event.target.value)}) : row))}}"
                                                     }
                                                   }
                                                 ],
@@ -3895,7 +3896,7 @@
                                                 "props": {
                                                   "name": "sch_direction_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.direction ?? ''}}",
+                                                  "value": "{{(sch.direction || '')}}",
                                                   "autoBinding": false
                                                 },
                                                 "actions": [
@@ -3904,7 +3905,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.direction": "{{$event.target.value}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {direction: ($event.target.value)}) : row))}}"
                                                     }
                                                   }
                                                 ],
@@ -3951,7 +3952,7 @@
                                                   "type": "number",
                                                   "name": "sch_interval_ms_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.interval_ms ?? ''}}",
+                                                  "value": "{{(sch.interval_ms || '')}}",
                                                   "autoBinding": false
                                                 },
                                                 "actions": [
@@ -3960,7 +3961,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.interval_ms": "{{Number($event.target.value) || 0}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {interval_ms: (Number($event.target.value) || 0)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -3989,7 +3990,7 @@
                                                   "type": "number",
                                                   "name": "sch_width_px_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.width_px ?? ''}}",
+                                                  "value": "{{(sch.width_px || '')}}",
                                                   "autoBinding": false
                                                 },
                                                 "actions": [
@@ -3998,7 +3999,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.width_px": "{{Number($event.target.value) || 0}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {width_px: (Number($event.target.value) || 0)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -4027,7 +4028,7 @@
                                                   "type": "number",
                                                   "name": "sch_height_px_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.height_px ?? ''}}",
+                                                  "value": "{{(sch.height_px || '')}}",
                                                   "autoBinding": false
                                                 },
                                                 "actions": [
@@ -4036,7 +4037,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.height_px": "{{Number($event.target.value) || 0}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {height_px: (Number($event.target.value) || 0)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -4065,7 +4066,7 @@
                                                   "type": "number",
                                                   "name": "sch_radius_px_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.radius_px ?? ''}}",
+                                                  "value": "{{(sch.radius_px || '')}}",
                                                   "autoBinding": false
                                                 },
                                                 "actions": [
@@ -4074,7 +4075,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.radius_px": "{{Number($event.target.value) || 0}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {radius_px: (Number($event.target.value) || 0)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -4103,7 +4104,7 @@
                                                   "type": "number",
                                                   "name": "sch_offset_px_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.offset_px ?? ''}}",
+                                                  "value": "{{(sch.offset_px || '')}}",
                                                   "autoBinding": false,
                                                   "min": -500,
                                                   "max": 500
@@ -4114,7 +4115,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.offset_px": "{{Number($event.target.value)}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {offset_px: (Number($event.target.value))}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -4142,7 +4143,7 @@
                                                 "props": {
                                                   "name": "sch_vertical_align_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.vertical_align ?? 'middle'}}",
+                                                  "value": "{{(sch.vertical_align || 'middle')}}",
                                                   "autoBinding": false
                                                 },
                                                 "actions": [
@@ -4151,7 +4152,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.vertical_align": "{{$event.target.value}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {vertical_align: ($event.target.value)}) : row))}}"
                                                     }
                                                   }
                                                 ],
@@ -4206,7 +4207,7 @@
                                                   "type": "number",
                                                   "name": "sch_vertical_offset_px_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.vertical_offset_px ?? ''}}",
+                                                  "value": "{{(sch.vertical_offset_px || '')}}",
                                                   "autoBinding": false,
                                                   "min": -500,
                                                   "max": 500
@@ -4217,7 +4218,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.vertical_offset_px": "{{Number($event.target.value)}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {vertical_offset_px: (Number($event.target.value))}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -4246,7 +4247,7 @@
                                                   "type": "number",
                                                   "name": "sch_z_index_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.z_index ?? ''}}",
+                                                  "value": "{{(sch.z_index || '')}}",
                                                   "autoBinding": false
                                                 },
                                                 "actions": [
@@ -4255,7 +4256,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.z_index": "{{Number($event.target.value) || 0}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {z_index: (Number($event.target.value) || 0)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -4284,7 +4285,7 @@
                                                   "type": "number",
                                                   "name": "sch_max_items_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.max_items ?? ''}}",
+                                                  "value": "{{(sch.max_items || '')}}",
                                                   "autoBinding": false
                                                 },
                                                 "actions": [
@@ -4293,7 +4294,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.max_items": "{{Number($event.target.value) || 0}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {max_items: (Number($event.target.value) || 0)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -4321,7 +4322,7 @@
                                                 "props": {
                                                   "name": "sch_mobile_mode_{{sidx}}",
                                                   "className": "input w-full",
-                                                  "value": "{{sch.mobile_mode ?? ''}}",
+                                                  "value": "{{(sch.mobile_mode || '')}}",
                                                   "autoBinding": false
                                                 },
                                                 "actions": [
@@ -4330,7 +4331,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.mobile_mode": "{{$event.target.value}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {mobile_mode: ($event.target.value)}) : row))}}"
                                                     }
                                                   }
                                                 ],
@@ -4416,7 +4417,7 @@
                                                         "handler": "setState",
                                                         "params": {
                                                           "target": "local",
-                                                          "form.schedules.{{sidx}}.autoplay": "{{$event.target.checked === true}}"
+                                                          "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {autoplay: ($event.target.checked === true)}) : row))}}"
                                                         }
                                                       }
                                                     ]
@@ -4466,7 +4467,7 @@
                                                         "handler": "setState",
                                                         "params": {
                                                           "target": "local",
-                                                          "form.schedules.{{sidx}}.show_arrows": "{{$event.target.checked === true}}"
+                                                          "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {show_arrows: ($event.target.checked === true)}) : row))}}"
                                                         }
                                                       }
                                                     ]
@@ -4516,7 +4517,7 @@
                                                         "handler": "setState",
                                                         "params": {
                                                           "target": "local",
-                                                          "form.schedules.{{sidx}}.show_dots": "{{$event.target.checked === true}}"
+                                                          "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {show_dots: ($event.target.checked === true)}) : row))}}"
                                                         }
                                                       }
                                                     ]
@@ -4580,7 +4581,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.pause_on_hover": "{{$event.target.checked === true}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {pause_on_hover: ($event.target.checked === true)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -4616,7 +4617,7 @@
                                                     "handler": "setState",
                                                     "params": {
                                                       "target": "local",
-                                                      "form.schedules.{{sidx}}.open_new_tab": "{{$event.target.checked === true}}"
+                                                      "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {open_new_tab: ($event.target.checked === true)}) : row))}}"
                                                     }
                                                   }
                                                 ]
@@ -4667,7 +4668,7 @@
                                             "handler": "setState",
                                             "params": {
                                               "target": "local",
-                                              "form.schedules.{{sidx}}.enabled": "{{$event.target.checked === true}}"
+                                              "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {enabled: ($event.target.checked === true)}) : row))}}"
                                             }
                                           }
                                         ]
@@ -4688,7 +4689,7 @@
                                         "handler": "setState",
                                         "params": {
                                           "target": "local",
-                                          "form.schedules.{{sidx}}._deleted": true
+                                          "form.schedules": "{{(_local.form.schedules || []).map((row) => (row.id === sch.id ? Object.assign({}, row, {_deleted: true}) : row))}}"
                                         }
                                       }
                                     ]
@@ -4698,7 +4699,7 @@
                             ]
                           }
                         ],
-                        "if": "{{!(sch._deleted === true || sch._deleted === 1 || sch._deleted === '1' || sch._deleted === 'true')}}"
+                        "if": "{{!sch._deleted}}"
                       }
                     ]
                   },
@@ -4724,7 +4725,8 @@
                             "handler": "setState",
                             "params": {
                               "target": "local",
-                              "form.schedules": "{{(_local.form.schedules || []).concat([{id: 's' + Date.now(), enabled: true, start_date: '', start_time: '', end_date: '', end_time: '', item_ids: [], d0: true, d1: true, d2: true, d3: true, d4: true, d5: true, d6: true, _deleted: false, position: (_local.form.position || 'right')}])}}"
+                              "form.schedules": "{{(_local.form.schedules || []).concat([{id: 's' + ((_local.form.schedules || []).length + 1) + '_' + ((_local.schSeq || 0) + 1), enabled: true, start_date: '', start_time: '', end_date: '', end_time: '', d0: true, d1: true, d2: true, d3: true, d4: true, d5: true, d6: true, _deleted: false, position: (_local.form.position || 'right')}])}}",
+                              "schSeq": "{{(_local.schSeq || 0) + 1}}"
                             }
                           }
                         ]
@@ -4791,7 +4793,7 @@
                                 "pause_on_hover": "{{_local.form?.pause_on_hover === true || _local.form?.pause_on_hover === 1 || _local.form?.pause_on_hover === '1' || _local.form?.pause_on_hover === 'true' ? 1 : 0}}",
                                 "open_new_tab": "{{_local.form?.open_new_tab === true || _local.form?.open_new_tab === 1 || _local.form?.open_new_tab === '1' || _local.form?.open_new_tab === 'true' ? 1 : 0}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
-                                "schedules_enabled": "{{_local.form?.schedules_enabled ? 1 : 0}}",
+                                "schedules_enabled": "{{_local.form.schedules_enabled ? 1 : 0}}",
                                 "schedules": "{{_local.form.schedules || []}}"
                               }
                             },

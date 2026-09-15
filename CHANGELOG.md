@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.22
+- Admin **예약** cards no longer vanish on click. List iteration is `{{_local.form.schedules || []}}` (no `??` / `?.` — G7 often fails those and re-renders an empty list).
+- **예약 추가** uses a short `concat` with `id: 's' + length + '_' + schSeq` (no `Date.now()`). New rows include enabled, dates, weekdays d0–d6, position, `_deleted: false`.
+- Field/remove updates replace the whole `form.schedules` array (`map` + `Object.assign` keyed by `sch.id`), the same static-key pattern as 결합 `itemIds` — nested `form.schedules.{{sidx}}.*` keys are gone so a click cannot replace the array.
+- Soft-delete sets `_deleted: true` on that row only; the card wrapper is `if: "{{!sch._deleted}}"` (missing `_deleted` stays visible). 예약 buttons keep `type: "button"`.
+- Saving keeps newly added rows that only have id/enabled/position; stored JSON preserves `id`.
+
 ## 0.1.21
 - Admin dark theme: 「캐러셀 옵션」 boxes no longer use `bg-gray-50` (G7 often does not apply Tailwind `dark:` fills, so the block stayed near-white and labels vanished). Main settings and per-reservation boxes are transparent with the same border as sibling toggle rows (X 버튼). Headings stay `text-sm font-semibold` / inherit.
 - Same-screen filled cards that relied on `bg-white dark:bg-gray-800` (ad list rows, stats summary/by-item cards) drop the light fill so they match dark admin. Secondary admin buttons drop `bg-white` / `bg-gray-100` fills and keep a border only.

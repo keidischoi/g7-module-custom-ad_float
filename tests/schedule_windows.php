@@ -136,6 +136,41 @@ namespace {
     expect('overlayVisual pins base show_close', $direct['show_close'] ?? null, false);
     expect('overlayVisual still applies other schedule visuals', $direct['width_px'] ?? null, 90);
 
+    $added = [
+        'id' => 's1_1',
+        'enabled' => true,
+        'start_date' => '',
+        'start_time' => '',
+        'end_date' => '',
+        'end_time' => '',
+        'd0' => true,
+        'd1' => true,
+        'd2' => true,
+        'd3' => true,
+        'd4' => true,
+        'd5' => true,
+        'd6' => true,
+        '_deleted' => false,
+        'position' => 'right',
+    ];
+    $kept = AdminPayload::normalizeSchedules([$added]);
+    expect('예약 추가 row survives normalize', count($kept), 1);
+    expect('preserves admin row id', $kept[0]['id'] ?? null, 's1_1');
+    expect('preserves position', $kept[0]['position'] ?? null, 'right');
+    expect('all-days weekdays stored empty', $kept[0]['weekdays'] ?? null, []);
+
+    $softDeleted = AdminPayload::normalizeSchedules([
+        array_merge($added, ['_deleted' => true]),
+        array_merge($added, ['id' => 's2_2', '_deleted' => false]),
+    ]);
+    expect('soft-deleted row dropped, other kept', array_column($softDeleted, 'id'), ['s2_2']);
+
+    $identityOnly = AdminPayload::normalizeSchedules([
+        ['id' => 'n1', 'enabled' => true],
+        [],
+    ]);
+    expect('id/enabled-only row kept, empty junk dropped', array_column($identityOnly, 'id'), ['n1']);
+
     echo "\n{$passed} passed, {$failed} failed\n";
     exit($failed === 0 ? 0 : 1);
 }
