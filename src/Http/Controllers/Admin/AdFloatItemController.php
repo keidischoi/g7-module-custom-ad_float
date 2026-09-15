@@ -115,29 +115,30 @@ class AdFloatItemController extends AdminBaseController
     private function uploadedImages(Request $request): array
     {
         $out = [];
-        $images = $request->file('images');
-        if (is_array($images)) {
-            foreach ($images as $file) {
-                if ($file instanceof \Illuminate\Http\UploadedFile) {
-                    $out[] = $file;
-                }
+        $seen = [];
+        $add = function ($file) use (&$out, &$seen) {
+            if (! $file instanceof \Illuminate\Http\UploadedFile) {
+                return;
             }
-        } elseif ($images instanceof \Illuminate\Http\UploadedFile) {
-            $out[] = $images;
-        }
-        $single = $request->file('image');
-        if ($single instanceof \Illuminate\Http\UploadedFile) {
-            $path = $single->getRealPath() ?: $single->getClientOriginalName();
-            $dup = false;
-            foreach ($out as $file) {
-                $other = $file->getRealPath() ?: $file->getClientOriginalName();
-                if ($other === $path) {
-                    $dup = true;
-                    break;
-                }
+            $token = $file->getRealPath() ?: ($file->getClientOriginalName().':'.$file->getSize());
+            if (isset($seen[$token])) {
+                return;
             }
-            if (! $dup) {
-                array_unshift($out, $single);
+            $seen[$token] = true;
+            $out[] = $file;
+        };
+
+        foreach ($request->allFiles() as $key => $file) {
+            $name = is_string($key) ? $key : '';
+            if ($name !== 'image' && $name !== 'images' && ! str_starts_with($name, 'images')) {
+                continue;
+            }
+            if (is_array($file)) {
+                foreach ($file as $one) {
+                    $add($one);
+                }
+            } else {
+                $add($file);
             }
         }
 
