@@ -6,12 +6,15 @@ use App\Http\Controllers\Api\Base\AdminBaseController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Custom\AdFloat\Services\AdFloatService;
+use Modules\Custom\AdFloat\Services\MileageBridge;
 use Modules\Custom\AdFloat\Support\AdminPayload;
 
 class AdFloatSettingController extends AdminBaseController
 {
-    public function __construct(private AdFloatService $service)
-    {
+    public function __construct(
+        private AdFloatService $service,
+        private MileageBridge $mileage,
+    ) {
         parent::__construct();
     }
 
@@ -20,7 +23,7 @@ class AdFloatSettingController extends AdminBaseController
         try {
             $row = \Modules\Custom\AdFloat\Models\AdFloatSetting::current();
 
-            return $this->success('custom-ad_float::messages.settings.fetch_success', $row->toAdminArray());
+            return $this->success('custom-ad_float::messages.settings.fetch_success', $this->adminPayload($row));
         } catch (\Exception $e) {
             return $this->error('custom-ad_float::messages.settings.fetch_failed', 500, $e->getMessage());
         }
@@ -57,11 +60,14 @@ class AdFloatSettingController extends AdminBaseController
                 'start_at' => ['nullable', 'date'],
                 'end_at' => ['nullable', 'date'],
                 'schedules_enabled' => ['nullable'],
+                'click_reward_enabled' => ['nullable'],
+                'click_reward_amount' => ['nullable', 'integer', 'min:0', 'max:100000000'],
+                'click_reward_daily_limit' => ['nullable', 'integer', 'min:0', 'max:100000'],
             ], AdminPayload::scheduleNestedRules()));
 
             $row = $this->service->updateSettings($data);
 
-            return $this->success('custom-ad_float::messages.settings.update_success', $row->toAdminArray());
+            return $this->success('custom-ad_float::messages.settings.update_success', $this->adminPayload($row));
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
@@ -74,9 +80,17 @@ class AdFloatSettingController extends AdminBaseController
         try {
             $row = $this->service->resetClosedState();
 
-            return $this->success('custom-ad_float::messages.settings.reset_closed_success', $row->toAdminArray());
+            return $this->success('custom-ad_float::messages.settings.reset_closed_success', $this->adminPayload($row));
         } catch (\Exception $e) {
             return $this->error('custom-ad_float::messages.settings.reset_closed_failed', 500, $e->getMessage());
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function adminPayload(\Modules\Custom\AdFloat\Models\AdFloatSetting $row): array
+    {
+        return $row->toAdminArray() + ['mileage_available' => $this->mileage->available()];
     }
 }

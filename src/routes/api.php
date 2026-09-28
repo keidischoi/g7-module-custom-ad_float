@@ -5,6 +5,7 @@ use Modules\Custom\AdFloat\Http\Controllers\Admin\AdFloatItemController;
 use Modules\Custom\AdFloat\Http\Controllers\Admin\AdFloatSettingController;
 use Modules\Custom\AdFloat\Http\Controllers\Admin\AdFloatStatController;
 use Modules\Custom\AdFloat\Http\Controllers\Public\AssetController;
+use Modules\Custom\AdFloat\Http\Controllers\Public\ClickRewardController;
 use Modules\Custom\AdFloat\Http\Controllers\Public\MediaController;
 use Modules\Custom\AdFloat\Http\Controllers\Public\PayloadController;
 use Modules\Custom\AdFloat\Http\Controllers\Public\TrackController;
@@ -32,6 +33,12 @@ Route::get('media/{path}', [MediaController::class, 'show'])
 Route::post('track', [TrackController::class, 'store'])
     ->middleware(['throttle:120,1'])
     ->name('track.store');
+
+// 로그인 회원 클릭 마일리지 적립 (익명 track 통계와 별개, 설정 기본 꺼짐)
+Route::post('ads/{id}/click-reward', [ClickRewardController::class, 'store'])
+    ->whereNumber('id')
+    ->middleware(['auth:sanctum', 'throttle:60,1'])
+    ->name('ads.click_reward');
 
 Route::prefix('admin/stats')
     ->middleware(['auth:sanctum', 'throttle:600,1'])

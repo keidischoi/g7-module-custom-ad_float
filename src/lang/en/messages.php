@@ -37,4 +37,8 @@ return [
         'untitled' => '(Untitled)',
         'deleted_item' => 'Deleted ad #:id',
     ],
+    'click_reward' => [
+        'awarded' => ':amount mileage earned.',
+        'skipped' => 'Not eligible for a reward.',
+    ],
 ];

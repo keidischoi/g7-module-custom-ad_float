@@ -14,7 +14,8 @@
       "items": "광고 목록",
       "create": "광고 등록",
       "edit": "광고 수정",
-      "schedules": "날짜 및 시간 예약"
+      "schedules": "날짜 및 시간 예약",
+      "mileage": "마일리지"
     },
     "fields": {
       "enabled": "사용",
@@ -60,7 +61,10 @@
       "source_url": "웹주소로 연결",
       "sort_order": "정렬 순서",
       "display_seconds": "개별 노출 시간(초)",
-      "combine_on_create": "결합하여 캐러셀로 등록"
+      "combine_on_create": "결합하여 캐러셀로 등록",
+      "click_reward_enabled": "광고 클릭 적립 사용",
+      "click_reward_amount": "클릭 1회 적립액",
+      "click_reward_daily_limit": "하루 최대 적립 횟수"
     },
     "weekdays": {
       "d0": "일",
@@ -162,6 +166,11 @@
         "30d": "최근 30일",
         "all": "전체"
       }
-    }
+    },
+    "mileage_hint": "로그인한 회원이 플로팅 광고를 클릭하면 마일리지를 적립합니다. 같은 광고는 회원당 하루 1번만 적립됩니다. (익명 클릭 통계는 그대로 집계)",
+    "mileage_unavailable": "쇼핑몰(sirsoft-ecommerce) 모듈이 없거나 꺼져 있거나 마일리지 설정이 꺼져 있어 지금은 적립되지 않습니다.",
+    "click_reward_enabled_hint": "기본값은 꺼짐입니다. 링크가 있는 광고만 적립됩니다.",
+    "click_reward_amount_hint": "0이면 적립하지 않습니다.",
+    "click_reward_daily_limit_hint": "회원 1명이 하루에 적립받을 수 있는 최대 횟수 (0 = 무제한)."
   }
 }

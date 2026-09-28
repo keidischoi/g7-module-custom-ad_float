@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.30
+- 로그인 회원 광고 클릭 마일리지 적립 (기본 꺼짐). 관리자 > 플로팅 광고 설정에 「마일리지」 카드 추가: `click_reward_enabled`(false) / `click_reward_amount`(5) / `click_reward_daily_limit`(5, 0=무제한). 이커머스 마일리지를 쓸 수 없으면 안내 문구 표시.
+- 새 API `POST /api/modules/custom-ad_float/ads/{id}/click-reward` (auth:sanctum, throttle 60/분) → `{awarded, amount, reason}`. (회원, 광고, 날짜)당 1번(`target_key = item:{id}:{Y-m-d}`) + 회원별 하루 한도. 링크 있는 활성 광고만. 이커머스(sirsoft-ecommerce) 없거나 마일리지 꺼져도 오류 없음.
+- 익명 클릭/노출 통계(`POST track`, sendBeacon)는 그대로. `ad-float.js` 는 `auth_token` 이 있을 때만 별도 `fetch(keepalive, Bearer)` 로 적립 요청, 적립되면 "+N 마일리지" 토스트.
+- 마이그레이션: `2026_09_28_000009_add_click_reward_settings` (settings 컬럼 3개), `2026_09_28_000010_create_custom_ad_float_mileage_rewards` (적립 원장, unique user_id+action+target_key). `MileageBridge` 추가.
+- Deploy: `php artisan module:update custom-ad_float && php artisan migrate`.
+
 ## 0.1.29
 - Fix uploaded ads showing a broken image (끊김) after a successful FileUploader register. `store('custom-ad-float', 'public')` still saves `custom-ad-float/{file}` on the public disk (`storage/app/public/custom-ad-float`). `imageUrl()` used `Storage::disk('public')->url()`, which prefixes `APP_URL` (often an internal Synology Web Station host/port such as `:8482`) so `<img src>` points off the public reverse-proxy origin.
 - Uploaded `image_path` values now become a same-origin relative URL: `/api/modules/custom-ad_float/media/custom-ad-float/{file}` (Laravel-served, no `APP_URL`). Equivalent public-disk web path is `/storage/custom-ad-float/{file}`. http(s) URL-mode paths are unchanged.

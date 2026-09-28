@@ -17,6 +17,7 @@ class AdFloatSetting extends Model
         'radius_px', 'offset_px', 'vertical_align', 'vertical_offset_px', 'z_index', 'autoplay', 'show_arrows', 'show_dots', 'show_close',
         'pause_on_hover', 'open_new_tab', 'link_open_mode', 'mobile_mode', 'max_items', 'close_cookie_key',
         'start_at', 'end_at', 'schedules', 'schedules_enabled',
+        'click_reward_enabled', 'click_reward_amount', 'click_reward_daily_limit',
     ];
 
     protected $casts = [
@@ -263,7 +264,37 @@ class AdFloatSetting extends Model
             'end_at' => optional($this->end_at)->format('Y-m-d\TH:i'),
             'schedules_enabled' => $this->schedulesEnabled(),
             'schedules' => $this->schedulesForAdmin(),
-        ]);
+        ]) + $this->clickRewardSettings();
+    }
+
+    /**
+     * 배너 클릭 마일리지 적립 설정 (컬럼이 없으면 기본값 = 꺼짐).
+     *
+     * @return array{click_reward_enabled: bool, click_reward_amount: int, click_reward_daily_limit: int}
+     */
+    public function clickRewardSettings(): array
+    {
+        $attrs = $this->getAttributes();
+        $has = static::hasClickRewardColumns();
+
+        return [
+            'click_reward_enabled' => $has && array_key_exists('click_reward_enabled', $attrs)
+                ? AdminPayload::toBool($attrs['click_reward_enabled'], false)
+                : false,
+            'click_reward_amount' => $has && isset($attrs['click_reward_amount']) ? max(0, (int) $attrs['click_reward_amount']) : 5,
+            'click_reward_daily_limit' => $has && isset($attrs['click_reward_daily_limit']) ? max(0, (int) $attrs['click_reward_daily_limit']) : 5,
+        ];
+    }
+
+    public static function hasClickRewardColumns(): bool
+    {
+        try {
+            return Schema::hasColumn('custom_ad_float_settings', 'click_reward_enabled')
+                && Schema::hasColumn('custom_ad_float_settings', 'click_reward_amount')
+                && Schema::hasColumn('custom_ad_float_settings', 'click_reward_daily_limit');
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     /**

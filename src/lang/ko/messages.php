@@ -37,4 +37,8 @@ return [
         'untitled' => '(제목 없음)',
         'deleted_item' => '삭제된 광고 #:id',
     ],
+    'click_reward' => [
+        'awarded' => ':amount 마일리지가 적립되었습니다.',
+        'skipped' => '적립 대상이 아닙니다.',
+    ],
 ];

@@ -62,6 +62,54 @@
     sendTrack('click', itemId);
   }
 
+  // 로그인 회원 클릭 마일리지 적립 (익명 통계와 별개). 토큰이 없으면(비회원) 아무것도 하지 않음.
+  // 적립 여부(설정 꺼짐·하루 1번·일일 한도)는 서버가 판단. 실패해도 클릭은 그대로 진행.
+  var REWARD_API = '/api/modules/custom-ad_float/ads/';
+  var rewardSentAt = {};
+
+  function authToken() {
+    try { return localStorage.getItem('auth_token') || ''; } catch (e) { return ''; }
+  }
+
+  function showRewardToast(amount) {
+    try {
+      var n = Number(amount) || 0;
+      if (n <= 0 || !document.body) return;
+      var el = document.createElement('div');
+      el.setAttribute('role', 'status');
+      el.textContent = '+' + n.toLocaleString() + ' \uB9C8\uC77C\uB9AC\uC9C0';
+      el.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483000;' +
+        'padding:8px 14px;border-radius:9999px;background:rgba(17,24,39,.9);color:#facc15;font-size:13px;' +
+        'font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);pointer-events:none;transition:opacity .3s;opacity:1';
+      document.body.appendChild(el);
+      setTimeout(function () { el.style.opacity = '0'; }, 1800);
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 2200);
+    } catch (e) {}
+  }
+
+  function rewardClick(itemId) {
+    var id = Number(itemId || 0);
+    var token = authToken();
+    if (!id || !token || typeof fetch !== 'function') return;
+    var now = Date.now();
+    if (rewardSentAt[id] && now - rewardSentAt[id] < 3000) return;
+    rewardSentAt[id] = now;
+    try {
+      fetch(REWARD_API + id + '/click-reward', {
+        method: 'POST',
+        keepalive: true,
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', Authorization: 'Bearer ' + token }
+      })
+        .then(function (r) { return r && r.ok ? r.json() : null; })
+        .then(function (j) {
+          var d = j && (j.data !== undefined ? j.data : j);
+          if (d && d.awarded) showRewardToast(d.amount);
+        })
+        .catch(function () {});
+    } catch (e) {}
+  }
+
   function isAdVisible(root) {
     if (!root || !root.isConnected) return false;
     try {
@@ -862,6 +910,10 @@
       trackClick(itemId);
       var mode = linkOpenMode(config);
       var href = link.getAttribute('href') || link.href;
+      if (link.tagName === 'A' && href && href !== '#' && !/^javascript:/i.test(href) &&
+          (event.button === undefined || event.button === 0)) {
+        rewardClick(itemId);
+      }
       if (mode === 'modal' && isHttpUrl(href)) {
         event.preventDefault();
         stop();

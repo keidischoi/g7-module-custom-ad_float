@@ -171,6 +171,22 @@ class AdFloatService
             }
             $data['open_new_tab'] = $mode === 'new_tab';
         }
+        if (AdFloatSetting::hasClickRewardColumns()) {
+            if (array_key_exists('click_reward_enabled', $data)) {
+                $data['click_reward_enabled'] = AdminPayload::toBool($data['click_reward_enabled'], false);
+            }
+            foreach (['click_reward_amount', 'click_reward_daily_limit'] as $intKey) {
+                if (array_key_exists($intKey, $data)) {
+                    if ($data[$intKey] === null || $data[$intKey] === '') {
+                        unset($data[$intKey]);
+                    } else {
+                        $data[$intKey] = max(0, (int) $data[$intKey]);
+                    }
+                }
+            }
+        } else {
+            unset($data['click_reward_enabled'], $data['click_reward_amount'], $data['click_reward_daily_limit']);
+        }
         $removeIds = AdminPayload::collectRemoveScheduleIds($data);
         unset($data['remove_schedule_id'], $data['remove_schedule_ids']);
         if (array_key_exists('schedules', $data) || $removeIds !== []) {

@@ -14,7 +14,8 @@
       "items": "Ad catalog",
       "create": "Add ad",
       "edit": "Edit ad",
-      "schedules": "Date and time reservations"
+      "schedules": "Date and time reservations",
+      "mileage": "Mileage"
     },
     "fields": {
       "enabled": "Enabled",
@@ -60,7 +61,10 @@
       "source_url": "Link from URL",
       "sort_order": "Sort order",
       "display_seconds": "Display seconds",
-      "combine_on_create": "Register as a combined carousel"
+      "combine_on_create": "Register as a combined carousel",
+      "click_reward_enabled": "Reward ad clicks",
+      "click_reward_amount": "Mileage per click",
+      "click_reward_daily_limit": "Max rewards per day"
     },
     "weekdays": {
       "d0": "Sun",
@@ -162,6 +166,11 @@
         "30d": "Last 30 days",
         "all": "All"
       }
-    }
+    },
+    "mileage_hint": "Logged-in members earn mileage when they click a floating ad. Each ad rewards once per member per day. (Anonymous click stats are unchanged.)",
+    "mileage_unavailable": "The shop (sirsoft-ecommerce) module is missing/disabled or its mileage is turned off, so no mileage is earned right now.",
+    "click_reward_enabled_hint": "Off by default. Only ads with a link are rewarded.",
+    "click_reward_amount_hint": "0 disables the reward.",
+    "click_reward_daily_limit_hint": "Maximum rewarded clicks per member per day (0 = unlimited)."
   }
 }

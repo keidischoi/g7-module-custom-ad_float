@@ -47,7 +47,10 @@
           "start_at": "",
           "end_at": "",
           "schedules": [],
-          "schedules_enabled": false
+          "schedules_enabled": false,
+          "click_reward_enabled": false,
+          "click_reward_amount": 5,
+          "click_reward_daily_limit": 5
         }
       }
     },
@@ -228,7 +231,10 @@
                                 "link_open_mode": "{{_local.form.link_open_mode || 'new_tab'}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
                                 "schedules_enabled": "{{_local.form.schedules_enabled ? 1 : 0}}",
-                                "schedules": "{{_local.form.schedules || []}}"
+                                "schedules": "{{_local.form.schedules || []}}",
+                                "click_reward_enabled": "{{(_local.form && (_local.form.click_reward_enabled === true || _local.form.click_reward_enabled === 1 || _local.form.click_reward_enabled === '1' || _local.form.click_reward_enabled === 'true')) ? 1 : 0}}",
+                                "click_reward_amount": "{{Number(_local.form && _local.form.click_reward_amount != null ? _local.form.click_reward_amount : 5) || 0}}",
+                                "click_reward_daily_limit": "{{Number(_local.form && _local.form.click_reward_daily_limit != null ? _local.form.click_reward_daily_limit : 5) || 0}}"
                               }
                             },
                             "onSuccess": [
@@ -1577,6 +1583,197 @@
                           "value": "modal"
                         },
                         "text": "$t:custom-ad_float.admin.link_open.modal"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "basic",
+            "name": "Div",
+            "id": "caf_mileage",
+            "props": {
+              "className": "mb-8 p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "H2",
+                "props": {
+                  "className": "text-lg font-semibold mb-1"
+                },
+                "text": "$t:custom-ad_float.admin.sections.mileage"
+              },
+              {
+                "type": "basic",
+                "name": "P",
+                "props": {
+                  "className": "text-xs text-gray-500 mb-2"
+                },
+                "text": "$t:custom-ad_float.admin.mileage_hint"
+              },
+              {
+                "type": "basic",
+                "name": "P",
+                "if": "{{!(_local.form && _local.form.mileage_available)}}",
+                "props": {
+                  "className": "mb-2 px-3 py-2 rounded-lg text-xs bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200"
+                },
+                "text": "$t:custom-ad_float.admin.mileage_unavailable"
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "id": "tog_click_reward_enabled",
+                "props": {
+                  "className": "flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "props": {
+                          "className": "text-sm font-medium"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.click_reward_enabled"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-0.5"
+                        },
+                        "text": "$t:custom-ad_float.admin.click_reward_enabled_hint"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Toggle",
+                    "props": {
+                      "name": "click_reward_enabled",
+                      "autoBinding": false,
+                      "checked": "{{!!(_local.form && (_local.form.click_reward_enabled === true || _local.form.click_reward_enabled === 1 || _local.form.click_reward_enabled === '1' || _local.form.click_reward_enabled === 'true'))}}"
+                    },
+                    "actions": [
+                      {
+                        "type": "change",
+                        "handler": "setState",
+                        "params": {
+                          "target": "local",
+                          "form.click_reward_enabled": "{{$event.target.checked === true}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "grid grid-cols-1 md:grid-cols-2 gap-4 mt-3"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "id": "f_click_reward_amount",
+                    "props": {
+                      "className": "form-group w-full"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Label",
+                        "props": {
+                          "className": "form-label text-xs text-gray-500"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.click_reward_amount"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Input",
+                        "props": {
+                          "type": "number",
+                          "name": "click_reward_amount",
+                          "className": "input w-full",
+                          "value": "{{(_local.form && _local.form.click_reward_amount != null) ? _local.form.click_reward_amount : 5}}",
+                          "autoBinding": false,
+                          "min": 0
+                        },
+                        "actions": [
+                          {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "form.click_reward_amount": "{{Number($event.target.value) || 0}}"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-0.5"
+                        },
+                        "text": "$t:custom-ad_float.admin.click_reward_amount_hint"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "id": "f_click_reward_daily_limit",
+                    "props": {
+                      "className": "form-group w-full"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Label",
+                        "props": {
+                          "className": "form-label text-xs text-gray-500"
+                        },
+                        "text": "$t:custom-ad_float.admin.fields.click_reward_daily_limit"
+                      },
+                      {
+                        "type": "basic",
+                        "name": "Input",
+                        "props": {
+                          "type": "number",
+                          "name": "click_reward_daily_limit",
+                          "className": "input w-full",
+                          "value": "{{(_local.form && _local.form.click_reward_daily_limit != null) ? _local.form.click_reward_daily_limit : 5}}",
+                          "autoBinding": false,
+                          "min": 0
+                        },
+                        "actions": [
+                          {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                              "target": "local",
+                              "form.click_reward_daily_limit": "{{Number($event.target.value) || 0}}"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "basic",
+                        "name": "P",
+                        "props": {
+                          "className": "text-xs text-gray-500 mt-0.5"
+                        },
+                        "text": "$t:custom-ad_float.admin.click_reward_daily_limit_hint"
                       }
                     ]
                   }
@@ -5070,7 +5267,10 @@
                                                 "mobile_mode": "{{_local.form.mobile_mode || 'hide'}}",
                                                 "schedules_enabled": "{{_local.form.schedules_enabled ? 1 : 0}}",
                                                 "schedules": "{{_local.form.schedules || []}}",
-                                                "remove_schedule_id": "{{sch.id}}"
+                                                "remove_schedule_id": "{{sch.id}}",
+                                                "click_reward_enabled": "{{(_local.form && (_local.form.click_reward_enabled === true || _local.form.click_reward_enabled === 1 || _local.form.click_reward_enabled === '1' || _local.form.click_reward_enabled === 'true')) ? 1 : 0}}",
+                                                "click_reward_amount": "{{Number(_local.form && _local.form.click_reward_amount != null ? _local.form.click_reward_amount : 5) || 0}}",
+                                                "click_reward_daily_limit": "{{Number(_local.form && _local.form.click_reward_daily_limit != null ? _local.form.click_reward_daily_limit : 5) || 0}}"
                                               }
                                             },
                                             "onSuccess": [
@@ -5218,7 +5418,10 @@
                                 "link_open_mode": "{{_local.form.link_open_mode || 'new_tab'}}",
                                 "mobile_mode": "{{_local.form?.mobile_mode || 'hide'}}",
                                 "schedules_enabled": "{{_local.form.schedules_enabled ? 1 : 0}}",
-                                "schedules": "{{_local.form.schedules || []}}"
+                                "schedules": "{{_local.form.schedules || []}}",
+                                "click_reward_enabled": "{{(_local.form && (_local.form.click_reward_enabled === true || _local.form.click_reward_enabled === 1 || _local.form.click_reward_enabled === '1' || _local.form.click_reward_enabled === 'true')) ? 1 : 0}}",
+                                "click_reward_amount": "{{Number(_local.form && _local.form.click_reward_amount != null ? _local.form.click_reward_amount : 5) || 0}}",
+                                "click_reward_daily_limit": "{{Number(_local.form && _local.form.click_reward_daily_limit != null ? _local.form.click_reward_daily_limit : 5) || 0}}"
                               }
                             },
                             "onSuccess": [
