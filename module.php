@@ -4,6 +4,7 @@ namespace Modules\Custom\AdFloat;
 
 use App\Extension\AbstractModule;
 use Modules\Custom\AdFloat\Listeners\InjectAdFloatListener;
+use Modules\Custom\AdFloat\Listeners\MileageIntegrationListener;
 
 class Module extends AbstractModule
 {
@@ -125,6 +126,7 @@ class Module extends AbstractModule
     {
         return [
             InjectAdFloatListener::class,
+            MileageIntegrationListener::class,
         ];
     }
 
