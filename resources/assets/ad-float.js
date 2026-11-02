@@ -1,5 +1,31 @@
 (function () {
   'use strict';
+  // 🌐 화면 글자 사전 — en 에 없으면 ko
+  var T = {
+   ko: {
+    mileage: " 마일리지",
+    ad: "광고",
+    close: "닫기",
+    open_in_new_tab: "새 탭에서 열기",
+    previous_ad: "이전 광고",
+    next_ad: "다음 광고",
+    close_ad: "광고 닫기",
+    ad_n: "{n}번 광고"
+   },
+   en: {
+    mileage: " mileage",
+    ad: "Ad",
+    close: "Close",
+    open_in_new_tab: "Open in new tab",
+    previous_ad: "Previous ad",
+    next_ad: "Next ad",
+    close_ad: "Close ad",
+    ad_n: "Ad {n}"
+   }
+  };
+  function __loc() { try { return String(localStorage.getItem('g7_locale') || document.documentElement.lang || 'ko').slice(0, 2); } catch (e) { return 'ko'; } }
+  function tr(k, v) { var d = T[__loc()] || T.ko; var s = d[k] != null ? d[k] : (T.ko[k] != null ? T.ko[k] : k); return v ? s.replace(/\{(\w+)\}/g, function (m, x) { return v[x] != null ? String(v[x]) : m; }) : s; }
+
 
   if (window.__g7CustomAdFloatBooted) return;
   window.__g7CustomAdFloatBooted = true;
@@ -77,7 +103,7 @@
       if (n <= 0 || !document.body) return;
       var el = document.createElement('div');
       el.setAttribute('role', 'status');
-      el.textContent = '+' + n.toLocaleString() + ' \uB9C8\uC77C\uB9AC\uC9C0';
+      el.textContent = '+' + n.toLocaleString() + tr('mileage');
       el.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483000;' +
         'padding:8px 14px;border-radius:9999px;background:rgba(17,24,39,.9);color:#facc15;font-size:13px;' +
         'font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);pointer-events:none;transition:opacity .3s;opacity:1';
@@ -601,7 +627,7 @@
       document.body.style.overflow = 'hidden';
     } catch (e) {}
     ensureStyle();
-    var label = (title && String(title).replace(/^\s+|\s+$/g, '')) || '광고';
+    var label = (title && String(title).replace(/^\s+|\s+$/g, '')) || tr('ad');
     modalEl = document.createElement('div');
     modalEl.className = 'g7-caf-modal';
     modalEl.setAttribute('role', 'dialog');
@@ -626,7 +652,7 @@
     var closeBtn = document.createElement('button');
     closeBtn.type = 'button';
     closeBtn.className = 'g7-caf-modal-close';
-    closeBtn.setAttribute('aria-label', '닫기');
+    closeBtn.setAttribute('aria-label', tr('close'));
     closeBtn.textContent = '×';
     closeBtn.addEventListener('click', closeLinkModal);
 
@@ -668,7 +694,7 @@
     openNew.href = url;
     openNew.target = '_blank';
     openNew.rel = 'noopener noreferrer';
-    openNew.textContent = '새 탭에서 열기';
+    openNew.textContent = tr('open_in_new_tab');
     foot.appendChild(openNew);
 
     box.appendChild(bar);
@@ -797,12 +823,12 @@
       prevBtn = document.createElement('button');
       prevBtn.type = 'button';
       prevBtn.className = 'g7-ad-prev';
-      prevBtn.setAttribute('aria-label', '이전 광고');
+      prevBtn.setAttribute('aria-label', tr('previous_ad'));
       prevBtn.textContent = '‹';
       nextBtn = document.createElement('button');
       nextBtn.type = 'button';
       nextBtn.className = 'g7-ad-next';
-      nextBtn.setAttribute('aria-label', '다음 광고');
+      nextBtn.setAttribute('aria-label', tr('next_ad'));
       nextBtn.textContent = '›';
       nav.appendChild(prevBtn);
       nav.appendChild(nextBtn);
@@ -816,7 +842,7 @@
         var dot = document.createElement('button');
         dot.type = 'button';
         dot.className = 'g7-ad-dot' + (dotIndex === 0 ? ' is-active' : '');
-        dot.setAttribute('aria-label', (dotIndex + 1) + '번 광고');
+        dot.setAttribute('aria-label', tr('ad_n', { n: dotIndex + 1 }));
         dot.dataset.index = String(dotIndex);
         dotsWrap.appendChild(dot);
       });
@@ -827,7 +853,7 @@
       var close = document.createElement('button');
       close.type = 'button';
       close.className = 'g7-ad-close';
-      close.setAttribute('aria-label', '광고 닫기');
+      close.setAttribute('aria-label', tr('close_ad'));
       close.textContent = '×';
       close.addEventListener('click', function () {
         root.remove();

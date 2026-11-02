@@ -423,7 +423,7 @@
                             "props": {
                               "className": "text-xs text-gray-500"
                             },
-                            "text": "노출 {{row.impressions}} · 클릭 {{row.clicks}} · CTR {{row.ctr}}"
+                            "text": "$t:custom-ad_float.ui.views_clicks_ctr|p1={{row.impressions}}|p2={{row.clicks}}|p3={{row.ctr}}"
                           }
                         ]
                       },

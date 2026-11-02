@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.32
+
+- 🌐 영어(en) 화면
+
 ## 0.1.31
 
 - **마일리지(custom-mileage) 연동.** custom-mileage **0.3.1 이상**이 켜져 있으면 이 확장의 마일리지가 custom-mileage 를 거칩니다 (금액·켜고 끄기 설정은 그대로).

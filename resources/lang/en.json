@@ -172,5 +172,25 @@
     "click_reward_enabled_hint": "Off by default. Only ads with a link are rewarded.",
     "click_reward_amount_hint": "0 disables the reward.",
     "click_reward_daily_limit_hint": "Maximum rewarded clicks per member per day (0 = unlimited)."
+  },
+  "ui": {
+    "left": "Left",
+    "right": "Right",
+    "top": "Top",
+    "bottom": "Bottom",
+    "left_right": "Left & right",
+    "top_bottom": "Top & bottom",
+    "hidden": "Hidden",
+    "shown": "Shown",
+    "no_title": "(No title)",
+    "no_link": "No link",
+    "order": "{p1} · order {p2}",
+    "image_upload": "Image upload",
+    "linked_by_url": "Linked by URL",
+    "active": "Active",
+    "inactive": "Inactive",
+    "pause": "Pause",
+    "enable": "Enable",
+    "views_clicks_ctr": "Views {p1} · clicks {p2} · CTR {p3}"
   }
 }
