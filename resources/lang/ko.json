@@ -172,5 +172,25 @@
     "click_reward_enabled_hint": "기본값은 꺼짐입니다. 링크가 있는 광고만 적립됩니다.",
     "click_reward_amount_hint": "0이면 적립하지 않습니다.",
     "click_reward_daily_limit_hint": "회원 1명이 하루에 적립받을 수 있는 최대 횟수 (0 = 무제한)."
+  },
+  "ui": {
+    "left": "왼쪽",
+    "right": "오른쪽",
+    "top": "상단",
+    "bottom": "하단",
+    "left_right": "좌우",
+    "top_bottom": "상하",
+    "hidden": "숨김",
+    "shown": "표시",
+    "no_title": "(제목 없음)",
+    "no_link": "링크 없음",
+    "order": "{p1} · 정렬 {p2}",
+    "image_upload": "이미지 업로드",
+    "linked_by_url": "웹주소로 연결",
+    "active": "활성",
+    "inactive": "비활성",
+    "pause": "중지",
+    "enable": "사용",
+    "views_clicks_ctr": "노출 {p1} · 클릭 {p2} · CTR {p3}"
   }
 }

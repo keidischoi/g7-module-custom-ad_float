@@ -473,7 +473,7 @@
                             "props": {
                               "value": "left"
                             },
-                            "text": "왼쪽"
+                            "text": "$t:custom-ad_float.ui.left"
                           },
                           {
                             "type": "basic",
@@ -481,7 +481,7 @@
                             "props": {
                               "value": "right"
                             },
-                            "text": "오른쪽"
+                            "text": "$t:custom-ad_float.ui.right"
                           },
                           {
                             "type": "basic",
@@ -489,7 +489,7 @@
                             "props": {
                               "value": "top"
                             },
-                            "text": "상단"
+                            "text": "$t:custom-ad_float.ui.top"
                           },
                           {
                             "type": "basic",
@@ -497,7 +497,7 @@
                             "props": {
                               "value": "bottom"
                             },
-                            "text": "하단"
+                            "text": "$t:custom-ad_float.ui.bottom"
                           }
                         ]
                       }
@@ -666,7 +666,7 @@
                             "props": {
                               "value": "horizontal"
                             },
-                            "text": "좌우"
+                            "text": "$t:custom-ad_float.ui.left_right"
                           },
                           {
                             "type": "basic",
@@ -674,7 +674,7 @@
                             "props": {
                               "value": "vertical"
                             },
-                            "text": "상하"
+                            "text": "$t:custom-ad_float.ui.top_bottom"
                           }
                         ]
                       }
@@ -1016,7 +1016,7 @@
                             "props": {
                               "value": "hide"
                             },
-                            "text": "숨김"
+                            "text": "$t:custom-ad_float.ui.hidden"
                           },
                           {
                             "type": "basic",
@@ -1024,7 +1024,7 @@
                             "props": {
                               "value": "show"
                             },
-                            "text": "표시"
+                            "text": "$t:custom-ad_float.ui.shown"
                           }
                         ]
                       }
@@ -3440,7 +3440,7 @@
                                 "props": {
                                   "className": "font-semibold truncate"
                                 },
-                                "text": "{{ad.title || '(제목 없음)'}}"
+                                "text": "{{ad.title || '$t:custom-ad_float.ui.no_title'}}"
                               },
                               {
                                 "type": "basic",
@@ -3448,7 +3448,7 @@
                                 "props": {
                                   "className": "text-sm text-gray-500 truncate"
                                 },
-                                "text": "{{ad.target_url || '링크 없음'}} · 정렬 {{ad.sort_order}}"
+                                "text": "$t:custom-ad_float.ui.order|p1={{ad.target_url || '$t:custom-ad_float.ui.no_link'}}|p2={{ad.sort_order}}"
                               },
                               {
                                 "type": "basic",
@@ -3456,7 +3456,7 @@
                                 "props": {
                                   "className": "text-xs text-gray-400 truncate"
                                 },
-                                "text": "{{(ad.source || ad.image_source) === 'upload' ? '이미지 업로드' : '웹주소로 연결'}}"
+                                "text": "{{(ad.source || ad.image_source) === 'upload' ? '$t:custom-ad_float.ui.image_upload' : '$t:custom-ad_float.ui.linked_by_url'}}"
                               },
                               {
                                 "type": "basic",
@@ -3474,7 +3474,7 @@
                                 "props": {
                                   "className": "inline-flex mt-1 px-2 py-0.5 rounded text-xs bg-green-500 text-black"
                                 },
-                                "text": "활성"
+                                "text": "$t:custom-ad_float.ui.active"
                               },
                               {
                                 "type": "basic",
@@ -3483,7 +3483,7 @@
                                 "props": {
                                   "className": "inline-flex mt-1 px-2 py-0.5 rounded text-xs bg-red-500 text-white"
                                 },
-                                "text": "비활성"
+                                "text": "$t:custom-ad_float.ui.inactive"
                               }
                             ]
                           },
@@ -3501,7 +3501,7 @@
                                   "type": "button",
                                   "className": "px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600"
                                 },
-                                "text": "{{ad.enabled ? '중지' : '사용'}}",
+                                "text": "{{ad.enabled ? '$t:custom-ad_float.ui.pause' : '$t:custom-ad_float.ui.enable'}}",
                                 "actions": [
                                   {
                                     "type": "click",
@@ -4305,7 +4305,7 @@
                                                 "props": {
                                                   "className": "flex-1 text-sm truncate"
                                                 },
-                                                "text": "{{ad.title || '(제목 없음)'}}"
+                                                "text": "{{ad.title || '$t:custom-ad_float.ui.no_title'}}"
                                               },
                                               {
                                                 "type": "basic",
@@ -4403,7 +4403,7 @@
                                                     "props": {
                                                       "value": "left"
                                                     },
-                                                    "text": "왼쪽"
+                                                    "text": "$t:custom-ad_float.ui.left"
                                                   },
                                                   {
                                                     "type": "basic",
@@ -4411,7 +4411,7 @@
                                                     "props": {
                                                       "value": "right"
                                                     },
-                                                    "text": "오른쪽"
+                                                    "text": "$t:custom-ad_float.ui.right"
                                                   },
                                                   {
                                                     "type": "basic",
@@ -4419,7 +4419,7 @@
                                                     "props": {
                                                       "value": "top"
                                                     },
-                                                    "text": "상단"
+                                                    "text": "$t:custom-ad_float.ui.top"
                                                   },
                                                   {
                                                     "type": "basic",
@@ -4427,7 +4427,7 @@
                                                     "props": {
                                                       "value": "bottom"
                                                     },
-                                                    "text": "하단"
+                                                    "text": "$t:custom-ad_float.ui.bottom"
                                                   }
                                                 ]
                                               }
@@ -4474,7 +4474,7 @@
                                                     "props": {
                                                       "value": "horizontal"
                                                     },
-                                                    "text": "좌우"
+                                                    "text": "$t:custom-ad_float.ui.left_right"
                                                   },
                                                   {
                                                     "type": "basic",
@@ -4482,7 +4482,7 @@
                                                     "props": {
                                                       "value": "vertical"
                                                     },
-                                                    "text": "상하"
+                                                    "text": "$t:custom-ad_float.ui.top_bottom"
                                                   }
                                                 ]
                                               }
@@ -4900,7 +4900,7 @@
                                                     "props": {
                                                       "value": "hide"
                                                     },
-                                                    "text": "숨김"
+                                                    "text": "$t:custom-ad_float.ui.hidden"
                                                   },
                                                   {
                                                     "type": "basic",
@@ -4908,7 +4908,7 @@
                                                     "props": {
                                                       "value": "show"
                                                     },
-                                                    "text": "표시"
+                                                    "text": "$t:custom-ad_float.ui.shown"
                                                   }
                                                 ]
                                               }
